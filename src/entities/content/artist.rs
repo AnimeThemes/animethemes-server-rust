@@ -49,26 +49,4 @@ impl SoftDeleteEntity for Entity {
     }
 }
 
-// pub struct ArtistPerformances;
-
-// impl Linked for ArtistPerformances {
-//     type FromEntity = Entity;
-//     type ToEntity = performance::Entity;
-
-//     fn link(&self) -> Vec<LinkDef> {
-//         vec![Relation::Performances.def().into()]
-//     }
-// }
-
-// pub struct MemberPerformances;
-
-// impl Linked for MemberPerformances {
-//     type FromEntity = Entity;
-//     type ToEntity = performance::Entity;
-
-//     fn link(&self) -> Vec<LinkDef> {
-//         vec![Relation::MemberPerformances.def().into()]
-//     }
-// }
-
 impl ActiveModelBehavior for ActiveModel {}

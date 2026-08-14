@@ -21,12 +21,12 @@ impl Loader<u64> for AnimeThemeEntryVideosLoader {
 
         let mut result: HashMap<u64, Self::Value> = HashMap::new();
 
-        for (pivot, video) in rows {
-            if let Some(video) = video {
+        for (pivot, model) in rows {
+            if let Some(model) = model {
                 result
                     .entry(pivot.entry_id)
                     .or_default()
-                    .push((pivot, video));
+                    .push((pivot, model));
             }
         }
 

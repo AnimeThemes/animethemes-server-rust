@@ -14,7 +14,7 @@ impl Loader<u64> for AnimeSynonymsLoader {
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
-        let synonyms = synonym::Entity::find()
+        let models = synonym::Entity::find()
             .filter(synonym::Column::SynonymableType.eq("anime"))
             .filter(synonym::Column::SynonymableId.is_in(keys))
             .all(&self.db)
@@ -22,11 +22,8 @@ impl Loader<u64> for AnimeSynonymsLoader {
 
         let mut result: HashMap<u64, Self::Value> = HashMap::new();
 
-        for synonym in synonyms {
-            result
-                .entry(synonym.synonymable_id)
-                .or_default()
-                .push(synonym);
+        for model in models {
+            result.entry(model.synonymable_id).or_default().push(model);
         }
 
         Ok(result)

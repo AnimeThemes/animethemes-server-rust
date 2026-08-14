@@ -34,7 +34,7 @@ impl ArtistQuery {
             .one(db)
             .await?;
 
-        Ok(artist.map(|a| a.into()))
+        Ok(artist.map(Into::into))
     }
 
     async fn artist_connection(

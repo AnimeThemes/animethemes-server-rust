@@ -18,18 +18,17 @@ impl Loader<u64> for ArtistMembersLoader {
             .filter(artist_members::Column::ArtistId.is_in(keys))
             .join(JoinType::LeftJoin, artist_members::Relation::Member.def())
             .select_also(artist::Entity)
-            // .find_also_related((artist::Entity, artist_members::Relation::Member))
             .all(&self.db)
             .await?;
 
         let mut result: HashMap<u64, Self::Value> = HashMap::new();
 
-        for (pivot, member) in rows {
-            if let Some(member) = member {
+        for (pivot, model) in rows {
+            if let Some(model) = model {
                 result
                     .entry(pivot.artist_id)
                     .or_default()
-                    .push((pivot, member));
+                    .push((pivot, model));
             }
         }
 

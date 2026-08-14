@@ -14,14 +14,11 @@ impl Loader<u64> for PerformanceArtistLoader {
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
-        let artists = artist::Entity::find()
+        let models = artist::Entity::find()
             .filter(artist::Column::Id.is_in(keys.iter().copied()))
             .all(&self.db)
             .await?;
 
-        Ok(artists
-            .into_iter()
-            .map(|artist| (artist.id, artist))
-            .collect())
+        Ok(models.into_iter().map(|model| (model.id, model)).collect())
     }
 }

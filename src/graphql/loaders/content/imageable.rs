@@ -35,14 +35,14 @@ impl Loader<ImageableKey> for ImageableLoader {
 
         let mut result: HashMap<ImageableKey, Self::Value> = HashMap::new();
 
-        for (pivot, image) in rows {
-            if let Some(image) = image {
+        for (pivot, model) in rows {
+            if let Some(model) = model {
                 let key = ImageableKey {
                     imageable_type: pivot.imageable_type.clone(),
                     id: pivot.imageable_id,
                 };
 
-                result.entry(key).or_default().push((pivot, image));
+                result.entry(key).or_default().push((pivot, model));
             }
         }
 

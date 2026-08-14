@@ -21,12 +21,12 @@ impl Loader<u64> for AnimeSeriesLoader {
 
         let mut result: HashMap<u64, Self::Value> = HashMap::new();
 
-        for (pivot, series) in rows {
-            if let Some(series) = series {
+        for (pivot, model) in rows {
+            if let Some(model) = model {
                 result
                     .entry(pivot.anime_id)
                     .or_default()
-                    .push((pivot, series));
+                    .push((pivot, model));
             }
         }
 

@@ -34,7 +34,7 @@ impl SeriesQuery {
             .one(db)
             .await?;
 
-        Ok(series.map(|a| a.into()))
+        Ok(series.map(Into::into))
     }
 
     async fn series_connection(

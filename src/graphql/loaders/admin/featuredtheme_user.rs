@@ -14,11 +14,11 @@ impl Loader<u64> for FeaturedThemeUserLoader {
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
-        let users = user::Entity::find()
+        let models = user::Entity::find()
             .filter(user::Column::Id.is_in(keys.iter().copied()))
             .all(&self.db)
             .await?;
 
-        Ok(users.into_iter().map(|user| (user.id, user)).collect())
+        Ok(models.into_iter().map(|model| (model.id, model)).collect())
     }
 }

@@ -13,7 +13,7 @@ impl Loader<u64> for PlaylistTracksCountLoader {
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
-        let tracks: Vec<(u64, i64)> = track::Entity::find()
+        let models: Vec<(u64, i64)> = track::Entity::find()
             .select_only()
             .column(track::Column::PlaylistId)
             .column_as(track::Column::Id.count(), "count")
@@ -23,6 +23,6 @@ impl Loader<u64> for PlaylistTracksCountLoader {
             .all(&self.db)
             .await?;
 
-        Ok(tracks.into_iter().collect())
+        Ok(models.into_iter().collect())
     }
 }

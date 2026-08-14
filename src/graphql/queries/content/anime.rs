@@ -45,7 +45,7 @@ impl AnimeQuery {
             .one(db)
             .await?;
 
-        Ok(anime.map(|a| a.into()))
+        Ok(anime.map(Into::into))
     }
 
     pub async fn anime_connection(

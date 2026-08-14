@@ -14,11 +14,11 @@ impl Loader<u64> for PagePageLoader {
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
-        let pages = page::Entity::find()
+        let models = page::Entity::find()
             .filter(page::Column::Id.is_in(keys.iter().copied()))
             .all(&self.db)
             .await?;
 
-        Ok(pages.into_iter().map(|page| (page.id, page)).collect())
+        Ok(models.into_iter().map(|model| (model.id, model)).collect())
     }
 }

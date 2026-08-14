@@ -86,7 +86,7 @@ impl AnimeThemeQuery {
             .all(db)
             .await?;
 
-        Ok(themes.into_iter().map(|m| m.into()).collect())
+        Ok(themes.into_iter().map(Into::into).collect())
     }
 
     pub async fn animetheme_connection(

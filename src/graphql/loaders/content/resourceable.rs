@@ -35,14 +35,14 @@ impl Loader<ResourceableKey> for ResourceableLoader {
 
         let mut result: HashMap<ResourceableKey, Self::Value> = HashMap::new();
 
-        for (pivot, resource) in rows {
-            if let Some(resource) = resource {
+        for (pivot, model) in rows {
+            if let Some(model) = model {
                 let key = ResourceableKey {
                     resourceable_type: pivot.resourceable_type.clone(),
                     id: pivot.resourceable_id,
                 };
 
-                result.entry(key).or_default().push((pivot, resource));
+                result.entry(key).or_default().push((pivot, model));
             }
         }
 

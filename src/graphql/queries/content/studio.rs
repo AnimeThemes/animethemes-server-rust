@@ -34,7 +34,7 @@ impl StudioQuery {
             .one(db)
             .await?;
 
-        Ok(studio.map(|a| a.into()))
+        Ok(studio.map(Into::into))
     }
 
     async fn studio_connection(

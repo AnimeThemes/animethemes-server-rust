@@ -34,7 +34,7 @@ impl PageQuery {
             .one(db)
             .await?;
 
-        Ok(page.map(|a| a.into()))
+        Ok(page.map(Into::into))
     }
 
     async fn page_connection(

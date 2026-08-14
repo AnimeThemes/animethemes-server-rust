@@ -14,18 +14,15 @@ impl Loader<u64> for SongPerformancesLoader {
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
-        let performances = performance::Entity::find()
+        let models = performance::Entity::find()
             .filter(performance::Column::SongId.is_in(keys))
             .all(&self.db)
             .await?;
 
         let mut result: HashMap<u64, Self::Value> = HashMap::new();
 
-        for performance in performances {
-            result
-                .entry(performance.song_id)
-                .or_default()
-                .push(performance);
+        for model in models {
+            result.entry(model.song_id).or_default().push(model);
         }
 
         Ok(result)

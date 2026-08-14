@@ -19,6 +19,6 @@ impl FeaturedThemeQuery {
             .one(db)
             .await?;
 
-        Ok(featured_theme.map(|f| f.into()))
+        Ok(featured_theme.map(Into::into))
     }
 }

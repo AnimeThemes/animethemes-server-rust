@@ -14,11 +14,11 @@ impl Loader<u64> for FeaturedThemeVideoLoader {
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
-        let videos = video::Entity::find()
+        let models = video::Entity::find()
             .filter(video::Column::Id.is_in(keys.iter().copied()))
             .all(&self.db)
             .await?;
 
-        Ok(videos.into_iter().map(|video| (video.id, video)).collect())
+        Ok(models.into_iter().map(|model| (model.id, model)).collect())
     }
 }

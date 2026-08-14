@@ -14,11 +14,11 @@ impl Loader<u64> for AnimeThemeEntryThemeLoader {
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
-        let themes = animetheme::Entity::find()
+        let models = animetheme::Entity::find()
             .filter(animetheme::Column::Id.is_in(keys.iter().copied()))
             .all(&self.db)
             .await?;
 
-        Ok(themes.into_iter().map(|theme| (theme.id, theme)).collect())
+        Ok(models.into_iter().map(|model| (model.id, model)).collect())
     }
 }

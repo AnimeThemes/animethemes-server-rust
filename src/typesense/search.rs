@@ -225,5 +225,5 @@ where
         .all(db)
         .await?;
 
-    Ok(models.into_iter().map(|m| m.into()).collect())
+    Ok(models.into_iter().map(Into::into).collect())
 }
