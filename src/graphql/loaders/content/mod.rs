@@ -1,0 +1,10 @@
+pub mod anime;
+pub mod animetheme;
+pub mod animethemeentry;
+pub mod artist;
+pub mod imageable;
+pub mod performance;
+pub mod resourceable;
+pub mod song;
+pub mod studio;
+pub mod video;

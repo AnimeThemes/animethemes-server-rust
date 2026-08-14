@@ -1,0 +1,27 @@
+use std::collections::HashMap;
+
+use async_graphql::dataloader::Loader;
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+
+use crate::entities::content::artist;
+
+pub struct PerformanceArtistLoader {
+    pub db: DatabaseConnection,
+}
+
+impl Loader<u64> for PerformanceArtistLoader {
+    type Value = artist::Model;
+    type Error = sea_orm::DbErr;
+
+    async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
+        let artists = artist::Entity::find()
+            .filter(artist::Column::Id.is_in(keys.iter().copied()))
+            .all(&self.db)
+            .await?;
+
+        Ok(artists
+            .into_iter()
+            .map(|artist| (artist.id, artist))
+            .collect())
+    }
+}

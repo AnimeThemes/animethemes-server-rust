@@ -1,0 +1,9 @@
+pub mod anime;
+pub mod animetheme;
+pub mod animethemeentry;
+pub mod animeyear;
+pub mod artist;
+pub mod image;
+pub mod series;
+pub mod studio;
+pub mod video;

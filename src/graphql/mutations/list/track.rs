@@ -1,0 +1,141 @@
+use animethemes_graphql_rust::entities::list::{playlist, track};
+use async_graphql::{Context, Error, InputObject, Object, Result};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+
+use crate::{
+    actions::entities::list::track::{
+        InsertTrackActionParameters, PlaylistTrackAction, UpdateTrackActionParameters,
+    },
+    graphql::types::list::track::PlaylistTrack,
+    middlewares::current_user::CurrentUser,
+    policies::{AppError, Policy, PolicyAction, list::track::PlaylistTrackPolicy},
+};
+
+#[derive(InputObject)]
+struct CreatePlaylistTrackInput {
+    entry_id: u64,
+    video_id: u64,
+    position: Option<i32>,
+}
+
+#[derive(InputObject)]
+struct UpdatePlaylistTrackInput {
+    entry_id: Option<u64>,
+    video_id: Option<u64>,
+    position: Option<i32>,
+}
+
+#[derive(Default)]
+pub struct PlaylistTrackMutation;
+
+#[Object]
+impl PlaylistTrackMutation {
+    async fn create_playlist_track(
+        &self,
+        ctx: &Context<'_>,
+        playlist: String,
+        input: CreatePlaylistTrackInput,
+    ) -> Result<PlaylistTrack> {
+        let user = ctx
+            .data::<CurrentUser>()
+            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let db = ctx.data::<DatabaseConnection>()?;
+
+        let playlist = playlist::Entity::find()
+            .filter(playlist::Column::Hashid.eq(playlist))
+            .one(db)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        PlaylistTrackPolicy::check(Some(user), PolicyAction::Create, Some(&playlist))
+            .authorize()?;
+
+        let track = PlaylistTrackAction::insert(
+            db,
+            playlist,
+            InsertTrackActionParameters {
+                entry_id: input.entry_id,
+                video_id: input.video_id,
+                position: input.position,
+            },
+        )
+        .await?;
+
+        Ok(track.into())
+    }
+
+    async fn update_playlist_track(
+        &self,
+        ctx: &Context<'_>,
+        id: String,
+        playlist: String,
+        input: UpdatePlaylistTrackInput,
+    ) -> Result<PlaylistTrack> {
+        let user = ctx
+            .data::<CurrentUser>()
+            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let db = ctx.data::<DatabaseConnection>()?;
+
+        let playlist = playlist::Entity::find()
+            .filter(playlist::Column::Hashid.eq(playlist))
+            .one(db)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        PlaylistTrackPolicy::check(Some(user), PolicyAction::Update, Some(&playlist))
+            .authorize()?;
+
+        let track = track::Entity::find()
+            .filter(track::Column::Hashid.eq(id))
+            .one(db)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        let track = PlaylistTrackAction::update(
+            &db,
+            track,
+            UpdateTrackActionParameters {
+                entry_id: input.entry_id,
+                video_id: input.video_id,
+                position: input.position,
+            },
+        )
+        .await?;
+
+        Ok(track.into())
+    }
+
+    async fn delete_playlist_track(
+        &self,
+        ctx: &Context<'_>,
+        id: String,
+        playlist: String,
+    ) -> Result<bool> {
+        let user = ctx
+            .data::<CurrentUser>()
+            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let db = ctx.data::<DatabaseConnection>()?;
+
+        let playlist = playlist::Entity::find()
+            .filter(playlist::Column::Hashid.eq(playlist))
+            .one(db)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        PlaylistTrackPolicy::check(Some(user), PolicyAction::Delete, Some(&playlist))
+            .authorize()?;
+
+        let track = track::Entity::find()
+            .filter(track::Column::Hashid.eq(id))
+            .one(db)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        PlaylistTrackAction::remove(&db, track).await?;
+
+        Ok(true)
+    }
+}
