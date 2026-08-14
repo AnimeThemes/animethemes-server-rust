@@ -3,8 +3,10 @@ use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::Da
 use crate::{
     entities::content::song,
     graphql::{
-        loaders::content::song::song_performances::SongPerformancesLoader,
-        types::content::performance::Performance,
+        loaders::content::song::{
+            song_animethemes::SongAnimeThemesLoader, song_performances::SongPerformancesLoader,
+        },
+        types::content::{animetheme::AnimeTheme, performance::Performance},
     },
 };
 
@@ -39,6 +41,14 @@ pub struct Song {
 
 #[ComplexObject]
 impl Song {
+    async fn animethemes(&self, ctx: &Context<'_>) -> Result<Vec<AnimeTheme>> {
+        let loader = ctx.data::<DataLoader<SongAnimeThemesLoader>>()?;
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(AnimeTheme::from).collect())
+    }
+
     async fn performances(&self, ctx: &Context<'_>) -> Result<Vec<Performance>> {
         let loader = ctx.data::<DataLoader<SongPerformancesLoader>>()?;
 

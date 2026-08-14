@@ -1,6 +1,9 @@
 use anyhow::Result;
 use async_graphql::Error;
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Select};
+use sea_orm::{
+    ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, Select,
+    sea_query::{CaseStatement, SimpleExpr},
+};
 use typesense::{models::SearchParameters, prelude::Document};
 
 use crate::{
@@ -208,7 +211,19 @@ where
         return Ok(Vec::new());
     }
 
-    let models = builder.filter(id_column.is_in(ids)).all(db).await?;
+    let order: SimpleExpr = ids
+        .iter()
+        .enumerate()
+        .fold(CaseStatement::new(), |case, (index, id)| {
+            case.case(id_column.eq(id), index as i32)
+        })
+        .into();
+
+    let models = builder
+        .filter(id_column.is_in(&ids))
+        .order_by_asc(order)
+        .all(db)
+        .await?;
 
     Ok(models.into_iter().map(|m| m.into()).collect())
 }

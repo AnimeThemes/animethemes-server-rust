@@ -9,8 +9,10 @@ use crate::{
     graphql::{
         loaders::content::{
             artist::{
-                artist_groups::ArtistGroupsLoader, artist_members::ArtistMembersLoader,
-                artist_performances::ArtistPerformancesLoader,
+                artist_groups::ArtistGroupsLoader,
+                artist_memberperformances::ArtistMemberPerformancesLoader,
+                artist_members::ArtistMembersLoader, artist_performances::ArtistPerformancesLoader,
+                artist_synonyms::ArtistSynonymsLoader,
             },
             imageable::{ImageableKey, ImageableLoader},
             resourceable::{ResourceableKey, ResourceableLoader},
@@ -22,6 +24,7 @@ use crate::{
             imageable::{ImageableConnection, ImageableEdge, ImageableEdgeFields},
             performance::Performance,
             resourceable::{ResourceableConnection, ResourceableEdge, ResourceableEdgeFields},
+            synonym::Synonym,
         },
     },
 };
@@ -61,6 +64,14 @@ pub struct Artist {
 
 #[ComplexObject]
 impl Artist {
+    async fn synonyms(&self, ctx: &Context<'_>) -> Result<Vec<Synonym>> {
+        let loader = ctx.data::<DataLoader<ArtistSynonymsLoader>>()?;
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(Synonym::from).collect())
+    }
+
     async fn members(
         &self,
         ctx: &Context<'_>,
@@ -137,6 +148,14 @@ impl Artist {
 
     async fn performances(&self, ctx: &Context<'_>) -> Result<Vec<Performance>> {
         let loader = ctx.data::<DataLoader<ArtistPerformancesLoader>>()?;
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(Performance::from).collect())
+    }
+
+    async fn member_performances(&self, ctx: &Context<'_>) -> Result<Vec<Performance>> {
+        let loader = ctx.data::<DataLoader<ArtistMemberPerformancesLoader>>()?;
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 

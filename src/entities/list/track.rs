@@ -20,10 +20,8 @@ pub struct Model {
     pub id: u64,
     pub hashid: Option<String>,
     pub entry_id: Option<u64>,
-    pub next_id: Option<u64>,
     pub playlist_id: u64,
     pub position: i32,
-    pub previous_id: Option<u64>,
     pub video_id: Option<u64>,
     #[sea_orm(column_type = "Timestamp")]
     pub created_at: Option<chrono::DateTime<Utc>>,
@@ -32,12 +30,6 @@ pub struct Model {
 
     #[sea_orm(belongs_to, from = "playlist_id", to = "id")]
     pub playlist: BelongsTo<playlist::Entity>,
-
-    #[sea_orm(self_ref, relation_enum = "Previous", from = "previous_id", to = "id")]
-    pub previous: BelongsTo<Option<Entity>>,
-
-    #[sea_orm(self_ref, relation_enum = "Next", from = "next_id", to = "id")]
-    pub next: BelongsTo<Option<Entity>>,
 
     #[sea_orm(belongs_to, from = "entry_id", to = "id")]
     pub entry: BelongsTo<Option<animethemeentry::Entity>>,

@@ -4,8 +4,16 @@ use chrono::{DateTime, Utc};
 use crate::{
     entities::auth::user,
     graphql::{
-        loaders::auth::user::{user_playlists::UserPlaylistsLoader, user_roles::UserRolesLoader},
-        types::{auth::role::Role, list::playlist::Playlist},
+        enums::sort::list::playlist_sort::PlaylistSort,
+        loaders::auth::user::{
+            user_permissions::UserPermissionsLoader,
+            user_playlists::{UserPlaylistsLoader, UserPlaylistsLoaderKey},
+            user_roles::UserRolesLoader,
+        },
+        types::{
+            auth::{permission::Permission, role::Role},
+            list::playlist::Playlist,
+        },
     },
 };
 
@@ -42,10 +50,17 @@ impl From<&user::Model> for Me {
 
 #[ComplexObject]
 impl Me {
-    async fn playlists(&self, ctx: &Context<'_>) -> Result<Vec<Playlist>> {
+    async fn playlists(
+        &self,
+        ctx: &Context<'_>,
+        sort: Option<Vec<PlaylistSort>>,
+    ) -> Result<Vec<Playlist>> {
         let loader = ctx.data::<DataLoader<UserPlaylistsLoader>>()?;
 
-        let models = loader.load_one(self.id).await?.unwrap_or_default();
+        let models = loader
+            .load_one(UserPlaylistsLoaderKey::new(self.id, sort))
+            .await?
+            .unwrap_or_default();
 
         Ok(models.into_iter().map(Playlist::from).collect())
     }
@@ -56,5 +71,13 @@ impl Me {
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
         Ok(models.into_iter().map(Role::from).collect())
+    }
+
+    async fn permissions(&self, ctx: &Context<'_>) -> Result<Vec<Permission>> {
+        let loader = ctx.data::<DataLoader<UserPermissionsLoader>>()?;
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(Permission::from).collect())
     }
 }

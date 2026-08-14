@@ -1,6 +1,10 @@
 use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use chrono::{DateTime, Utc};
 
-use crate::{entities::document::page, graphql::loaders::document::page_page::PagePageLoader};
+use crate::{
+    entities::document::page,
+    graphql::{loaders::document::page_page::PagePageLoader, utils::format_datetime},
+};
 
 /// Represents a static markdown page used for guides and other documentation.
 ///
@@ -20,10 +24,24 @@ pub struct Page {
     pub previous_id: Option<u64>,
     #[graphql(skip)]
     pub next_id: Option<u64>,
+    #[graphql(skip)]
+    pub created_at: Option<DateTime<Utc>>,
+    #[graphql(skip)]
+    pub updated_at: Option<DateTime<Utc>>,
 }
 
 #[ComplexObject]
 impl Page {
+    /// The date that the resource was created
+    async fn created_at(&self, #[graphql(default = "%+")] format: String) -> Option<String> {
+        format_datetime(self.created_at.as_ref(), &format)
+    }
+
+    /// The date that the resource was updated
+    async fn updated_at(&self, #[graphql(default = "%+")] format: String) -> Option<String> {
+        format_datetime(self.updated_at.as_ref(), &format)
+    }
+
     async fn previous(&self, ctx: &Context<'_>) -> Result<Option<Page>> {
         let Some(previous_id) = self.previous_id else {
             return Ok(None);
@@ -54,6 +72,8 @@ impl From<page::Model> for Page {
             body: model.body,
             previous_id: model.previous_id,
             next_id: model.next_id,
+            created_at: model.created_at,
+            updated_at: model.updated_at,
         }
     }
 }

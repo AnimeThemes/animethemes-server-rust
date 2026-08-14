@@ -1,12 +1,30 @@
 use animethemes_graphql_rust::enums::LocalizedEnum;
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::{
+    ComplexObject, Context, Result, SimpleObject,
+    connection::{Connection, Edge, EmptyFields},
+    dataloader::DataLoader,
+};
 
 use crate::{
     entities::content::video::{self},
     graphql::{
         enums::content::{videooverlap::VideoOverlap, videosource::VideoSource},
-        loaders::content::video::{video_audio::VideoAudioLoader, video_script::VideoScriptLoader},
-        types::content::{audio::Audio, videoscript::VideoScript},
+        loaders::content::video::{
+            video_animethemeentries::VideoAnimeThemeEntriesLoader, video_audio::VideoAudioLoader,
+            video_script::VideoScriptLoader, video_tracks::VideoTracksLoader,
+        },
+        types::{
+            content::{
+                animethemeentry::AnimeThemeEntry,
+                animethemeentry_video::{
+                    VideoAnimeThemeEntryConnection, VideoAnimeThemeEntryEdge,
+                    VideoAnimeThemeEntryEdgeFields,
+                },
+                audio::Audio,
+                videoscript::VideoScript,
+            },
+            list::track::PlaylistTrack,
+        },
     },
 };
 
@@ -56,6 +74,39 @@ pub struct Video {
 
 #[ComplexObject]
 impl Video {
+    async fn animethemeentries(
+        &self,
+        ctx: &Context<'_>,
+    ) -> Result<
+        Connection<
+            u64,
+            AnimeThemeEntry,
+            EmptyFields,
+            VideoAnimeThemeEntryEdgeFields,
+            VideoAnimeThemeEntryConnection,
+            VideoAnimeThemeEntryEdge,
+        >,
+    > {
+        let loader = ctx.data::<DataLoader<VideoAnimeThemeEntriesLoader>>()?;
+
+        let rows = loader.load_one(self.id).await?.unwrap_or_default();
+
+        let mut connection = Connection::with_additional_fields(false, false, EmptyFields);
+
+        for (pivot, model) in rows {
+            connection.edges.push(Edge::with_additional_fields(
+                model.id,
+                model.into(),
+                VideoAnimeThemeEntryEdgeFields {
+                    created_at: pivot.created_at,
+                    updated_at: pivot.updated_at,
+                },
+            ));
+        }
+
+        Ok(connection)
+    }
+
     async fn audio(&self, ctx: &Context<'_>) -> Result<Option<Audio>> {
         let Some(audio_id) = self.audio_id else {
             return Ok(None);
@@ -66,12 +117,20 @@ impl Video {
         Ok(loader.load_one(audio_id).await?.map(Into::into))
     }
 
-    async fn script(&self, ctx: &Context<'_>) -> Result<Option<VideoScript>> {
+    async fn videoscript(&self, ctx: &Context<'_>) -> Result<Option<VideoScript>> {
         let loader = ctx.data::<DataLoader<VideoScriptLoader>>()?;
 
         let script = loader.load_one(self.id).await?;
 
         Ok(script.map(Into::into))
+    }
+
+    async fn tracks(&self, ctx: &Context<'_>) -> Result<Vec<PlaylistTrack>> {
+        let loader = ctx.data::<DataLoader<VideoTracksLoader>>()?;
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(PlaylistTrack::from).collect())
     }
 }
 

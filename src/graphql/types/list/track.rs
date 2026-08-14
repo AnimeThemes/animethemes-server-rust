@@ -4,10 +4,13 @@ use crate::{
     entities::list::track,
     graphql::{
         loaders::list::playlist::{
-            track_entry::TrackEntryLoader, track_track::TrackTrackLoader,
+            track_entry::TrackEntryLoader, track_playlist::TrackPlaylistLoader,
             track_video::TrackVideoLoader,
         },
-        types::content::{animethemeentry::AnimeThemeEntry, video::Video},
+        types::{
+            content::{animethemeentry::AnimeThemeEntry, video::Video},
+            list::playlist::Playlist,
+        },
     },
 };
 
@@ -23,37 +26,21 @@ pub struct PlaylistTrack {
     #[graphql(skip)]
     pub _id: u64,
     #[graphql(skip)]
+    pub playlist_id: u64,
+    #[graphql(skip)]
     pub entry_id: Option<u64>,
     #[graphql(skip)]
     pub video_id: Option<u64>,
-    #[graphql(skip)]
-    pub previous_id: Option<u64>,
-    #[graphql(skip)]
-    pub next_id: Option<u64>,
     /// The position of the playlist track within the playlist
     pub position: i32,
 }
 
 #[ComplexObject]
 impl PlaylistTrack {
-    async fn previous(&self, ctx: &Context<'_>) -> Result<Option<PlaylistTrack>> {
-        let Some(previous_id) = self.previous_id else {
-            return Ok(None);
-        };
+    async fn playlist(&self, ctx: &Context<'_>) -> Result<Option<Playlist>> {
+        let loader = ctx.data::<DataLoader<TrackPlaylistLoader>>()?;
 
-        let loader = ctx.data::<DataLoader<TrackTrackLoader>>()?;
-
-        Ok(loader.load_one(previous_id).await?.map(Into::into))
-    }
-
-    async fn next(&self, ctx: &Context<'_>) -> Result<Option<PlaylistTrack>> {
-        let Some(next_id) = self.next_id else {
-            return Ok(None);
-        };
-
-        let loader = ctx.data::<DataLoader<TrackTrackLoader>>()?;
-
-        Ok(loader.load_one(next_id).await?.map(Into::into))
+        Ok(loader.load_one(self.playlist_id).await?.map(Into::into))
     }
 
     async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<Option<AnimeThemeEntry>> {
@@ -82,10 +69,9 @@ impl From<track::Model> for PlaylistTrack {
         Self {
             hashid: model.hashid.unwrap(),
             _id: model.id,
+            playlist_id: model.playlist_id,
             entry_id: model.entry_id,
             video_id: model.video_id,
-            previous_id: model.previous_id,
-            next_id: model.next_id,
             position: model.position,
         }
     }

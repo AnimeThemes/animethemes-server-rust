@@ -5,6 +5,7 @@ pub mod artist;
 pub mod imageable;
 pub mod performance;
 pub mod resourceable;
+pub mod series;
 pub mod song;
 pub mod studio;
 pub mod video;

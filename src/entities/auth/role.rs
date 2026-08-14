@@ -3,7 +3,7 @@ use std::str::FromStr;
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::auth::user;
+use crate::entities::auth::{permission, user};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
@@ -20,6 +20,9 @@ pub struct Model {
     pub created_at: Option<chrono::DateTime<Utc>>,
     #[sea_orm(column_type = "Timestamp")]
     pub updated_at: Option<chrono::DateTime<Utc>>,
+
+    #[sea_orm(has_many, via = "role_has_permissions")]
+    pub permissions: HasMany<permission::Entity>,
 
     #[sea_orm(has_many, via = "model_has_roles")]
     pub users: HasMany<user::Entity>,

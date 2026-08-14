@@ -4,7 +4,7 @@ use sea_orm::{QueryOrder, Select, sea_query::Expr};
 
 use crate::graphql::enums::sort::GraphQLSort;
 
-#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub enum PlaylistSort {
     Id,
     IdDesc,
