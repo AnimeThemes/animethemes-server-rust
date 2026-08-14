@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::{entities::content::animethemeentry, scopes::without_trashed};
+use animethemes_server_rust::{entities::content::animethemeentry, scopes::without_trashed};
 use async_graphql::{
     Context, InputObject, Object, Result,
     connection::{Connection, EmptyFields},

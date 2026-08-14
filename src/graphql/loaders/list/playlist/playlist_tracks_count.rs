@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use animethemes_graphql_rust::entities::list::track;
+use animethemes_server_rust::entities::list::track;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QuerySelect};
 

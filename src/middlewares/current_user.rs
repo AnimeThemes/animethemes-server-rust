@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::entities::auth::{role, user};
+use animethemes_server_rust::entities::auth::{role, user};
 use axum::{
     extract::{Request, State},
     middleware::Next,

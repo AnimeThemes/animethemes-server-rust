@@ -1,13 +1,13 @@
-use animethemes_graphql_rust::entities::content::animetheme;
-use animethemes_graphql_rust::scopes::without_trashed;
-use animethemes_graphql_rust::typesense::documents::animetheme_document::{
+use animethemes_server_rust::entities::content::animetheme;
+use animethemes_server_rust::scopes::without_trashed;
+use animethemes_server_rust::typesense::documents::animetheme_document::{
     AnimeThemeDocument, build_animetheme_documents,
 };
-use animethemes_graphql_rust::typesense::index_document::index_document;
+use animethemes_server_rust::typesense::index_document::index_document;
 use anyhow::{Context, Result};
 
-use animethemes_graphql_rust::db::connect;
-use animethemes_graphql_rust::typesense::client::create_typesense_client;
+use animethemes_server_rust::db::connect;
+use animethemes_server_rust::typesense::client::create_typesense_client;
 
 use sea_orm::{EntityTrait, QueryFilter};
 use typesense::prelude::Document;

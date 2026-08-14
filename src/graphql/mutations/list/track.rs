@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::entities::list::{playlist, track};
+use animethemes_server_rust::entities::list::{playlist, track};
 use async_graphql::{Context, Error, InputObject, Object, Result};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 

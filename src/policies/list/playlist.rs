@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::{
+use animethemes_server_rust::{
     entities::{auth::role::Roles, list::playlist},
     enums::list::playlistvisibility::PlaylistVisibility,
 };

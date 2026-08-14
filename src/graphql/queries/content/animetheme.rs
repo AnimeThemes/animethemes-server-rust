@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::{
+use animethemes_server_rust::{
     entities::content::{anime, animetheme, animethemeentry},
     enums::content::{
         animeformat::AnimeFormat as AnimeFormatEnum, themetype::ThemeType as ThemeTypeEnum,

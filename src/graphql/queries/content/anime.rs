@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::enums::content::animeseason::AnimeSeason as AnimeSeasonEnum;
+use animethemes_server_rust::enums::content::animeseason::AnimeSeason as AnimeSeasonEnum;
 use async_graphql::{
     Context, InputObject, Object, Result,
     connection::{Connection, EmptyFields},

@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::entities::auth::role::{self, Roles};
+use animethemes_server_rust::entities::auth::role::{self, Roles};
 use sea_orm::EntityTrait;
 
 use crate::middlewares::current_user::CurrentUser;

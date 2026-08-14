@@ -6,7 +6,7 @@ mod policies;
 mod schema;
 mod session;
 
-use animethemes_graphql_rust::{db, entities, enums, scopes, typesense};
+use animethemes_server_rust::{db, entities, enums, scopes, typesense};
 
 use axum::{
     Router,

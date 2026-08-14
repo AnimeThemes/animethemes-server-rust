@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::enums::LocalizedEnum;
+use animethemes_server_rust::enums::LocalizedEnum;
 use async_graphql::{
     ComplexObject, Context, Result, SimpleObject,
     connection::{Connection, Edge, EmptyFields},

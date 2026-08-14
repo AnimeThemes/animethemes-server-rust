@@ -1,13 +1,13 @@
-use animethemes_graphql_rust::entities::list::playlist;
-use animethemes_graphql_rust::scopes::list::playlist::public_playlists;
-use animethemes_graphql_rust::typesense::documents::playlist_document::{
+use animethemes_server_rust::entities::list::playlist;
+use animethemes_server_rust::scopes::list::playlist::public_playlists;
+use animethemes_server_rust::typesense::documents::playlist_document::{
     PlaylistDocument, build_playlist_documents,
 };
-use animethemes_graphql_rust::typesense::index_document::index_document;
+use animethemes_server_rust::typesense::index_document::index_document;
 use anyhow::{Context, Result};
 
-use animethemes_graphql_rust::db::connect;
-use animethemes_graphql_rust::typesense::client::create_typesense_client;
+use animethemes_server_rust::db::connect;
+use animethemes_server_rust::typesense::client::create_typesense_client;
 
 use sea_orm::{EntityTrait, QueryFilter};
 use typesense::prelude::Document;

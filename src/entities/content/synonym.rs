@@ -23,11 +23,11 @@ pub struct Model {
     #[sea_orm(column_type = "Timestamp")]
     pub deleted_at: Option<chrono::DateTime<Utc>>,
 
-    #[sea_orm(has_many)]
-    pub anime: HasMany<anime::Entity>,
+    #[sea_orm(belongs_to, from = "synonymable_id", to = "id")]
+    pub anime: BelongsTo<anime::Entity>,
 
-    #[sea_orm(has_many)]
-    pub artists: HasMany<artist::Entity>,
+    #[sea_orm(belongs_to, from = "synonymable_id", to = "id")]
+    pub artist: BelongsTo<artist::Entity>,
 }
 
 impl SoftDeleteEntity for Entity {

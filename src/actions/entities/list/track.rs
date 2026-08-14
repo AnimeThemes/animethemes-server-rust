@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::{
+use animethemes_server_rust::{
     entities::list::{playlist, track},
     traits::sortable::Sortable,
 };

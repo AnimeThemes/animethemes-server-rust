@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::entities::list::track;
+use animethemes_server_rust::entities::list::track;
 use async_graphql::Enum;
 use sea_orm::{QueryOrder, Select, sea_query::Expr};
 

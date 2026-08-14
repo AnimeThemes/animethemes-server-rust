@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::entities::auth::role;
+use animethemes_server_rust::entities::auth::role;
 use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
 
 use crate::graphql::{

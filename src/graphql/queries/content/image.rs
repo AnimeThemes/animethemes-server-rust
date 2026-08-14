@@ -1,4 +1,4 @@
-use animethemes_graphql_rust::{
+use animethemes_server_rust::{
     entities::content::image, enums::content::imagefacet::ImageFacet as ImageFacetEnum,
 };
 use async_graphql::{

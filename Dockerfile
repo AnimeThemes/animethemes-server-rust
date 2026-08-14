@@ -27,6 +27,4 @@ RUN apt-get update && \
 
 COPY --from=builder /out/ /usr/local/bin/
 
-EXPOSE 8000
-
-CMD ["/usr/local/bin/animethemes-graphql-rust"]
+CMD ["/usr/local/bin/animethemes-server-rust"]
