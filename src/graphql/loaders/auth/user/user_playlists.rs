@@ -71,7 +71,7 @@ impl Loader<UserPlaylistsLoaderKey> for UserPlaylistsLoader {
                 group_keys.into_iter().map(|key| (key.key, key)).collect();
 
             for model in models {
-                if let Some(key) = keys_by_id.get(&model.user_id.unwrap()).copied() {
+                if let Some(key) = keys_by_id.get(&model.user_id).copied() {
                     result
                         .get_mut(key)
                         .expect("loader key must exist in result")

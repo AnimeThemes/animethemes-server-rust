@@ -27,7 +27,7 @@ impl MigrationTrait for Migration {
             .col(ColumnDef::new("name").string().not_null())
             .col(ColumnDef::new("visibility").integer().not_null())
             .col(ColumnDef::new("description").text().null())
-            .col(ColumnDef::new("user_id").big_unsigned().null())
+            .col(ColumnDef::new("user_id").big_unsigned().not_null())
             .col(ColumnDef::new("created_at").timestamp().null())
             .col(ColumnDef::new("updated_at").timestamp().null())
             .foreign_key(

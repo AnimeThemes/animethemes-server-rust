@@ -48,7 +48,7 @@ impl PlaylistMutation {
             name: Set(input.name),
             description: Set(input.description),
             visibility: Set(input.visibility.into()),
-            user_id: Set(Some(user.user.clone().id)),
+            user_id: Set(user.user.clone().id),
             ..Default::default()
         };
 

@@ -17,7 +17,7 @@ pub struct Model {
     pub hashid: Option<String>,
     pub description: Option<String>,
     pub name: String,
-    pub user_id: Option<u64>,
+    pub user_id: u64,
     pub visibility: PlaylistVisibility,
     #[sea_orm(column_type = "Timestamp")]
     pub created_at: Option<chrono::DateTime<Utc>>,
@@ -25,7 +25,7 @@ pub struct Model {
     pub updated_at: Option<chrono::DateTime<Utc>>,
 
     #[sea_orm(belongs_to, from = "user_id", to = "id")]
-    pub user: BelongsTo<Option<user::Entity>>,
+    pub user: BelongsTo<user::Entity>,
 
     #[sea_orm(has_many, relation_enum = "Tracks")]
     pub tracks: HasMany<track::Entity>,
@@ -70,9 +70,6 @@ impl ActiveModelBehavior for ActiveModel {
 
 impl HasHashId for Model {
     fn hashids(&self) -> Vec<u64> {
-        vec![
-            self.user_id.expect("user_id is required to set hashid"),
-            self.id,
-        ]
+        vec![self.user_id, self.id]
     }
 }

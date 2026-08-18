@@ -1,6 +1,6 @@
 use animethemes_server_rust::enums::LocalizedEnum;
 use async_graphql::{
-    ComplexObject, Context, InputObject, Result, SimpleObject, dataloader::DataLoader,
+    ComplexObject, Context, Error, InputObject, Result, SimpleObject, dataloader::DataLoader,
 };
 
 use crate::{
@@ -16,6 +16,7 @@ use crate::{
         },
         types::{auth::user::User, list::track::PlaylistTrack},
     },
+    policies::AppError,
 };
 
 #[derive(InputObject, Clone, Debug, PartialEq, Eq, Hash)]
@@ -36,7 +37,7 @@ pub struct Playlist {
     #[graphql(skip)]
     pub id: u64,
     #[graphql(skip)]
-    pub user_id: Option<u64>,
+    pub user_id: u64,
     /// The title of the playlist
     pub name: String,
     /// The description of the playlist
@@ -65,14 +66,15 @@ impl Playlist {
         Ok(count > 0)
     }
 
-    async fn user(&self, ctx: &Context<'_>) -> Result<Option<User>> {
-        let Some(user_id) = self.user_id else {
-            return Ok(None);
-        };
-
+    async fn user(&self, ctx: &Context<'_>) -> Result<User> {
         let loader = ctx.data::<DataLoader<PlaylistUserLoader>>()?;
 
-        Ok(loader.load_one(user_id).await?.map(Into::into))
+        let user = loader
+            .load_one(self.user_id)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        Ok(user.into())
     }
 
     async fn tracks(

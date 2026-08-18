@@ -43,7 +43,7 @@ impl PlaylistPolicy {
         }
 
         if let Some(user) = user
-            && playlist.user_id == Some(user.user.id)
+            && playlist.user_id == user.user.id
         {
             return PolicyResponse::Allow;
         }
@@ -64,7 +64,7 @@ impl PlaylistPolicy {
     pub fn update(user: &CurrentUser, playlist: &playlist::Model) -> PolicyResponse {
         let has_role = has_any_role(&user.roles, &vec![Roles::Admin, Roles::Verified]);
 
-        if has_role && playlist.user_id == Some(user.user.id) {
+        if has_role && playlist.user_id == user.user.id {
             return PolicyResponse::Allow;
         }
 
@@ -74,7 +74,7 @@ impl PlaylistPolicy {
     pub fn delete(user: &CurrentUser, playlist: &playlist::Model) -> PolicyResponse {
         let has_role = has_any_role(&user.roles, &vec![Roles::Admin, Roles::Verified]);
 
-        if has_role && playlist.user_id == Some(user.user.id) {
+        if has_role && playlist.user_id == user.user.id {
             return PolicyResponse::Allow;
         }
 
