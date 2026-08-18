@@ -1,7 +1,7 @@
 use anyhow::Result;
 use async_graphql::Error;
 use sea_orm::{
-    ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, Select,
+    ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, QuerySelect, Select,
     sea_query::{CaseStatement, SimpleExpr},
 };
 use typesense::{models::SearchParameters, prelude::Document};
@@ -33,6 +33,7 @@ pub async fn search_anime(
     typesense: &TypesenseClient,
     builder: Select<anime::Entity>,
     term: String,
+    first: i32,
 ) -> Result<Vec<anime::Model>> {
     search::<anime::Entity, AnimeDocument>(
         db,
@@ -40,6 +41,7 @@ pub async fn search_anime(
         builder,
         anime::Column::Id,
         term,
+        first,
         anime_document::QUERY_BY,
         anime_document::QUERY_BY_WEIGHTS,
     )
@@ -51,6 +53,7 @@ pub async fn search_artists(
     typesense: &TypesenseClient,
     builder: Select<artist::Entity>,
     term: String,
+    first: i32,
 ) -> Result<Vec<artist::Model>> {
     search::<artist::Entity, ArtistDocument>(
         db,
@@ -58,6 +61,7 @@ pub async fn search_artists(
         builder,
         artist::Column::Id,
         term,
+        first,
         artist_document::QUERY_BY,
         artist_document::QUERY_BY_WEIGHTS,
     )
@@ -69,6 +73,7 @@ pub async fn search_animethemes(
     typesense: &TypesenseClient,
     builder: Select<animetheme::Entity>,
     term: String,
+    first: i32,
 ) -> Result<Vec<animetheme::Model>> {
     search::<animetheme::Entity, AnimeThemeDocument>(
         db,
@@ -76,6 +81,7 @@ pub async fn search_animethemes(
         builder,
         animetheme::Column::Id,
         term,
+        first,
         animetheme_document::QUERY_BY,
         animetheme_document::QUERY_BY_WEIGHTS,
     )
@@ -87,6 +93,7 @@ pub async fn search_playlists(
     typesense: &TypesenseClient,
     builder: Select<playlist::Entity>,
     term: String,
+    first: i32,
 ) -> Result<Vec<playlist::Model>> {
     search::<playlist::Entity, PlaylistDocument>(
         db,
@@ -94,6 +101,7 @@ pub async fn search_playlists(
         builder.filter(public_playlists()),
         playlist::Column::Id,
         term,
+        first,
         playlist_document::QUERY_BY,
         playlist_document::QUERY_BY_WEIGHTS,
     )
@@ -105,6 +113,7 @@ pub async fn search_series(
     typesense: &TypesenseClient,
     builder: Select<series::Entity>,
     term: String,
+    first: i32,
 ) -> Result<Vec<series::Model>> {
     search::<series::Entity, SeriesDocument>(
         db,
@@ -112,6 +121,7 @@ pub async fn search_series(
         builder,
         series::Column::Id,
         term,
+        first,
         series_document::QUERY_BY,
         series_document::QUERY_BY_WEIGHTS,
     )
@@ -123,6 +133,7 @@ pub async fn search_songs(
     typesense: &TypesenseClient,
     builder: Select<song::Entity>,
     term: String,
+    first: i32,
 ) -> Result<Vec<song::Model>> {
     search::<song::Entity, SongDocument>(
         db,
@@ -130,6 +141,7 @@ pub async fn search_songs(
         builder,
         song::Column::Id,
         term,
+        first,
         song_document::QUERY_BY,
         song_document::QUERY_BY_WEIGHTS,
     )
@@ -141,6 +153,7 @@ pub async fn search_studios(
     typesense: &TypesenseClient,
     builder: Select<studio::Entity>,
     term: String,
+    first: i32,
 ) -> Result<Vec<studio::Model>> {
     search::<studio::Entity, StudioDocument>(
         db,
@@ -148,6 +161,7 @@ pub async fn search_studios(
         builder,
         studio::Column::Id,
         term,
+        first,
         studio_document::QUERY_BY,
         studio_document::QUERY_BY_WEIGHTS,
     )
@@ -159,6 +173,7 @@ pub async fn search_videos(
     typesense: &TypesenseClient,
     builder: Select<video::Entity>,
     term: String,
+    first: i32,
 ) -> Result<Vec<video::Model>> {
     search::<video::Entity, VideoDocument>(
         db,
@@ -166,6 +181,7 @@ pub async fn search_videos(
         builder,
         video::Column::Id,
         term,
+        first,
         video_document::QUERY_BY,
         video_document::QUERY_BY_WEIGHTS,
     )
@@ -178,6 +194,7 @@ async fn search<E, D>(
     builder: Select<E>,
     id_column: E::Column,
     term: String,
+    first: i32,
     query_by: &str,
     query_by_weights: &str,
 ) -> Result<Vec<E::Model>>
@@ -222,6 +239,7 @@ where
     let models = builder
         .filter(id_column.is_in(&ids))
         .order_by_asc(order)
+        .limit(first as u64)
         .all(db)
         .await?;
 

@@ -10,13 +10,17 @@ use animethemes_server_rust::{db, entities, enums, scopes, typesense};
 
 use axum::{
     Router,
-    http::{HeaderValue, Method},
+    http::{
+        HeaderValue, Method,
+        header::{AUTHORIZATION, CONTENT_TYPE},
+    },
     middleware::from_fn_with_state,
     routing::{get, post},
 };
 use dotenvy::dotenv;
 use sea_orm::DatabaseConnection;
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{AllowOrigin, CorsLayer};
+use url::Url;
 
 use crate::{
     middlewares::current_user::current_user_middleware,
@@ -45,9 +49,24 @@ async fn main() {
     let app_url = env::var("APP_URL").expect("APP_URL must be set in .env");
     let app_port = env::var("APP_PORT").unwrap_or(80.to_string());
 
+    let parsed_url = Url::parse(&app_url).unwrap();
+
     let cors = CorsLayer::new()
-        .allow_origin(app_url.parse::<HeaderValue>().unwrap())
-        .allow_methods([Method::GET, Method::POST])
+        .allow_origin(AllowOrigin::predicate(
+            move |origin: &HeaderValue, _request_parts| {
+                let Ok(origin) = origin.to_str() else {
+                    return false;
+                };
+
+                let Ok(origin) = Url::parse(origin) else {
+                    return false;
+                };
+
+                origin.scheme() == parsed_url.scheme() && origin.host() == parsed_url.host()
+            },
+        ))
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        .allow_headers([CONTENT_TYPE, AUTHORIZATION])
         .allow_credentials(true);
 
     let session_layer = create_session_layer().await;

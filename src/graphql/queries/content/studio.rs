@@ -43,6 +43,7 @@ impl StudioQuery {
         pagination: Option<PaginationInput>,
         filter: Option<StudioFilterInput>,
         sort: Option<Vec<StudioSort>>,
+        _search: Option<String>,
     ) -> Result<Connection<u64, Studio, EmptyFields, EmptyFields>> {
         let mut query = studio::Entity::find().filter(without_trashed::<studio::Entity>());
 

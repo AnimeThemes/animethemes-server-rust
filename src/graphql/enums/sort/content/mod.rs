@@ -1,4 +1,5 @@
 pub mod anime_sort;
+pub mod animetheme_sort;
 pub mod artist_sort;
 pub mod image_sort;
 pub mod series_sort;

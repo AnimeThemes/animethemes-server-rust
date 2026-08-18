@@ -77,7 +77,7 @@ impl AnimeYearSeason {
         filter.animeyear_season = Some(self.season.clone().into());
 
         AnimeQuery::default()
-            .anime_connection(ctx, pagination, Some(filter), sort)
+            .anime_connection(ctx, pagination, Some(filter), sort, None)
             .await
     }
 }

@@ -1,6 +1,6 @@
 use async_graphql::{EmptySubscription, Schema, http::GraphiQLSource};
 
-use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
+use async_graphql_axum::{GraphQLBatchRequest, GraphQLResponse};
 use axum::{Extension, extract::State, response::Html};
 use sea_orm::DatabaseConnection;
 use tower_sessions::Session;
@@ -28,7 +28,7 @@ pub async fn graphql_handler(
     State(state): State<AppState>,
     session: Session,
     current_user: Option<Extension<CurrentUser>>,
-    req: GraphQLRequest,
+    req: GraphQLBatchRequest,
 ) -> GraphQLResponse {
     let mut request = req.into_inner().data(session);
 
@@ -36,7 +36,7 @@ pub async fn graphql_handler(
         request = request.data(current_user);
     }
 
-    state.schema.execute(request).await.into()
+    state.schema.execute_batch(request).await.into()
 }
 
 pub async fn graphiql() -> Html<String> {

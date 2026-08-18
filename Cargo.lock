@@ -83,6 +83,7 @@ dependencies = [
  "tower-sessions",
  "tower-sessions-redis-store",
  "typesense",
+ "url",
 ]
 
 [[package]]

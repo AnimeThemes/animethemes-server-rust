@@ -43,6 +43,7 @@ impl SeriesQuery {
         pagination: Option<PaginationInput>,
         filter: Option<SeriesFilterInput>,
         sort: Option<Vec<SeriesSort>>,
+        _search: Option<String>,
     ) -> Result<Connection<u64, Series, EmptyFields, EmptyFields>> {
         let mut query = series::Entity::find().filter(without_trashed::<series::Entity>());
 

@@ -43,6 +43,7 @@ impl ArtistQuery {
         pagination: Option<PaginationInput>,
         filter: Option<ArtistFilterInput>,
         sort: Option<Vec<ArtistSort>>,
+        _search: Option<String>,
     ) -> Result<Connection<u64, Artist, EmptyFields, EmptyFields>> {
         let mut query = artist::Entity::find().filter(without_trashed::<artist::Entity>());
 

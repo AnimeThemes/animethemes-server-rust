@@ -15,7 +15,10 @@ use sea_orm::{
 };
 
 use crate::graphql::{
-    enums::content::{animeformat::AnimeFormat, themetype::ThemeType},
+    enums::{
+        content::{animeformat::AnimeFormat, themetype::ThemeType},
+        sort::{GraphQLSort, content::animetheme_sort::AnimeThemeSort},
+    },
     inputs::pagination_input::PaginationInput,
     types::content::animetheme::AnimeTheme,
     utils::cursor_paginate,
@@ -33,6 +36,7 @@ struct AnimeThemeShuffleInput {
 #[derive(InputObject, Default)]
 pub struct AnimeThemeFilterInput {
     id_in: Option<Vec<u64>>,
+    r#type: Option<ThemeType>,
 }
 
 #[derive(Default)]
@@ -94,6 +98,8 @@ impl AnimeThemeQuery {
         ctx: &Context<'_>,
         pagination: Option<PaginationInput>,
         filter: Option<AnimeThemeFilterInput>,
+        sort: Option<Vec<AnimeThemeSort>>,
+        _search: Option<String>,
     ) -> Result<Connection<u64, AnimeTheme, EmptyFields, EmptyFields>> {
         let mut query: sea_orm::prelude::Select<animetheme::Entity> =
             animetheme::Entity::find().filter(without_trashed::<animetheme::Entity>());
@@ -102,6 +108,16 @@ impl AnimeThemeQuery {
 
         if let Some(id_in) = filter.id_in {
             query = query.filter(animetheme::Column::Id.is_in(id_in))
+        }
+
+        if let Some(r#type) = filter.r#type {
+            query = query.filter(animetheme::Column::Type.eq::<ThemeTypeEnum>(r#type.into()))
+        }
+
+        if let Some(sorts) = sort {
+            for sort in sorts {
+                query = sort.apply_sort(query);
+            }
         }
 
         cursor_paginate(

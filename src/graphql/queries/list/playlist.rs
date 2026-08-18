@@ -49,6 +49,7 @@ impl PlaylistQuery {
         pagination: Option<PaginationInput>,
         filter: Option<PlaylistFilterInput>,
         sort: Option<Vec<PlaylistSort>>,
+        _search: Option<String>,
     ) -> Result<Connection<u64, Playlist, EmptyFields, EmptyFields>> {
         let user = ctx.data::<CurrentUser>().ok();
 

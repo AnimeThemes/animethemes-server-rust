@@ -24,6 +24,7 @@ use crate::graphql::types::{
 
 struct Search {
     term: String,
+    first: i32,
 }
 
 /// Returns a listing of resources that match a given search term.
@@ -36,7 +37,14 @@ impl Search {
         let typesense = ctx.data::<TypesenseClient>()?;
 
         Ok(convert_type(
-            search_anime(db, typesense, anime::Entity::find(), self.term.clone()).await?,
+            search_anime(
+                db,
+                typesense,
+                anime::Entity::find(),
+                self.term.clone(),
+                self.first,
+            )
+            .await?,
         ))
     }
 
@@ -47,7 +55,14 @@ impl Search {
         let typesense = ctx.data::<TypesenseClient>()?;
 
         Ok(convert_type(
-            search_artists(db, typesense, artist::Entity::find(), self.term.clone()).await?,
+            search_artists(
+                db,
+                typesense,
+                artist::Entity::find(),
+                self.term.clone(),
+                self.first,
+            )
+            .await?,
         ))
     }
 
@@ -58,8 +73,14 @@ impl Search {
         let typesense = ctx.data::<TypesenseClient>()?;
 
         Ok(convert_type(
-            search_animethemes(db, typesense, animetheme::Entity::find(), self.term.clone())
-                .await?,
+            search_animethemes(
+                db,
+                typesense,
+                animetheme::Entity::find(),
+                self.term.clone(),
+                self.first,
+            )
+            .await?,
         ))
     }
 
@@ -70,7 +91,14 @@ impl Search {
         let typesense = ctx.data::<TypesenseClient>()?;
 
         Ok(convert_type(
-            search_playlists(db, typesense, playlist::Entity::find(), self.term.clone()).await?,
+            search_playlists(
+                db,
+                typesense,
+                playlist::Entity::find(),
+                self.term.clone(),
+                self.first,
+            )
+            .await?,
         ))
     }
 
@@ -81,7 +109,14 @@ impl Search {
         let typesense = ctx.data::<TypesenseClient>()?;
 
         Ok(convert_type(
-            search_series(db, typesense, series::Entity::find(), self.term.clone()).await?,
+            search_series(
+                db,
+                typesense,
+                series::Entity::find(),
+                self.term.clone(),
+                self.first,
+            )
+            .await?,
         ))
     }
 
@@ -92,7 +127,14 @@ impl Search {
         let typesense = ctx.data::<TypesenseClient>()?;
 
         Ok(convert_type(
-            search_songs(db, typesense, song::Entity::find(), self.term.clone()).await?,
+            search_songs(
+                db,
+                typesense,
+                song::Entity::find(),
+                self.term.clone(),
+                self.first,
+            )
+            .await?,
         ))
     }
 
@@ -103,7 +145,14 @@ impl Search {
         let typesense = ctx.data::<TypesenseClient>()?;
 
         Ok(convert_type(
-            search_studios(db, typesense, studio::Entity::find(), self.term.clone()).await?,
+            search_studios(
+                db,
+                typesense,
+                studio::Entity::find(),
+                self.term.clone(),
+                self.first,
+            )
+            .await?,
         ))
     }
 
@@ -114,7 +163,14 @@ impl Search {
         let typesense = ctx.data::<TypesenseClient>()?;
 
         Ok(convert_type(
-            search_videos(db, typesense, video::Entity::find(), self.term.clone()).await?,
+            search_videos(
+                db,
+                typesense,
+                video::Entity::find(),
+                self.term.clone(),
+                self.first,
+            )
+            .await?,
         ))
     }
 }
@@ -124,8 +180,16 @@ pub struct SearchQuery;
 
 #[Object]
 impl SearchQuery {
-    async fn search(&self, _ctx: &Context<'_>, search: String) -> Result<Search> {
-        Ok(Search { term: search })
+    async fn search(
+        &self,
+        _ctx: &Context<'_>,
+        search: String,
+        #[graphql(default = 10)] first: i32,
+    ) -> Result<Search> {
+        Ok(Search {
+            term: search,
+            first: first,
+        })
     }
 }
 

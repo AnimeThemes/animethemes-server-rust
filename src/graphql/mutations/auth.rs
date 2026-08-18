@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[derive(InputObject)]
-pub struct SignUpInput {
+pub struct RegisterInput {
     name: String,
     #[graphql(validator(email))]
     email: String,
@@ -48,7 +48,7 @@ pub struct AuthMutation;
 
 #[Object]
 impl AuthMutation {
-    pub async fn sign_up(&self, ctx: &Context<'_>, input: SignUpInput) -> Result<Me> {
+    pub async fn register(&self, ctx: &Context<'_>, input: RegisterInput) -> Result<Me> {
         if !input.terms {
             return Err(Error::new("You must accept the Terms to proceed."));
         }
@@ -160,6 +160,14 @@ impl AuthMutation {
         let db = ctx.data::<DatabaseConnection>()?;
 
         user.update(db).await?;
+
+        Ok(true)
+    }
+
+    pub async fn logout(&self, ctx: &Context<'_>) -> Result<bool> {
+        let session = ctx.data::<Session>()?;
+
+        session.delete().await?;
 
         Ok(true)
     }

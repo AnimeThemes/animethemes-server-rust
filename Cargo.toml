@@ -27,3 +27,4 @@ tower-http = { version = "0.7.0", features = ["cors"] }
 tower-sessions = "0.14.0"
 tower-sessions-redis-store = "0.16.0"
 typesense = "0.4.0"
+url = "2.5.8"
