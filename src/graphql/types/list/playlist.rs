@@ -69,12 +69,11 @@ impl Playlist {
     async fn user(&self, ctx: &Context<'_>) -> Result<User> {
         let loader = ctx.data::<DataLoader<PlaylistUserLoader>>()?;
 
-        let user = loader
+        Ok(loader
             .load_one(self.user_id)
             .await?
-            .ok_or_else(|| Error::from(AppError::NotFound))?;
-
-        Ok(user.into())
+            .ok_or_else(|| Error::from(AppError::NotFound))?
+            .into())
     }
 
     async fn tracks(

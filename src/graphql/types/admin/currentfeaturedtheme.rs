@@ -1,4 +1,4 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject, dataloader::DataLoader};
 use chrono::{DateTime, Utc};
 
 use crate::{
@@ -15,12 +15,13 @@ use crate::{
         },
         utils::format_datetime,
     },
+    policies::AppError,
 };
 
-/// Represents a video to be featured on the homepage of the site for a specified amount of time.
+/// Represents the current featured theme on the homepage of the site.
 #[derive(SimpleObject)]
 #[graphql(complex)]
-pub struct FeaturedTheme {
+pub struct CurrentFeaturedTheme {
     /// The primary key of the resource
     pub id: u64,
     #[graphql(skip)]
@@ -28,15 +29,15 @@ pub struct FeaturedTheme {
     #[graphql(skip)]
     pub end_at: Option<DateTime<Utc>>,
     #[graphql(skip)]
-    pub entry_id: Option<u64>,
+    pub entry_id: u64,
     #[graphql(skip)]
-    pub video_id: Option<u64>,
+    pub video_id: u64,
     #[graphql(skip)]
     pub user_id: Option<u64>,
 }
 
 #[ComplexObject]
-impl FeaturedTheme {
+impl CurrentFeaturedTheme {
     /// The start date of the resource
     async fn start_at(&self, #[graphql(default = "%+")] format: String) -> Option<String> {
         format_datetime(self.start_at.as_ref(), &format)
@@ -47,24 +48,26 @@ impl FeaturedTheme {
         format_datetime(self.end_at.as_ref(), &format)
     }
 
-    async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<Option<AnimeThemeEntry>> {
-        let Some(entry_id) = self.entry_id else {
-            return Ok(None);
-        };
-
+    async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<AnimeThemeEntry> {
         let loader = ctx.data::<DataLoader<FeaturedThemeEntryLoader>>()?;
 
-        Ok(loader.load_one(entry_id).await?.map(Into::into))
+        let model = loader
+            .load_one(self.entry_id)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        Ok(model.into())
     }
 
-    async fn video(&self, ctx: &Context<'_>) -> Result<Option<Video>> {
-        let Some(video_id) = self.video_id else {
-            return Ok(None);
-        };
-
+    async fn video(&self, ctx: &Context<'_>) -> Result<Video> {
         let loader = ctx.data::<DataLoader<FeaturedThemeVideoLoader>>()?;
 
-        Ok(loader.load_one(video_id).await?.map(Into::into))
+        let model = loader
+            .load_one(self.video_id)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        Ok(model.into())
     }
 
     async fn user(&self, ctx: &Context<'_>) -> Result<Option<User>> {
@@ -78,14 +81,18 @@ impl FeaturedTheme {
     }
 }
 
-impl From<featuredtheme::Model> for FeaturedTheme {
+impl From<featuredtheme::Model> for CurrentFeaturedTheme {
     fn from(model: featuredtheme::Model) -> Self {
         Self {
             id: model.id,
             start_at: model.start_at,
             end_at: model.end_at,
-            entry_id: model.entry_id,
-            video_id: model.video_id,
+            entry_id: model
+                .entry_id
+                .expect("entry_id is required for the current featured theme"),
+            video_id: model
+                .video_id
+                .expect("video_id is required for the current featured theme"),
             user_id: model.user_id,
         }
     }

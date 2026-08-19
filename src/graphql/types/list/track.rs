@@ -1,4 +1,4 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject, dataloader::DataLoader};
 
 use crate::{
     entities::list::track,
@@ -12,6 +12,7 @@ use crate::{
             list::playlist::Playlist,
         },
     },
+    policies::AppError,
 };
 
 /// Represents an entry in a playlist.
@@ -28,39 +29,43 @@ pub struct PlaylistTrack {
     #[graphql(skip)]
     pub playlist_id: u64,
     #[graphql(skip)]
-    pub entry_id: Option<u64>,
+    pub entry_id: u64,
     #[graphql(skip)]
-    pub video_id: Option<u64>,
+    pub video_id: u64,
     /// The position of the playlist track within the playlist
     pub position: i32,
 }
 
 #[ComplexObject]
 impl PlaylistTrack {
-    async fn playlist(&self, ctx: &Context<'_>) -> Result<Option<Playlist>> {
+    async fn playlist(&self, ctx: &Context<'_>) -> Result<Playlist> {
         let loader = ctx.data::<DataLoader<TrackPlaylistLoader>>()?;
 
-        Ok(loader.load_one(self.playlist_id).await?.map(Into::into))
+        Ok(loader
+            .load_one(self.playlist_id)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?
+            .into())
     }
 
-    async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<Option<AnimeThemeEntry>> {
-        let Some(entry_id) = self.entry_id else {
-            return Ok(None);
-        };
-
+    async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<AnimeThemeEntry> {
         let loader = ctx.data::<DataLoader<TrackEntryLoader>>()?;
 
-        Ok(loader.load_one(entry_id).await?.map(Into::into))
+        Ok(loader
+            .load_one(self.entry_id)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?
+            .into())
     }
 
-    async fn video(&self, ctx: &Context<'_>) -> Result<Option<Video>> {
-        let Some(video_id) = self.video_id else {
-            return Ok(None);
-        };
-
+    async fn video(&self, ctx: &Context<'_>) -> Result<Video> {
         let loader = ctx.data::<DataLoader<TrackVideoLoader>>()?;
 
-        Ok(loader.load_one(video_id).await?.map(Into::into))
+        Ok(loader
+            .load_one(self.video_id)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?
+            .into())
     }
 }
 
@@ -70,8 +75,8 @@ impl From<track::Model> for PlaylistTrack {
             hashid: model.hashid.unwrap(),
             _id: model.id,
             playlist_id: model.playlist_id,
-            entry_id: model.entry_id,
-            video_id: model.video_id,
+            entry_id: model.entry_id.expect("entry_id is required for track"),
+            video_id: model.video_id.expect("video_id is required for track"),
             position: model.position,
         }
     }

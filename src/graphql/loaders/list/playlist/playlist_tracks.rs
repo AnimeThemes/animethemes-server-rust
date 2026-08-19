@@ -24,7 +24,9 @@ pub struct PlaylistTracksLoaderQuery {
 
 impl PlaylistTracksLoaderQuery {
     fn condition(&self) -> Condition {
-        let mut condition = Condition::all();
+        let mut condition = Condition::all()
+            .add(track::Column::EntryId.is_not_null())
+            .add(track::Column::VideoId.is_not_null());
 
         if let Some(filter) = &self.filter {
             if let Some(entry_id) = filter.entry_id.clone() {
