@@ -15,8 +15,8 @@ use crate::{
     },
 };
 
-pub const QUERY_BY: &str = "song.title,song.title_native,anime.title,anime.title_english,anime.title_native,anime.synonyms,type_sequence";
-pub const QUERY_BY_WEIGHTS: &str = "10,8,6,5,5,4,4";
+pub const QUERY_BY: &str = "song.title,song.title_native,anime.title,type_sequence, anime.title_english,anime.title_native,anime.synonyms";
+pub const QUERY_BY_WEIGHTS: &str = "10,8,6,6,5,5,4";
 
 #[derive(Debug, Clone, Serialize, Deserialize, Typesense)]
 #[typesense(collection_name = "animethemes", enable_nested_fields = true)]

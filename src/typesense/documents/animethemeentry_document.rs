@@ -13,8 +13,8 @@ use crate::{
     },
 };
 
-pub const QUERY_BY: &str = "animetheme.song.title,animetheme.song.title_native,animetheme.anime.title,animetheme.anime.title_english,animetheme.anime.title_native,animetheme.anime.synonyms,type_sequence_version";
-pub const QUERY_BY_WEIGHTS: &str = "10,8,6,5,5,4,4";
+pub const QUERY_BY: &str = "animetheme.song.title,animetheme.song.title_native,animetheme.anime.title,type_sequence_version,animetheme.anime.title_english,animetheme.anime.title_native,animetheme.anime.synonyms";
+pub const QUERY_BY_WEIGHTS: &str = "10,8,6,6,5,5,4";
 
 #[derive(Debug, Clone, Serialize, Deserialize, Typesense)]
 #[typesense(collection_name = "animethemeentries", enable_nested_fields = true)]
