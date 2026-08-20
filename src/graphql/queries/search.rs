@@ -12,8 +12,11 @@ use crate::{
         },
     },
 };
-use animethemes_server_rust::typesense::search::OffsetPageInfo as OffsetPageInfoTypesense;
-use async_graphql::{Context, Object, ObjectType, Result};
+use animethemes_server_rust::{
+    enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason, themetype::ThemeType},
+    typesense::search::OffsetPageInfo as OffsetPageInfoTypesense,
+};
+use async_graphql::{Context, Enum, InputObject, Object, ObjectType, Result};
 use sea_orm::{DatabaseConnection, EntityTrait, ModelTrait};
 
 use crate::graphql::types::{
@@ -30,11 +33,94 @@ pub struct Search {
     page: i32,
 }
 
+#[derive(InputObject, Default)]
+struct SearchAnimeFilterInput {
+    title_romaji_like: Option<String>,
+    season: Option<AnimeSeason>,
+    year: Option<i16>,
+    format: Option<AnimeFormat>,
+}
+
+#[derive(InputObject, Default)]
+struct SearchArtistFilterInput {
+    name_main_like: Option<String>,
+}
+
+#[derive(InputObject, Default)]
+struct SearchSeriesFilterInput {
+    title_romaji_like: Option<String>,
+}
+
+#[derive(InputObject, Default)]
+struct SearchStudioFilterInput {
+    name_like: Option<String>,
+}
+
+#[derive(InputObject, Default)]
+struct SearchAnimeThemeFilterInput {
+    r#type: Option<ThemeType>,
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+enum SearchAnimeSort {
+    TitleRomaji,
+    TitleRomajiDesc,
+    Year,
+    YearDesc,
+    Season,
+    SeasonDesc,
+    CreatedAtDesc,
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+enum SearchArtistSort {
+    NameMain,
+    NameMainDesc,
+    CreatedAtDesc,
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+enum SearchPlaylistSort {
+    Name,
+    NameDesc,
+    CreatedAtDesc,
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+enum SearchSeriesSort {
+    TitleRomaji,
+    TitleRomajiDesc,
+    CreatedAtDesc,
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+enum SearchStudioSort {
+    Name,
+    NameDesc,
+    CreatedAtDesc,
+}
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+enum SearchAnimeThemeSort {
+    SongTitleRomaji,
+    SongTitleRomajiDesc,
+    AnimeYear,
+    AnimeYearDesc,
+    AnimeSeason,
+    AnimeSeasonDesc,
+    CreatedAtDesc,
+}
+
 /// Returns a listing of resources that match a given search term.
 #[Object]
 impl Search {
     /// The anime results of the search
-    async fn anime(&self, ctx: &Context<'_>) -> Result<OffsetPagination<Anime>> {
+    async fn anime(
+        &self,
+        ctx: &Context<'_>,
+        _filter: Option<SearchAnimeFilterInput>,
+        _sort: Option<Vec<SearchAnimeSort>>,
+    ) -> Result<OffsetPagination<Anime>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
@@ -53,7 +139,12 @@ impl Search {
     }
 
     /// The artist results of the search
-    async fn artists(&self, ctx: &Context<'_>) -> Result<OffsetPagination<Artist>> {
+    async fn artists(
+        &self,
+        ctx: &Context<'_>,
+        _filter: Option<SearchArtistFilterInput>,
+        _sort: Option<Vec<SearchArtistSort>>,
+    ) -> Result<OffsetPagination<Artist>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
@@ -72,7 +163,12 @@ impl Search {
     }
 
     /// The theme results of the search
-    async fn animethemes(&self, ctx: &Context<'_>) -> Result<OffsetPagination<AnimeTheme>> {
+    async fn animethemes(
+        &self,
+        ctx: &Context<'_>,
+        _filter: Option<SearchAnimeThemeFilterInput>,
+        _sort: Option<Vec<SearchAnimeThemeSort>>,
+    ) -> Result<OffsetPagination<AnimeTheme>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
@@ -91,7 +187,11 @@ impl Search {
     }
 
     /// The playlist results of the search
-    async fn playlists(&self, ctx: &Context<'_>) -> Result<OffsetPagination<Playlist>> {
+    async fn playlists(
+        &self,
+        ctx: &Context<'_>,
+        _sort: Option<Vec<SearchPlaylistSort>>,
+    ) -> Result<OffsetPagination<Playlist>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
@@ -110,7 +210,12 @@ impl Search {
     }
 
     /// The series results of the search
-    async fn series(&self, ctx: &Context<'_>) -> Result<OffsetPagination<Series>> {
+    async fn series(
+        &self,
+        ctx: &Context<'_>,
+        _filter: Option<SearchSeriesFilterInput>,
+        _sort: Option<Vec<SearchSeriesSort>>,
+    ) -> Result<OffsetPagination<Series>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
@@ -148,7 +253,12 @@ impl Search {
     }
 
     /// The studio results of the search
-    async fn studios(&self, ctx: &Context<'_>) -> Result<OffsetPagination<Studio>> {
+    async fn studios(
+        &self,
+        ctx: &Context<'_>,
+        _filter: Option<SearchStudioFilterInput>,
+        _sort: Option<Vec<SearchStudioSort>>,
+    ) -> Result<OffsetPagination<Studio>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
