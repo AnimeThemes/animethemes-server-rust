@@ -1,22 +1,17 @@
-use animethemes_server_rust::enums::content::{
-    animeformat::AnimeFormat as AnimeFormatEnum, animeseason::AnimeSeason as AnimeSeasonEnum,
-};
+use animethemes_server_rust::enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason};
 use async_graphql::{
     Context, InputObject, Object, Result,
-    connection::{Connection, EmptyFields},
+    connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
 use crate::{
     entities::content::anime,
     graphql::{
-        enums::{
-            content::{animeformat::AnimeFormat, animeseason::AnimeSeason},
-            sort::{GraphQLSort, content::anime_sort::AnimeSort},
-        },
+        cursor::{CursorSort, PaginationCursor, cursor_paginate},
+        enums::sort::{GraphQLSort, content::anime_sort::AnimeSort},
         inputs::pagination_input::PaginationInput,
         types::content::anime::Anime,
-        utils::cursor_paginate,
     },
     scopes::without_trashed,
 };
@@ -56,8 +51,7 @@ impl AnimeQuery {
         pagination: Option<PaginationInput>,
         filter: Option<AnimeFilterInput>,
         sort: Option<Vec<AnimeSort>>,
-        _search: Option<String>,
-    ) -> Result<Connection<u64, Anime, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Anime, EmptyFields, EmptyFields>> {
         let mut query = anime::Entity::find().filter(without_trashed::<anime::Entity>());
 
         let filter = filter.unwrap_or_default();
@@ -67,7 +61,7 @@ impl AnimeQuery {
         }
 
         if let Some(season) = filter.season {
-            query = query.filter(anime::Column::Season.eq::<AnimeSeasonEnum>(season.into()))
+            query = query.filter(anime::Column::Season.eq(season))
         }
 
         if let Some(year) = filter.year {
@@ -75,31 +69,35 @@ impl AnimeQuery {
         }
 
         if let Some(format) = filter.format {
-            query = query.filter(anime::Column::Format.eq::<AnimeFormatEnum>(format.into()))
+            query = query.filter(anime::Column::Format.eq(format))
         }
 
         if let Some(animeyear_season) = filter.animeyear_season {
-            query =
-                query.filter(anime::Column::Season.eq::<AnimeSeasonEnum>(animeyear_season.into()));
+            query = query.filter(anime::Column::Season.eq(animeyear_season));
         }
 
         if let Some(animeyear_year) = filter.animeyear_year {
             query = query.filter(anime::Column::Year.eq(animeyear_year))
         }
 
-        if let Some(sorts) = sort {
+        if let Some(sorts) = sort.clone() {
             for sort in sorts {
                 query = sort.apply_sort(query);
             }
         }
 
-        cursor_paginate(
-            query,
-            ctx,
-            anime::Column::Id,
-            pagination,
-            |model: &anime::Model| model.id,
-        )
-        .await
+        let mut cursor_sorts = sort
+            .clone()
+            .unwrap_or(vec![])
+            .iter()
+            .filter_map(AnimeSort::cursor_sort)
+            .collect::<Vec<_>>();
+
+        cursor_sorts.push(CursorSort {
+            column: anime::Column::Id,
+            order: Order::Asc,
+        });
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 }

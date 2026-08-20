@@ -1,4 +1,4 @@
-use animethemes_server_rust::enums::LocalizedEnum;
+use animethemes_server_rust::enums::{LocalizedEnum, list::playlistvisibility::PlaylistVisibility};
 use async_graphql::{
     ComplexObject, Context, Error, InputObject, Result, SimpleObject, dataloader::DataLoader,
 };
@@ -6,9 +6,7 @@ use async_graphql::{
 use crate::{
     entities::list::playlist::{self},
     graphql::{
-        enums::{
-            list::playlistvisibility::PlaylistVisibility, sort::list::track_sort::PlaylistTrackSort,
-        },
+        enums::sort::list::track_sort::PlaylistTrackSort,
         loaders::list::playlist::{
             playlist_tracks::{PlaylistTracksLoader, PlaylistTracksLoaderKey},
             playlist_tracks_count::PlaylistTracksCountLoader,
@@ -101,7 +99,7 @@ impl From<playlist::Model> for Playlist {
             user_id: model.user_id,
             name: model.name,
             description: model.description,
-            visibility: model.visibility.into(),
+            visibility: model.visibility,
             visibility_localized: model.visibility.localize().to_string(),
         }
     }

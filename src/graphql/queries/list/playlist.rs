@@ -1,16 +1,16 @@
 use async_graphql::{
     Context, Error, InputObject, Object, Result,
-    connection::{Connection, EmptyFields},
+    connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
 use crate::{
     entities::list::playlist,
     graphql::{
+        cursor::{CursorSort, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, list::playlist_sort::PlaylistSort},
         inputs::pagination_input::PaginationInput,
         types::list::playlist::Playlist,
-        utils::cursor_paginate,
     },
     middlewares::current_user::CurrentUser,
     policies::{AppError, Policy, PolicyAction, list::playlist::PlaylistPolicy},
@@ -49,8 +49,8 @@ impl PlaylistQuery {
         pagination: Option<PaginationInput>,
         filter: Option<PlaylistFilterInput>,
         sort: Option<Vec<PlaylistSort>>,
-        _search: Option<String>,
-    ) -> Result<Connection<u64, Playlist, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Playlist, EmptyFields, EmptyFields>>
+    {
         let user = ctx.data::<CurrentUser>().ok();
 
         PlaylistPolicy::check(user, PolicyAction::ViewAny, None).authorize()?;
@@ -63,19 +63,24 @@ impl PlaylistQuery {
             query = query.filter(playlist::Column::Name.like(name_like))
         }
 
-        if let Some(sorts) = sort {
+        if let Some(sorts) = sort.clone() {
             for sort in sorts {
                 query = sort.apply_sort(query);
             }
         }
 
-        cursor_paginate(
-            query,
-            ctx,
-            playlist::Column::Id,
-            pagination,
-            |model: &playlist::Model| model.id,
-        )
-        .await
+        let mut cursor_sorts = sort
+            .clone()
+            .unwrap_or(vec![])
+            .iter()
+            .filter_map(PlaylistSort::cursor_sort)
+            .collect::<Vec<_>>();
+
+        cursor_sorts.push(CursorSort {
+            column: playlist::Column::Id,
+            order: Order::Asc,
+        });
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 }

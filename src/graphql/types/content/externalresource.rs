@@ -1,10 +1,7 @@
-use animethemes_server_rust::enums::LocalizedEnum;
+use animethemes_server_rust::enums::{LocalizedEnum, content::resourcesite::ResourceSite};
 use async_graphql::SimpleObject;
 
-use crate::{
-    entities::content::externalresource::{self},
-    graphql::enums::content::resourcesite::ResourceSite,
-};
+use crate::entities::content::externalresource::{self};
 
 /// Represents a site with supplementary information for another resource such as an anime or artist.
 ///
@@ -29,7 +26,7 @@ impl From<externalresource::Model> for ExternalResource {
             id: model.id,
             external_id: model.external_id,
             link: model.link,
-            site: model.site.into(),
+            site: model.site,
             site_localized: model.site.localize().to_string(),
         }
     }

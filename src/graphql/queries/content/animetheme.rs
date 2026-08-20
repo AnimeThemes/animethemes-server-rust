@@ -1,27 +1,22 @@
 use animethemes_server_rust::{
     entities::content::{anime, animetheme, animethemeentry},
-    enums::content::{
-        animeformat::AnimeFormat as AnimeFormatEnum, themetype::ThemeType as ThemeTypeEnum,
-    },
+    enums::content::{animeformat::AnimeFormat, themetype::ThemeType},
     scopes::without_trashed,
 };
 use async_graphql::{
     Context, InputObject, Object, Result,
-    connection::{Connection, EmptyFields},
+    connection::{Connection, EmptyFields, OpaqueCursor},
 };
 use sea_orm::{
-    ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QueryOrder, QuerySelect,
-    RelationTrait, sea_query::Expr,
+    ColumnTrait, DatabaseConnection, EntityTrait, JoinType, Order, QueryFilter, QueryOrder,
+    QuerySelect, RelationTrait, sea_query::Expr,
 };
 
 use crate::graphql::{
-    enums::{
-        content::{animeformat::AnimeFormat, themetype::ThemeType},
-        sort::{GraphQLSort, content::animetheme_sort::AnimeThemeSort},
-    },
+    cursor::{CursorSort, PaginationCursor, cursor_paginate},
+    enums::sort::{GraphQLSort, content::animetheme_sort::AnimeThemeSort},
     inputs::pagination_input::PaginationInput,
     types::content::animetheme::AnimeTheme,
-    utils::cursor_paginate,
 };
 
 #[derive(InputObject, Default)]
@@ -62,13 +57,11 @@ impl AnimeThemeQuery {
             );
 
         if let Some(r#type) = input.r#type {
-            query = query.filter(
-                animetheme::Column::Type.is_in(r#type.into_iter().map(ThemeTypeEnum::from)),
-            );
+            query = query.filter(animetheme::Column::Type.is_in(r#type));
         }
 
         if let Some(format) = input.format {
-            query = query.filter(anime::Column::Format.eq(AnimeFormatEnum::from(format)));
+            query = query.filter(anime::Column::Format.eq(format));
         }
 
         if let Some(year_gte) = input.year_gte {
@@ -99,8 +92,8 @@ impl AnimeThemeQuery {
         pagination: Option<PaginationInput>,
         filter: Option<AnimeThemeFilterInput>,
         sort: Option<Vec<AnimeThemeSort>>,
-        _search: Option<String>,
-    ) -> Result<Connection<u64, AnimeTheme, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, AnimeTheme, EmptyFields, EmptyFields>>
+    {
         let mut query: sea_orm::prelude::Select<animetheme::Entity> =
             animetheme::Entity::find().filter(without_trashed::<animetheme::Entity>());
 
@@ -111,22 +104,27 @@ impl AnimeThemeQuery {
         }
 
         if let Some(r#type) = filter.r#type {
-            query = query.filter(animetheme::Column::Type.eq::<ThemeTypeEnum>(r#type.into()))
+            query = query.filter(animetheme::Column::Type.eq(r#type))
         }
 
-        if let Some(sorts) = sort {
+        if let Some(sorts) = sort.clone() {
             for sort in sorts {
                 query = sort.apply_sort(query);
             }
         }
 
-        cursor_paginate(
-            query,
-            ctx,
-            animetheme::Column::Id,
-            pagination,
-            |model: &animetheme::Model| model.id,
-        )
-        .await
+        let mut cursor_sorts = sort
+            .clone()
+            .unwrap_or(vec![])
+            .iter()
+            .filter_map(AnimeThemeSort::cursor_sort)
+            .collect::<Vec<_>>();
+
+        cursor_sorts.push(CursorSort {
+            column: animetheme::Column::Id,
+            order: Order::Asc,
+        });
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 }

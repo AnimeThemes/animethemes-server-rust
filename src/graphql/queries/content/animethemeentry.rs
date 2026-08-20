@@ -1,13 +1,14 @@
 use animethemes_server_rust::{entities::content::animethemeentry, scopes::without_trashed};
 use async_graphql::{
     Context, InputObject, Object, Result,
-    connection::{Connection, EmptyFields},
+    connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QueryOrder};
+use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter, QueryOrder};
 
 use crate::graphql::{
-    inputs::pagination_input::PaginationInput, types::content::animethemeentry::AnimeThemeEntry,
-    utils::cursor_paginate,
+    cursor::{CursorSort, PaginationCursor, cursor_paginate},
+    inputs::pagination_input::PaginationInput,
+    types::content::animethemeentry::AnimeThemeEntry,
 };
 
 #[derive(InputObject, Default)]
@@ -25,7 +26,8 @@ impl AnimeThemeEntryQuery {
         ctx: &Context<'_>,
         pagination: Option<PaginationInput>,
         filter: Option<AnimeThemeEntryFilterInput>,
-    ) -> Result<Connection<u64, AnimeThemeEntry, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, AnimeThemeEntry, EmptyFields, EmptyFields>>
+    {
         let mut query =
             animethemeentry::Entity::find().filter(without_trashed::<animethemeentry::Entity>());
 
@@ -37,13 +39,11 @@ impl AnimeThemeEntryQuery {
 
         query = query.order_by_desc(animethemeentry::Column::TracksCount);
 
-        cursor_paginate(
-            query,
-            ctx,
-            animethemeentry::Column::Id,
-            pagination,
-            |model: &animethemeentry::Model| model.id,
-        )
-        .await
+        let cursor_sorts = vec![CursorSort {
+            column: animethemeentry::Column::CreatedAt,
+            order: Order::Asc,
+        }];
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 }

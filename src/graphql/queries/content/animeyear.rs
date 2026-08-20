@@ -2,17 +2,16 @@ use std::collections::BTreeMap;
 
 use crate::{
     entities::content::anime,
-    enums::{LocalizedEnum, content::animeseason::AnimeSeason as AnimeSeasonEntity},
-    graphql::enums::sort::content::anime_sort::AnimeSort,
+    enums::{LocalizedEnum, content::animeseason::AnimeSeason},
+    graphql::{cursor::PaginationCursor, enums::sort::content::anime_sort::AnimeSort},
 };
 use async_graphql::{
     ComplexObject, Context, Object, Result, SimpleObject,
-    connection::{Connection, EmptyFields},
+    connection::{Connection, EmptyFields, OpaqueCursor},
 };
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
 
 use crate::graphql::{
-    enums::content::animeseason::AnimeSeason,
     inputs::pagination_input::PaginationInput,
     queries::content::anime::{AnimeFilterInput, AnimeQuery},
     types::content::anime::Anime,
@@ -43,7 +42,7 @@ impl AnimeYear {
             .copied()
             .map(|season| AnimeYearSeason {
                 season,
-                season_localized: AnimeSeasonEntity::from(season).localize().to_string(),
+                season_localized: season.localize().to_string(),
                 year: self.year,
             })
             .collect()
@@ -70,14 +69,14 @@ impl AnimeYearSeason {
         pagination: Option<PaginationInput>,
         filter: Option<AnimeFilterInput>,
         sort: Option<Vec<AnimeSort>>,
-    ) -> Result<Connection<u64, Anime, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Anime, EmptyFields, EmptyFields>> {
         let mut filter = filter.unwrap_or_default();
 
         filter.animeyear_year = Some(self.year);
         filter.animeyear_season = Some(self.season.clone().into());
 
         AnimeQuery::default()
-            .anime_connection(ctx, pagination, Some(filter), sort, None)
+            .anime_connection(ctx, pagination, Some(filter), sort)
             .await
     }
 }
@@ -110,7 +109,7 @@ impl AnimeYearQuery {
         }
 
         let rows = query
-            .into_tuple::<(Option<i16>, Option<AnimeSeasonEntity>)>()
+            .into_tuple::<(Option<i16>, Option<AnimeSeason>)>()
             .all(db)
             .await?;
 

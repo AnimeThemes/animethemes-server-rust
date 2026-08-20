@@ -1,16 +1,16 @@
 use async_graphql::{
     Context, InputObject, Object, Result,
-    connection::{Connection, EmptyFields},
+    connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
 use crate::{
     entities::document::page,
     graphql::{
+        cursor::{CursorSort, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, document::page_sort::PageSort},
         inputs::pagination_input::PaginationInput,
         types::document::page::Page,
-        utils::cursor_paginate,
     },
     scopes::without_trashed,
 };
@@ -42,7 +42,7 @@ impl PageQuery {
         ctx: &Context<'_>,
         pagination: Option<PaginationInput>,
         filter: Option<PageFilterInput>,
-    ) -> Result<Connection<u64, Page, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Page, EmptyFields, EmptyFields>> {
         let mut query = page::Entity::find().filter(without_trashed::<page::Entity>());
 
         let filter = filter.unwrap_or_default();
@@ -51,14 +51,12 @@ impl PageQuery {
             query = query.filter(page::Column::Name.like(name_like))
         }
 
-        cursor_paginate(
-            query,
-            ctx,
-            page::Column::Id,
-            pagination,
-            |model: &page::Model| model.id,
-        )
-        .await
+        let cursor_sorts = vec![CursorSort {
+            column: page::Column::CreatedAt,
+            order: Order::Asc,
+        }];
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 
     async fn blog_pages(
@@ -66,7 +64,7 @@ impl PageQuery {
         ctx: &Context<'_>,
         pagination: Option<PaginationInput>,
         sort: Option<Vec<PageSort>>,
-    ) -> Result<Connection<u64, Page, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Page, EmptyFields, EmptyFields>> {
         let mut query = page::Entity::find().filter(without_trashed::<page::Entity>());
 
         query = query.filter(
@@ -75,19 +73,24 @@ impl PageQuery {
                 .add(page::Column::Slug.like("status/%")),
         );
 
-        if let Some(sorts) = sort {
+        if let Some(sorts) = sort.clone() {
             for sort in sorts {
                 query = sort.apply_sort(query);
             }
         }
 
-        cursor_paginate(
-            query,
-            ctx,
-            page::Column::Id,
-            pagination,
-            |model: &page::Model| model.id,
-        )
-        .await
+        let mut cursor_sorts = sort
+            .clone()
+            .unwrap_or(vec![])
+            .iter()
+            .filter_map(PageSort::cursor_sort)
+            .collect::<Vec<_>>();
+
+        cursor_sorts.push(CursorSort {
+            column: page::Column::Id,
+            order: Order::Asc,
+        });
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 }

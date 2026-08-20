@@ -1,16 +1,16 @@
 use animethemes_server_rust::entities::content::video;
 use async_graphql::{
     Context, InputObject, Object, Result,
-    connection::{Connection, EmptyFields},
+    connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter};
 
 use crate::{
     graphql::{
+        cursor::{CursorSort, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, content::video_sort::VideoSort},
         inputs::pagination_input::PaginationInput,
         types::content::video::Video,
-        utils::cursor_paginate,
     },
     scopes::without_trashed,
 };
@@ -31,7 +31,7 @@ impl VideoQuery {
         pagination: Option<PaginationInput>,
         filter: Option<VideoFilterInput>,
         sort: Option<Vec<VideoSort>>,
-    ) -> Result<Connection<u64, Video, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Video, EmptyFields, EmptyFields>> {
         let mut query = video::Entity::find().filter(without_trashed::<video::Entity>());
 
         let filter = filter.unwrap_or_default();
@@ -40,19 +40,24 @@ impl VideoQuery {
             query = query.filter(video::Column::Nc.eq(nc))
         }
 
-        if let Some(sorts) = sort {
+        if let Some(sorts) = sort.clone() {
             for sort in sorts {
                 query = sort.apply_sort(query);
             }
         }
 
-        cursor_paginate(
-            query,
-            ctx,
-            video::Column::Id,
-            pagination,
-            |model: &video::Model| model.id,
-        )
-        .await
+        let mut cursor_sorts = sort
+            .clone()
+            .unwrap_or(vec![])
+            .iter()
+            .filter_map(VideoSort::cursor_sort)
+            .collect::<Vec<_>>();
+
+        cursor_sorts.push(CursorSort {
+            column: video::Column::Id,
+            order: Order::Asc,
+        });
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 }

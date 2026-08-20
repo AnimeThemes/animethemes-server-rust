@@ -1,21 +1,16 @@
-use animethemes_server_rust::{
-    entities::content::image, enums::content::imagefacet::ImageFacet as ImageFacetEnum,
-};
+use animethemes_server_rust::{entities::content::image, enums::content::imagefacet::ImageFacet};
 use async_graphql::{
     Context, InputObject, Object, Result,
-    connection::{Connection, EmptyFields},
+    connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter};
 
 use crate::{
     graphql::{
-        enums::{
-            content::imagefacet::ImageFacet,
-            sort::{GraphQLSort, content::image_sort::ImageSort},
-        },
+        cursor::{CursorSort, PaginationCursor, cursor_paginate},
+        enums::sort::{GraphQLSort, content::image_sort::ImageSort},
         inputs::pagination_input::PaginationInput,
         types::content::image::Image,
-        utils::cursor_paginate,
     },
     scopes::without_trashed,
 };
@@ -36,28 +31,33 @@ impl ImageQuery {
         pagination: Option<PaginationInput>,
         filter: Option<ImageFilterInput>,
         sort: Option<Vec<ImageSort>>,
-    ) -> Result<Connection<u64, Image, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Image, EmptyFields, EmptyFields>> {
         let mut query = image::Entity::find().filter(without_trashed::<image::Entity>());
 
         let filter = filter.unwrap_or_default();
 
         if let Some(facet) = filter.facet {
-            query = query.filter(image::Column::Facet.eq(ImageFacetEnum::from(facet)));
+            query = query.filter(image::Column::Facet.eq(facet));
         }
 
-        if let Some(sorts) = sort {
+        if let Some(sorts) = sort.clone() {
             for sort in sorts {
                 query = sort.apply_sort(query);
             }
         }
 
-        cursor_paginate(
-            query,
-            ctx,
-            image::Column::Id,
-            pagination,
-            |model: &image::Model| model.id,
-        )
-        .await
+        let mut cursor_sorts = sort
+            .clone()
+            .unwrap_or(vec![])
+            .iter()
+            .filter_map(ImageSort::cursor_sort)
+            .collect::<Vec<_>>();
+
+        cursor_sorts.push(CursorSort {
+            column: image::Column::Id,
+            order: Order::Asc,
+        });
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 }

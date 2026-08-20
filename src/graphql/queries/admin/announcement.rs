@@ -1,15 +1,8 @@
-use async_graphql::{
-    Context, Object, Result,
-    connection::{Connection, EmptyFields},
-};
-use sea_orm::{EntityTrait, QueryFilter};
+use async_graphql::{Context, Object, Result};
+use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::{
-    entities::admin::announcement,
-    graphql::{
-        inputs::pagination_input::PaginationInput, types::admin::announcement::Announcement,
-        utils::cursor_paginate,
-    },
+    entities::admin::announcement, graphql::types::admin::announcement::Announcement,
     scopes::admin::announcement::current_announcement,
 };
 
@@ -18,20 +11,13 @@ pub struct AnnouncementQuery;
 
 #[Object]
 impl AnnouncementQuery {
-    async fn announcement_connection(
-        &self,
-        ctx: &Context<'_>,
-        pagination: Option<PaginationInput>,
-    ) -> Result<Connection<u64, Announcement, EmptyFields, EmptyFields>> {
+    async fn current_announcements(&self, ctx: &Context<'_>) -> Result<Vec<Announcement>> {
+        let db = ctx.data::<DatabaseConnection>()?;
+
         let query = announcement::Entity::find().filter(current_announcement());
 
-        cursor_paginate(
-            query,
-            ctx,
-            announcement::Column::Id,
-            pagination,
-            |model: &announcement::Model| model.id,
-        )
-        .await
+        let result = query.all(db).await?;
+
+        Ok(result.into_iter().map(Into::into).collect())
     }
 }

@@ -1,13 +1,12 @@
 use animethemes_server_rust::entities::list::playlist;
+use animethemes_server_rust::enums::list::playlistvisibility::PlaylistVisibility;
 use async_graphql::{Context, Error, InputObject, Object, Result};
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter,
 };
 
-use crate::graphql::{
-    enums::list::playlistvisibility::PlaylistVisibility, types::list::playlist::Playlist,
-};
+use crate::graphql::types::list::playlist::Playlist;
 use crate::middlewares::current_user::CurrentUser;
 use crate::policies::list::playlist::PlaylistPolicy;
 use crate::policies::{AppError, Policy, PolicyAction};
@@ -47,7 +46,7 @@ impl PlaylistMutation {
         let playlist = playlist::ActiveModel {
             name: Set(input.name),
             description: Set(input.description),
-            visibility: Set(input.visibility.into()),
+            visibility: Set(input.visibility),
             user_id: Set(user.user.clone().id),
             ..Default::default()
         };
@@ -91,7 +90,7 @@ impl PlaylistMutation {
         }
 
         if let Some(visibility) = input.visibility {
-            playlist.visibility = Set(visibility.into());
+            playlist.visibility = Set(visibility);
         }
 
         let playlist = playlist.update(db).await?;

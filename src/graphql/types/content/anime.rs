@@ -1,4 +1,7 @@
-use animethemes_server_rust::enums::LocalizedEnum;
+use animethemes_server_rust::enums::{
+    LocalizedEnum,
+    content::{animeformat::AnimeFormat, animeseason::AnimeSeason},
+};
 use async_graphql::{
     ComplexObject, Context, Result, SimpleObject,
     connection::{Connection, Edge, EmptyFields},
@@ -8,7 +11,6 @@ use async_graphql::{
 use crate::{
     entities::content::anime::{self},
     graphql::{
-        enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason},
         loaders::content::{
             anime::{
                 anime_series::AnimeSeriesLoader, anime_studios::AnimeStudiosLoader,
@@ -245,9 +247,9 @@ impl From<anime::Model> for Anime {
         let title = AnimeTitle::from(&model);
         Self {
             id: model.id,
-            format: model.format.map(Into::into),
+            format: model.format,
             format_localized: model.format.map(|f| f.localize().to_string()),
-            season: model.season.map(Into::into),
+            season: model.season,
             season_localized: model.season.map(|s| s.localize().to_string()),
             slug: model.slug,
             synopsis: model.synopsis,

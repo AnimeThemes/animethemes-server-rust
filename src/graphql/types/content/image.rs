@@ -1,10 +1,7 @@
-use animethemes_server_rust::enums::LocalizedEnum;
+use animethemes_server_rust::enums::{LocalizedEnum, content::imagefacet::ImageFacet};
 use async_graphql::SimpleObject;
 
-use crate::{
-    entities::content::image::{self},
-    graphql::enums::content::imagefacet::ImageFacet,
-};
+use crate::entities::content::image::{self};
 
 /// Represents a visual component for another resource such as an anime or artist.
 ///
@@ -27,7 +24,7 @@ impl From<image::Model> for Image {
     fn from(model: image::Model) -> Self {
         Self {
             id: model.id,
-            facet: model.facet.into(),
+            facet: model.facet,
             facet_localized: model.facet.localize().to_string(),
             path: model.path.clone(),
             link: model.link(),

@@ -1,4 +1,7 @@
-use animethemes_server_rust::enums::LocalizedEnum;
+use animethemes_server_rust::enums::{
+    LocalizedEnum,
+    content::{videooverlap::VideoOverlap, videosource::VideoSource},
+};
 use async_graphql::{
     ComplexObject, Context, Result, SimpleObject,
     connection::{Connection, Edge, EmptyFields},
@@ -8,7 +11,6 @@ use async_graphql::{
 use crate::{
     entities::content::video::{self},
     graphql::{
-        enums::content::{videooverlap::VideoOverlap, videosource::VideoSource},
         loaders::content::video::{
             video_animethemeentries::VideoAnimeThemeEntriesLoader, video_audio::VideoAudioLoader,
             video_script::VideoScriptLoader, video_tracks::VideoTracksLoader,
@@ -145,12 +147,12 @@ impl From<video::Model> for Video {
             lyrics: model.lyrics,
             mimetype: model.mimetype.clone(),
             nc: model.nc,
-            overlap: model.overlap.into(),
+            overlap: model.overlap,
             overlap_localized: model.overlap.localize().to_string(),
             path: model.path.clone(),
             resolution: model.resolution,
             size: model.size,
-            source: model.source.map(Into::into),
+            source: model.source,
             source_localized: model.source.map(|s| s.localize().to_string()),
             subbed: model.subbed,
             tags: model.tags(),

@@ -1,16 +1,16 @@
 use async_graphql::{
     Context, InputObject, Object, Result,
-    connection::{Connection, EmptyFields},
+    connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
 use crate::{
     entities::content::studio,
     graphql::{
+        cursor::{CursorSort, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, content::studio_sort::StudioSort},
         inputs::pagination_input::PaginationInput,
         types::content::studio::Studio,
-        utils::cursor_paginate,
     },
     scopes::without_trashed,
 };
@@ -43,8 +43,7 @@ impl StudioQuery {
         pagination: Option<PaginationInput>,
         filter: Option<StudioFilterInput>,
         sort: Option<Vec<StudioSort>>,
-        _search: Option<String>,
-    ) -> Result<Connection<u64, Studio, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Studio, EmptyFields, EmptyFields>> {
         let mut query = studio::Entity::find().filter(without_trashed::<studio::Entity>());
 
         let filter = filter.unwrap_or_default();
@@ -53,19 +52,24 @@ impl StudioQuery {
             query = query.filter(studio::Column::Name.like(name_like))
         }
 
-        if let Some(sorts) = sort {
+        if let Some(sorts) = sort.clone() {
             for sort in sorts {
                 query = sort.apply_sort(query);
             }
         }
 
-        cursor_paginate(
-            query,
-            ctx,
-            studio::Column::Id,
-            pagination,
-            |model: &studio::Model| model.id,
-        )
-        .await
+        let mut cursor_sorts = sort
+            .clone()
+            .unwrap_or(vec![])
+            .iter()
+            .filter_map(StudioSort::cursor_sort)
+            .collect::<Vec<_>>();
+
+        cursor_sorts.push(CursorSort {
+            column: studio::Column::Id,
+            order: Order::Asc,
+        });
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 }

@@ -1,8 +1,8 @@
 use animethemes_server_rust::entities::content::animetheme;
 use async_graphql::Enum;
-use sea_orm::{QueryOrder, Select, sea_query::Expr};
+use sea_orm::{EntityTrait, Order, QueryOrder, Select, sea_query::Expr};
 
-use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::{cursor::CursorSort, enums::sort::GraphQLSort};
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq)]
 pub enum AnimeThemeSort {
@@ -17,18 +17,38 @@ pub enum AnimeThemeSort {
     Random,
 }
 
-impl GraphQLSort<animetheme::Entity> for AnimeThemeSort {
-    fn apply_sort(&self, query: Select<animetheme::Entity>) -> Select<animetheme::Entity> {
-        match self {
-            AnimeThemeSort::Id => query.order_by_asc(animetheme::Column::Id),
-            AnimeThemeSort::IdDesc => query.order_by_desc(animetheme::Column::Id),
-            AnimeThemeSort::Sequence => query.order_by_asc(animetheme::Column::Sequence),
-            AnimeThemeSort::SequenceDesc => query.order_by_desc(animetheme::Column::Sequence),
-            AnimeThemeSort::CreatedAt => query.order_by_asc(animetheme::Column::CreatedAt),
-            AnimeThemeSort::CreatedAtDesc => query.order_by_desc(animetheme::Column::CreatedAt),
-            AnimeThemeSort::UpdatedAt => query.order_by_asc(animetheme::Column::UpdatedAt),
-            AnimeThemeSort::UpdatedAtDesc => query.order_by_desc(animetheme::Column::UpdatedAt),
-            AnimeThemeSort::Random => query.order_by_asc(Expr::cust("RAND()")),
+impl GraphQLSort for AnimeThemeSort {
+    type Entity = animetheme::Entity;
+
+    fn cursor_sort(&self) -> Option<CursorSort<<Self::Entity as EntityTrait>::Column>> {
+        let (column, direction) = match self {
+            Self::Id => (animetheme::Column::Id, Order::Asc),
+            Self::IdDesc => (animetheme::Column::Id, Order::Desc),
+
+            Self::Sequence => (animetheme::Column::Sequence, Order::Asc),
+            Self::SequenceDesc => (animetheme::Column::Sequence, Order::Desc),
+
+            Self::CreatedAt => (animetheme::Column::CreatedAt, Order::Asc),
+            Self::CreatedAtDesc => (animetheme::Column::CreatedAt, Order::Desc),
+
+            Self::UpdatedAt => (animetheme::Column::UpdatedAt, Order::Asc),
+            Self::UpdatedAtDesc => (animetheme::Column::UpdatedAt, Order::Desc),
+
+            Self::Random => return None,
+        };
+
+        Some(CursorSort {
+            column,
+            order: direction,
+        })
+    }
+
+    fn apply_sort(&self, query: Select<Self::Entity>) -> Select<Self::Entity> {
+        let cursor_sort = self.cursor_sort();
+
+        match cursor_sort {
+            Some(cursor_sort) => query.order_by(cursor_sort.column, cursor_sort.order),
+            None => query.order_by_asc(Expr::cust("RAND()")),
         }
     }
 }

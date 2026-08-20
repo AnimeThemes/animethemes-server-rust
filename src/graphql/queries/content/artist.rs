@@ -1,16 +1,16 @@
 use async_graphql::{
     Context, InputObject, Object, Result,
-    connection::{Connection, EmptyFields},
+    connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
 use crate::{
     entities::content::artist,
     graphql::{
+        cursor::{CursorSort, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, content::artist_sort::ArtistSort},
         inputs::pagination_input::PaginationInput,
         types::content::artist::Artist,
-        utils::cursor_paginate,
     },
     scopes::without_trashed,
 };
@@ -43,8 +43,7 @@ impl ArtistQuery {
         pagination: Option<PaginationInput>,
         filter: Option<ArtistFilterInput>,
         sort: Option<Vec<ArtistSort>>,
-        _search: Option<String>,
-    ) -> Result<Connection<u64, Artist, EmptyFields, EmptyFields>> {
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Artist, EmptyFields, EmptyFields>> {
         let mut query = artist::Entity::find().filter(without_trashed::<artist::Entity>());
 
         let filter = filter.unwrap_or_default();
@@ -53,19 +52,24 @@ impl ArtistQuery {
             query = query.filter(artist::Column::Name.like(name_main_like))
         }
 
-        if let Some(sorts) = sort {
+        if let Some(sorts) = sort.clone() {
             for sort in sorts {
                 query = sort.apply_sort(query);
             }
         }
 
-        cursor_paginate(
-            query,
-            ctx,
-            artist::Column::Id,
-            pagination,
-            |model: &artist::Model| model.id,
-        )
-        .await
+        let mut cursor_sorts = sort
+            .clone()
+            .unwrap_or(vec![])
+            .iter()
+            .filter_map(ArtistSort::cursor_sort)
+            .collect::<Vec<_>>();
+
+        cursor_sorts.push(CursorSort {
+            column: artist::Column::Id,
+            order: Order::Asc,
+        });
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 }

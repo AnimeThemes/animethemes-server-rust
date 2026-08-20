@@ -1,10 +1,9 @@
-use animethemes_server_rust::enums::LocalizedEnum;
+use animethemes_server_rust::enums::{LocalizedEnum, content::themetype::ThemeType};
 use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
 
 use crate::{
     entities::content::animetheme,
     graphql::{
-        enums::content::themetype::ThemeType,
         loaders::content::{
             anime::anime_theme_entries::AnimeThemeEntriesLoader,
             animetheme::{
@@ -93,7 +92,7 @@ impl From<animetheme::Model> for AnimeTheme {
             sequence: model.sequence,
             song_id: model.song_id,
             slug: model.slug,
-            r#type: model.r#type.into(),
+            r#type: model.r#type,
             type_localized: model.r#type.localize().to_string(),
         }
     }
