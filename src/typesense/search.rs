@@ -1,7 +1,7 @@
 use anyhow::Result;
 use async_graphql::Error;
 use sea_orm::{
-    ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, QuerySelect, Select,
+    ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, Select,
     sea_query::{CaseStatement, SimpleExpr},
 };
 use typesense::{models::SearchParameters, prelude::Document};
@@ -34,14 +34,16 @@ pub async fn search_anime(
     builder: Select<anime::Entity>,
     term: String,
     first: i32,
-) -> Result<Vec<anime::Model>> {
+    page: i32,
+) -> Result<OffsetPagination<anime::Model>> {
     search::<anime::Entity, AnimeDocument>(
         db,
         typesense,
         builder,
         anime::Column::Id,
         term,
-        first,
+        first as u64,
+        page as u64,
         anime_document::QUERY_BY,
         anime_document::QUERY_BY_WEIGHTS,
     )
@@ -54,14 +56,16 @@ pub async fn search_artists(
     builder: Select<artist::Entity>,
     term: String,
     first: i32,
-) -> Result<Vec<artist::Model>> {
+    page: i32,
+) -> Result<OffsetPagination<artist::Model>> {
     search::<artist::Entity, ArtistDocument>(
         db,
         typesense,
         builder,
         artist::Column::Id,
         term,
-        first,
+        first as u64,
+        page as u64,
         artist_document::QUERY_BY,
         artist_document::QUERY_BY_WEIGHTS,
     )
@@ -74,14 +78,16 @@ pub async fn search_animethemes(
     builder: Select<animetheme::Entity>,
     term: String,
     first: i32,
-) -> Result<Vec<animetheme::Model>> {
+    page: i32,
+) -> Result<OffsetPagination<animetheme::Model>> {
     search::<animetheme::Entity, AnimeThemeDocument>(
         db,
         typesense,
         builder,
         animetheme::Column::Id,
         term,
-        first,
+        first as u64,
+        page as u64,
         animetheme_document::QUERY_BY,
         animetheme_document::QUERY_BY_WEIGHTS,
     )
@@ -94,14 +100,16 @@ pub async fn search_playlists(
     builder: Select<playlist::Entity>,
     term: String,
     first: i32,
-) -> Result<Vec<playlist::Model>> {
+    page: i32,
+) -> Result<OffsetPagination<playlist::Model>> {
     search::<playlist::Entity, PlaylistDocument>(
         db,
         typesense,
         builder.filter(public_playlists()),
         playlist::Column::Id,
         term,
-        first,
+        first as u64,
+        page as u64,
         playlist_document::QUERY_BY,
         playlist_document::QUERY_BY_WEIGHTS,
     )
@@ -114,14 +122,16 @@ pub async fn search_series(
     builder: Select<series::Entity>,
     term: String,
     first: i32,
-) -> Result<Vec<series::Model>> {
+    page: i32,
+) -> Result<OffsetPagination<series::Model>> {
     search::<series::Entity, SeriesDocument>(
         db,
         typesense,
         builder,
         series::Column::Id,
         term,
-        first,
+        first as u64,
+        page as u64,
         series_document::QUERY_BY,
         series_document::QUERY_BY_WEIGHTS,
     )
@@ -134,14 +144,16 @@ pub async fn search_songs(
     builder: Select<song::Entity>,
     term: String,
     first: i32,
-) -> Result<Vec<song::Model>> {
+    page: i32,
+) -> Result<OffsetPagination<song::Model>> {
     search::<song::Entity, SongDocument>(
         db,
         typesense,
         builder,
         song::Column::Id,
         term,
-        first,
+        first as u64,
+        page as u64,
         song_document::QUERY_BY,
         song_document::QUERY_BY_WEIGHTS,
     )
@@ -154,14 +166,16 @@ pub async fn search_studios(
     builder: Select<studio::Entity>,
     term: String,
     first: i32,
-) -> Result<Vec<studio::Model>> {
+    page: i32,
+) -> Result<OffsetPagination<studio::Model>> {
     search::<studio::Entity, StudioDocument>(
         db,
         typesense,
         builder,
         studio::Column::Id,
         term,
-        first,
+        first as u64,
+        page as u64,
         studio_document::QUERY_BY,
         studio_document::QUERY_BY_WEIGHTS,
     )
@@ -174,18 +188,33 @@ pub async fn search_videos(
     builder: Select<video::Entity>,
     term: String,
     first: i32,
-) -> Result<Vec<video::Model>> {
+    page: i32,
+) -> Result<OffsetPagination<video::Model>> {
     search::<video::Entity, VideoDocument>(
         db,
         typesense,
         builder,
         video::Column::Id,
         term,
-        first,
+        first as u64,
+        page as u64,
         video_document::QUERY_BY,
         video_document::QUERY_BY_WEIGHTS,
     )
     .await
+}
+
+pub struct OffsetPagination<T> {
+    pub data: Vec<T>,
+    pub page_info: OffsetPageInfo,
+}
+
+pub struct OffsetPageInfo {
+    pub total: u64,
+    pub offset: u64,
+    pub first: u64,
+    pub has_previous_page: bool,
+    pub has_next_page: bool,
 }
 
 async fn search<E, D>(
@@ -194,14 +223,17 @@ async fn search<E, D>(
     builder: Select<E>,
     id_column: E::Column,
     term: String,
-    first: i32,
+    first: u64,
+    page: u64,
     query_by: &str,
     query_by_weights: &str,
-) -> Result<Vec<E::Model>>
+) -> Result<OffsetPagination<E::Model>>
 where
     E: EntityTrait,
     D: Document + HasId,
 {
+    let offset = page as u64 * first;
+
     let documents = typesense
         .collection::<D>()
         .documents()
@@ -210,11 +242,15 @@ where
                 .q(term)
                 .query_by(query_by)
                 .query_by_weights(query_by_weights)
+                .page(page as i32)
+                .per_page(first as i32)
                 .build(),
         )
         .await
         .map_err(|error| Error::new(error.to_string()))
         .unwrap();
+
+    let total = documents.found.unwrap_or_default() as u64;
 
     let ids: Vec<String> = documents
         .hits
@@ -224,8 +260,19 @@ where
         .filter_map(|document| document.id().parse::<String>().ok())
         .collect();
 
+    let page_info = OffsetPageInfo {
+        total,
+        offset,
+        first,
+        has_previous_page: page > 1,
+        has_next_page: (offset + ids.len() as u64) < total,
+    };
+
     if ids.is_empty() {
-        return Ok(Vec::new());
+        return Ok(OffsetPagination {
+            data: Vec::new(),
+            page_info,
+        });
     }
 
     let order: SimpleExpr = ids
@@ -239,9 +286,12 @@ where
     let models = builder
         .filter(id_column.is_in(&ids))
         .order_by_asc(order)
-        .limit(first as u64)
         .all(db)
         .await?;
 
-    Ok(models.into_iter().map(Into::into).collect())
+    Ok(OffsetPagination {
+        data: models.into_iter().map(Into::into).collect(),
+
+        page_info,
+    })
 }
