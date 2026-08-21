@@ -13,14 +13,18 @@ use crate::policies::{AppError, Policy, PolicyAction};
 
 #[derive(InputObject)]
 struct CreatePlaylistInput {
+    #[graphql(validator(min_length = 1, max_length = 192))]
     name: String,
+    #[graphql(validator(min_length = 1, max_length = 1000))]
     description: Option<String>,
     visibility: PlaylistVisibility,
 }
 
 #[derive(InputObject)]
 struct UpdatePlaylistInput {
+    #[graphql(validator(min_length = 1, max_length = 192))]
     name: Option<String>,
+    #[graphql(validator(min_length = 1, max_length = 1000))]
     description: Option<String>,
     visibility: Option<PlaylistVisibility>,
 }

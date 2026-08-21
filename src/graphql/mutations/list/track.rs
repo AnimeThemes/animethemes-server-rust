@@ -15,6 +15,7 @@ use crate::{
 struct CreatePlaylistTrackInput {
     entry_id: u64,
     video_id: u64,
+    #[graphql(validator(minimum = 1))]
     position: Option<i32>,
 }
 
@@ -22,6 +23,7 @@ struct CreatePlaylistTrackInput {
 struct UpdatePlaylistTrackInput {
     entry_id: Option<u64>,
     video_id: Option<u64>,
+    #[graphql(validator(minimum = 1))]
     position: Option<i32>,
 }
 

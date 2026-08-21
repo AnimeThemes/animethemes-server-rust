@@ -1,7 +1,7 @@
 use animethemes_server_rust::entities::auth::user;
 use async_graphql::{Context, Error, InputObject, Object, Result};
 use bcrypt::{hash, verify};
-use sea_orm::{ActiveModelTrait, ActiveValue::Set, DatabaseConnection, PaginatorTrait};
+use sea_orm::{ActiveModelTrait, ActiveValue::Set, DatabaseConnection, SelectExt};
 use tower_sessions::Session;
 
 use crate::{
@@ -10,37 +10,65 @@ use crate::{
 
 #[derive(InputObject)]
 pub struct RegisterInput {
+    #[graphql(validator(min_length = 1, max_length = 35))]
     name: String,
-    #[graphql(validator(email))]
+    #[graphql(validator(email, max_length = 255))]
     email: String,
-    #[graphql(validator(min_length = 8))]
+    #[graphql(validator(min_length = 8), secret)]
     password: String,
-    #[graphql(validator(min_length = 8))]
+    #[graphql(validator(min_length = 8), secret)]
     password_confirm: String,
     terms: bool,
 }
 
+impl RegisterInput {
+    pub fn validate(&self) -> Result<()> {
+        if !self.terms {
+            return Err(Error::new("You must accept the Terms to proceed."));
+        }
+
+        if self.password != self.password_confirm {
+            return Err(Error::new("The password confirmation does not match."));
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(InputObject)]
 pub struct LoginInput {
-    #[graphql(validator(email))]
+    #[graphql(validator(email, max_length = 255))]
     email: String,
+    #[graphql(secret)]
     password: String,
 }
 
 #[derive(InputObject)]
 pub struct UpdateUserInformationInput {
+    #[graphql(validator(min_length = 1, max_length = 35))]
     name: Option<String>,
-    #[graphql(validator(min_length = 8))]
+    #[graphql(validator(email, max_length = 255))]
     email: Option<String>,
 }
 
 #[derive(InputObject)]
 pub struct UpdatePasswordInput {
+    #[graphql(secret)]
     current_password: String,
-    #[graphql(validator(min_length = 8))]
+    #[graphql(validator(min_length = 8), secret)]
     new_password: String,
-    #[graphql(validator(min_length = 8))]
+    #[graphql(validator(min_length = 8), secret)]
     new_password_confirm: String,
+}
+
+impl UpdatePasswordInput {
+    pub fn validate(&self) -> Result<()> {
+        if self.new_password != self.new_password_confirm {
+            return Err(Error::new("The password confirmation does not match."));
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Default)]
@@ -49,21 +77,15 @@ pub struct AuthMutation;
 #[Object]
 impl AuthMutation {
     pub async fn register(&self, ctx: &Context<'_>, input: RegisterInput) -> Result<Me> {
-        if !input.terms {
-            return Err(Error::new("You must accept the Terms to proceed."));
-        }
-
-        if input.password != input.password_confirm {
-            return Err(Error::new("The password confirmation does not match."));
-        }
+        input.validate()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
 
         let exists = user::Entity::find_by_email(input.email.clone())
-            .count(db)
+            .exists(db)
             .await?;
 
-        if exists > 0 {
+        if exists {
             return Err(Error::new("User already exists with this email."));
         }
 
@@ -137,15 +159,13 @@ impl AuthMutation {
         ctx: &Context<'_>,
         input: UpdatePasswordInput,
     ) -> Result<bool> {
+        input.validate()?;
+
         let user = ctx
             .data::<CurrentUser>()
             .map_err(|_| Error::from(AppError::Unauthenticated))?
             .user
             .clone();
-
-        if input.new_password != input.new_password_confirm {
-            return Err(Error::new("The password confirmation does not match"));
-        }
 
         if !verify(&input.current_password, &user.password)? {
             return Err(Error::new("Invalid current password"));
