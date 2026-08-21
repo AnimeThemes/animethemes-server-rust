@@ -27,6 +27,9 @@ pub struct AnimeThemeDocument {
     pub type_sequence: String,
     pub anime: AnimeDocument,
     pub song: Option<SongDocument>,
+    #[typesense(sort)]
+    pub song_title: Option<String>,
+    #[typesense(sort)]
     pub created_at: i64,
 }
 
@@ -46,7 +49,8 @@ impl From<AnimeThemeDocumentFrom> for AnimeThemeDocument {
             sequence: model.sequence,
             type_sequence: format!("{}{}", model.r#type.localize(), model.sequence.unwrap_or(1)),
             anime: anime_document,
-            song: song.map(SongDocument::from),
+            song: song.clone().map(SongDocument::from),
+            song_title: song.as_ref().and_then(|song| song.title.clone()),
             created_at: model.created_at.timestamp(),
         }
     }

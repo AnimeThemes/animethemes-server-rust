@@ -1,9 +1,17 @@
+use std::vec;
+
 use crate::{
     entities::{
         content::{anime, animetheme, artist, series, song, studio, video},
         list::playlist,
     },
-    graphql::types::{OffsetPageInfo, OffsetPagination},
+    graphql::{
+        enums::search_sort::{
+            SearchAnimeSort, SearchAnimeThemeSort, SearchArtistSort, SearchPlaylistSort,
+            SearchSeriesSort, SearchSort, SearchStudioSort,
+        },
+        types::{OffsetPageInfo, OffsetPagination},
+    },
     typesense::{
         client::TypesenseClient,
         search::{
@@ -16,7 +24,7 @@ use crate::{
     enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason, themetype::ThemeType},
     typesense::search::OffsetPageInfo as OffsetPageInfoTypesense,
 };
-use async_graphql::{Context, Enum, InputObject, Object, ObjectType, Result};
+use async_graphql::{Context, InputObject, Object, ObjectType, Result};
 use sea_orm::{DatabaseConnection, EntityTrait, ModelTrait};
 
 use crate::graphql::types::{
@@ -61,56 +69,6 @@ struct SearchAnimeThemeFilterInput {
     r#type: Option<ThemeType>,
 }
 
-#[derive(Enum, Copy, Clone, Eq, PartialEq)]
-enum SearchAnimeSort {
-    TitleRomaji,
-    TitleRomajiDesc,
-    Year,
-    YearDesc,
-    Season,
-    SeasonDesc,
-    CreatedAtDesc,
-}
-
-#[derive(Enum, Copy, Clone, Eq, PartialEq)]
-enum SearchArtistSort {
-    NameMain,
-    NameMainDesc,
-    CreatedAtDesc,
-}
-
-#[derive(Enum, Copy, Clone, Eq, PartialEq)]
-enum SearchPlaylistSort {
-    Name,
-    NameDesc,
-    CreatedAtDesc,
-}
-
-#[derive(Enum, Copy, Clone, Eq, PartialEq)]
-enum SearchSeriesSort {
-    TitleRomaji,
-    TitleRomajiDesc,
-    CreatedAtDesc,
-}
-
-#[derive(Enum, Copy, Clone, Eq, PartialEq)]
-enum SearchStudioSort {
-    Name,
-    NameDesc,
-    CreatedAtDesc,
-}
-
-#[derive(Enum, Copy, Clone, Eq, PartialEq)]
-enum SearchAnimeThemeSort {
-    SongTitleRomaji,
-    SongTitleRomajiDesc,
-    AnimeYear,
-    AnimeYearDesc,
-    AnimeSeason,
-    AnimeSeasonDesc,
-    CreatedAtDesc,
-}
-
 /// Returns a listing of resources that match a given search term.
 #[Object]
 impl Search {
@@ -119,11 +77,19 @@ impl Search {
         &self,
         ctx: &Context<'_>,
         _filter: Option<SearchAnimeFilterInput>,
-        _sort: Option<Vec<SearchAnimeSort>>,
+        sort: Option<Vec<SearchAnimeSort>>,
     ) -> Result<OffsetPagination<Anime>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
+
+        let sort_by = sort
+            .map(|s| {
+                s.into_iter()
+                    .map(|s| s.sort_key().to_string())
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
 
         let result = search_anime(
             db,
@@ -132,6 +98,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            sort_by,
         )
         .await?;
 
@@ -143,11 +110,19 @@ impl Search {
         &self,
         ctx: &Context<'_>,
         _filter: Option<SearchArtistFilterInput>,
-        _sort: Option<Vec<SearchArtistSort>>,
+        sort: Option<Vec<SearchArtistSort>>,
     ) -> Result<OffsetPagination<Artist>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
+
+        let sort_by = sort
+            .map(|s| {
+                s.into_iter()
+                    .map(|s| s.sort_key().to_string())
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
 
         let result = search_artists(
             db,
@@ -156,6 +131,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            sort_by,
         )
         .await?;
 
@@ -167,11 +143,19 @@ impl Search {
         &self,
         ctx: &Context<'_>,
         _filter: Option<SearchAnimeThemeFilterInput>,
-        _sort: Option<Vec<SearchAnimeThemeSort>>,
+        sort: Option<Vec<SearchAnimeThemeSort>>,
     ) -> Result<OffsetPagination<AnimeTheme>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
+
+        let sort_by = sort
+            .map(|s| {
+                s.into_iter()
+                    .map(|s| s.sort_key().to_string())
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
 
         let result = search_animethemes(
             db,
@@ -180,6 +164,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            sort_by,
         )
         .await?;
 
@@ -190,11 +175,19 @@ impl Search {
     async fn playlists(
         &self,
         ctx: &Context<'_>,
-        _sort: Option<Vec<SearchPlaylistSort>>,
+        sort: Option<Vec<SearchPlaylistSort>>,
     ) -> Result<OffsetPagination<Playlist>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
+
+        let sort_by = sort
+            .map(|s| {
+                s.into_iter()
+                    .map(|s| s.sort_key().to_string())
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
 
         let result = search_playlists(
             db,
@@ -203,6 +196,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            sort_by,
         )
         .await?;
 
@@ -214,11 +208,19 @@ impl Search {
         &self,
         ctx: &Context<'_>,
         _filter: Option<SearchSeriesFilterInput>,
-        _sort: Option<Vec<SearchSeriesSort>>,
+        sort: Option<Vec<SearchSeriesSort>>,
     ) -> Result<OffsetPagination<Series>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
+
+        let sort_by = sort
+            .map(|s| {
+                s.into_iter()
+                    .map(|s| s.sort_key().to_string())
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
 
         let result = search_series(
             db,
@@ -227,6 +229,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            sort_by,
         )
         .await?;
 
@@ -246,6 +249,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            vec![],
         )
         .await?;
 
@@ -257,11 +261,19 @@ impl Search {
         &self,
         ctx: &Context<'_>,
         _filter: Option<SearchStudioFilterInput>,
-        _sort: Option<Vec<SearchStudioSort>>,
+        sort: Option<Vec<SearchStudioSort>>,
     ) -> Result<OffsetPagination<Studio>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
+
+        let sort_by = sort
+            .map(|s| {
+                s.into_iter()
+                    .map(|s| s.sort_key().to_string())
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
 
         let result = search_studios(
             db,
@@ -270,6 +282,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            sort_by,
         )
         .await?;
 
@@ -289,6 +302,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            vec![],
         )
         .await?;
 

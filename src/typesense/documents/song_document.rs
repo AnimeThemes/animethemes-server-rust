@@ -14,7 +14,6 @@ pub const QUERY_BY_WEIGHTS: &str = "10,8";
 #[typesense(collection_name = "songs")]
 pub struct SongDocument {
     pub id: String,
-    #[typesense(sort)]
     pub title: Option<String>,
     pub title_native: Option<String>,
     pub created_at: i64,

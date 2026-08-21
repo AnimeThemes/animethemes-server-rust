@@ -16,6 +16,7 @@ pub struct StudioDocument {
     pub id: String,
     #[typesense(sort)]
     pub name: String,
+    #[typesense(sort)]
     pub created_at: i64,
 }
 

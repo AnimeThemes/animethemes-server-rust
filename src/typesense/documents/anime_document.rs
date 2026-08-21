@@ -16,14 +16,14 @@ pub struct AnimeDocument {
     pub id: String,
     #[typesense(sort)]
     pub title: String,
-    #[typesense(sort)]
     pub title_english: Option<String>,
-    #[typesense(sort)]
     pub title_native: Option<String>,
     pub format: Option<i32>,
+    #[typesense(sort)]
     pub season: Option<i32>,
     #[typesense(sort)]
     pub year: Option<i32>,
+    #[typesense(sort)]
     pub created_at: i64,
     pub synonyms: Vec<String>,
 }

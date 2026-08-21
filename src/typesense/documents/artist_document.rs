@@ -18,8 +18,8 @@ pub struct ArtistDocument {
     pub id: String,
     #[typesense(sort)]
     pub name: String,
-    #[typesense(sort)]
     pub name_native: Option<String>,
+    #[typesense(sort)]
     pub created_at: i64,
     pub r#as: Vec<String>,
     pub synonyms: Vec<String>,

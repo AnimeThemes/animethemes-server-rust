@@ -20,8 +20,10 @@ pub const QUERY_BY_WEIGHTS: &str = "10,8,8,6";
 #[typesense(collection_name = "series", enable_nested_fields = true)]
 pub struct SeriesDocument {
     pub id: String,
+    #[typesense(sort)]
     pub title: String,
     pub anime: Vec<AnimeDocument>,
+    #[typesense(sort)]
     pub created_at: i64,
 }
 
