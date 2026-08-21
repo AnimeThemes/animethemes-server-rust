@@ -24,9 +24,9 @@ pub struct Model {
     pub position: i32,
     pub video_id: Option<u64>,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: Option<chrono::DateTime<Utc>>,
+    pub created_at: chrono::DateTime<Utc>,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: Option<chrono::DateTime<Utc>>,
+    pub updated_at: chrono::DateTime<Utc>,
 
     #[sea_orm(belongs_to, from = "playlist_id", to = "id")]
     pub playlist: BelongsTo<playlist::Entity>,
@@ -40,17 +40,13 @@ pub struct Model {
 
 #[async_trait]
 impl ActiveModelBehavior for ActiveModel {
-    async fn before_save<C>(self, _db: &C, insert: bool) -> Result<Self, DbErr>
+    async fn before_save<C>(self, _db: &C, _insert: bool) -> Result<Self, DbErr>
     where
         C: ConnectionTrait,
     {
         let mut model = self;
 
-        model.updated_at = Set(Some(Utc::now()));
-
-        if insert {
-            model.created_at = Set(Some(Utc::now()));
-        }
+        model.updated_at = Set(Utc::now());
 
         Ok(model)
     }

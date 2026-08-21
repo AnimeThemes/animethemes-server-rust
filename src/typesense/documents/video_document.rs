@@ -23,7 +23,7 @@ pub struct VideoDocument {
     pub filename: String,
     pub tags: String,
     pub entries: Vec<AnimeThemeEntryDocument>,
-    pub created_at: Option<i64>,
+    pub created_at: i64,
 }
 
 impl HasId for VideoDocument {
@@ -41,7 +41,7 @@ impl From<VideoDocumentFrom> for VideoDocument {
             filename: model.filename.clone(),
             tags: model.tags(),
             entries: entry_documents,
-            created_at: model.created_at.map(|c| c.timestamp()),
+            created_at: model.created_at.timestamp(),
         }
     }
 }

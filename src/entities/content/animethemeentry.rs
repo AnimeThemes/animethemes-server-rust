@@ -21,9 +21,9 @@ pub struct Model {
     pub tracks_count: i32,
     pub version: i32,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: Option<chrono::DateTime<Utc>>,
+    pub created_at: chrono::DateTime<Utc>,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: Option<chrono::DateTime<Utc>>,
+    pub updated_at: chrono::DateTime<Utc>,
     #[sea_orm(column_type = "Timestamp")]
     pub deleted_at: Option<chrono::DateTime<Utc>>,
 

@@ -14,9 +14,9 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub video_id: u64,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: Option<chrono::DateTime<Utc>>,
+    pub created_at: chrono::DateTime<Utc>,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: Option<chrono::DateTime<Utc>>,
+    pub updated_at: chrono::DateTime<Utc>,
 
     #[sea_orm(belongs_to, from = "entry_id", to = "id")]
     pub animethemeentry: BelongsTo<animethemeentry::Entity>,

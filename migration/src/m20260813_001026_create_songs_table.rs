@@ -25,8 +25,18 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new("title").string().null())
                     .col(ColumnDef::new("title_native").string().null())
-                    .col(ColumnDef::new("created_at").timestamp().null())
-                    .col(ColumnDef::new("updated_at").timestamp().null())
+                    .col(
+                        ColumnDef::new("created_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
+                    .col(
+                        ColumnDef::new("updated_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
                     .col(ColumnDef::new("deleted_at").timestamp().null())
                     .to_owned(),
             )

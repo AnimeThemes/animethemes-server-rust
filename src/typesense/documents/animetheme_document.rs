@@ -27,7 +27,7 @@ pub struct AnimeThemeDocument {
     pub type_sequence: String,
     pub anime: AnimeDocument,
     pub song: Option<SongDocument>,
-    pub created_at: Option<i64>,
+    pub created_at: i64,
 }
 
 impl HasId for AnimeThemeDocument {
@@ -47,7 +47,7 @@ impl From<AnimeThemeDocumentFrom> for AnimeThemeDocument {
             type_sequence: format!("{}{}", model.r#type.localize(), model.sequence.unwrap_or(1)),
             anime: anime_document,
             song: song.map(SongDocument::from),
-            created_at: model.created_at.map(|c| c.timestamp()),
+            created_at: model.created_at.timestamp(),
         }
     }
 }

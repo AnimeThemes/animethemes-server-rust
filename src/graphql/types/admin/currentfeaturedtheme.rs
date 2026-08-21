@@ -13,7 +13,7 @@ use crate::{
             auth::user::User,
             content::{animethemeentry::AnimeThemeEntry, video::Video},
         },
-        utils::format_datetime,
+        utils::format_option_datetime,
     },
     policies::AppError,
 };
@@ -40,12 +40,12 @@ pub struct CurrentFeaturedTheme {
 impl CurrentFeaturedTheme {
     /// The start date of the resource
     async fn start_at(&self, #[graphql(default = "%+")] format: String) -> Option<String> {
-        format_datetime(self.start_at.as_ref(), &format)
+        format_option_datetime(self.start_at.as_ref(), &format)
     }
 
     /// The end date of the resource
     async fn end_at(&self, #[graphql(default = "%+")] format: String) -> Option<String> {
-        format_datetime(self.end_at.as_ref(), &format)
+        format_option_datetime(self.end_at.as_ref(), &format)
     }
 
     async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<AnimeThemeEntry> {

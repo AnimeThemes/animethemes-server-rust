@@ -35,8 +35,18 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new("uncen").boolean().default(false))
                     .col(ColumnDef::new("overlap").integer().not_null())
                     .col(ColumnDef::new("source").integer().null())
-                    .col(ColumnDef::new("created_at").timestamp().null())
-                    .col(ColumnDef::new("updated_at").timestamp().null())
+                    .col(
+                        ColumnDef::new("created_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
+                    .col(
+                        ColumnDef::new("updated_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
                     .col(ColumnDef::new("deleted_at").timestamp().null())
                     .to_owned(),
             )

@@ -23,7 +23,7 @@ pub struct AnimeThemeEntryDocument {
     pub version: String,
     pub type_sequence_version: String,
     pub animetheme: AnimeThemeDocument,
-    pub created_at: Option<i64>,
+    pub created_at: i64,
 }
 
 impl HasId for AnimeThemeEntryDocument {
@@ -42,7 +42,7 @@ impl From<AnimeThemeEntryDocumentFrom> for AnimeThemeEntryDocument {
             version: version.clone(),
             type_sequence_version: format!("{}{}", animetheme_document.type_sequence, version),
             animetheme: animetheme_document,
-            created_at: model.created_at.map(|c| c.timestamp()),
+            created_at: model.created_at.timestamp(),
         }
     }
 }

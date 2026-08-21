@@ -19,22 +19,21 @@ pub struct ArtistMemberEdgeFields {
     pub relevance: i32,
 
     #[graphql(skip)]
-    pub created_at: Option<DateTime<Utc>>,
-
+    pub created_at: DateTime<Utc>,
     #[graphql(skip)]
-    pub updated_at: Option<DateTime<Utc>>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[ComplexObject]
 impl ArtistMemberEdgeFields {
     /// The date that the resource was created
-    async fn created_at(&self, #[graphql(default = "%+")] format: String) -> Option<String> {
-        format_datetime(self.created_at.as_ref(), &format)
+    async fn created_at(&self, #[graphql(default = "%+")] format: String) -> String {
+        format_datetime(&self.created_at, &format)
     }
 
     /// The date that the resource was updated
-    async fn updated_at(&self, #[graphql(default = "%+")] format: String) -> Option<String> {
-        format_datetime(self.updated_at.as_ref(), &format)
+    async fn updated_at(&self, #[graphql(default = "%+")] format: String) -> String {
+        format_datetime(&self.updated_at, &format)
     }
 }
 

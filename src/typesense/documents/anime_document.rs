@@ -24,7 +24,7 @@ pub struct AnimeDocument {
     pub season: Option<i32>,
     #[typesense(sort)]
     pub year: Option<i32>,
-    pub created_at: Option<i64>,
+    pub created_at: i64,
     pub synonyms: Vec<String>,
 }
 
@@ -61,7 +61,7 @@ impl From<AnimeDocumentFrom> for AnimeDocument {
             format: model.format.map(|f| f.to_value()),
             season: model.season.map(|s| s.to_value()),
             year: model.year,
-            created_at: model.created_at.map(|c| c.timestamp()),
+            created_at: model.created_at.timestamp(),
             synonyms: synonyms.iter().map(|s| s.text.clone()).collect(),
         }
     }

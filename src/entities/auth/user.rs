@@ -19,9 +19,9 @@ pub struct Model {
     #[sea_orm(column_type = "Timestamp")]
     pub email_verified_at: Option<chrono::DateTime<Utc>>,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: Option<chrono::DateTime<Utc>>,
+    pub created_at: chrono::DateTime<Utc>,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: Option<chrono::DateTime<Utc>>,
+    pub updated_at: chrono::DateTime<Utc>,
 
     #[sea_orm(has_many, via = "model_has_roles")]
     pub roles: HasMany<role::Entity>,

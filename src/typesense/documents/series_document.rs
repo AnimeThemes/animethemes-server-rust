@@ -22,7 +22,7 @@ pub struct SeriesDocument {
     pub id: String,
     pub title: String,
     pub anime: Vec<AnimeDocument>,
-    pub created_at: Option<i64>,
+    pub created_at: i64,
 }
 
 impl HasId for SeriesDocument {
@@ -39,7 +39,7 @@ impl From<SeriesDocumentFrom> for SeriesDocument {
             id: model.id.to_string(),
             title: model.title,
             anime: anime_documents,
-            created_at: model.created_at.map(|c| c.timestamp()),
+            created_at: model.created_at.timestamp(),
         }
     }
 }

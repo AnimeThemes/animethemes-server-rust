@@ -20,7 +20,7 @@ pub struct ArtistDocument {
     pub name: String,
     #[typesense(sort)]
     pub name_native: Option<String>,
-    pub created_at: Option<i64>,
+    pub created_at: i64,
     pub r#as: Vec<String>,
     pub synonyms: Vec<String>,
     pub search_text: String,
@@ -70,7 +70,7 @@ impl From<ArtistDocumentFrom> for ArtistDocument {
             id: model.id.to_string(),
             name: model.name.clone(),
             name_native: name_native,
-            created_at: model.created_at.map(|c| c.timestamp()),
+            created_at: model.created_at.timestamp(),
             r#as: r#as,
             synonyms: synonyms.iter().map(|s| s.text.clone()).collect(),
             search_text: search_text.join(" "),

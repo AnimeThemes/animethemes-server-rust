@@ -28,8 +28,18 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new("user_id").big_unsigned().null())
                     .col(ColumnDef::new("entry_id").big_unsigned().null())
                     .col(ColumnDef::new("video_id").big_unsigned().null())
-                    .col(ColumnDef::new("created_at").timestamp().null())
-                    .col(ColumnDef::new("updated_at").timestamp().null())
+                    .col(
+                        ColumnDef::new("created_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
+                    .col(
+                        ColumnDef::new("updated_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("featured_themes_user_id_foreign")

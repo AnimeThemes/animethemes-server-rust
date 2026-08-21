@@ -16,7 +16,7 @@ pub struct PlaylistDocument {
     pub id: String,
     #[typesense(sort)]
     pub name: String,
-    pub created_at: Option<i64>,
+    pub created_at: i64,
 }
 
 impl HasId for PlaylistDocument {
@@ -30,7 +30,7 @@ impl From<playlist::Model> for PlaylistDocument {
         Self {
             id: model.id.to_string(),
             name: model.name.clone(),
-            created_at: model.created_at.map(|c| c.timestamp()),
+            created_at: model.created_at.timestamp(),
         }
     }
 }

@@ -27,8 +27,18 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new("resourceable_type").string().not_null())
                     .col(ColumnDef::new("resourceable_id").big_unsigned().not_null())
                     .col(ColumnDef::new("as").string().null())
-                    .col(ColumnDef::new("created_at").timestamp().null())
-                    .col(ColumnDef::new("updated_at").timestamp().null())
+                    .col(
+                        ColumnDef::new("created_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
+                    .col(
+                        ColumnDef::new("updated_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("resourceables_resource_id_foreign")

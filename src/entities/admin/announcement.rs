@@ -13,9 +13,9 @@ pub struct Model {
     #[sea_orm(column_type = "Timestamp")]
     pub end_at: Option<chrono::DateTime<Utc>>,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: Option<chrono::DateTime<Utc>>,
+    pub created_at: chrono::DateTime<Utc>,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: Option<chrono::DateTime<Utc>>,
+    pub updated_at: chrono::DateTime<Utc>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

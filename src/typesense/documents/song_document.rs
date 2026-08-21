@@ -17,7 +17,7 @@ pub struct SongDocument {
     #[typesense(sort)]
     pub title: Option<String>,
     pub title_native: Option<String>,
-    pub created_at: Option<i64>,
+    pub created_at: i64,
 }
 
 impl HasId for SongDocument {
@@ -38,7 +38,7 @@ impl From<song::Model> for SongDocument {
             id: model.id.to_string(),
             title: model.title.clone(),
             title_native: title_native,
-            created_at: model.created_at.map(|c| c.timestamp()),
+            created_at: model.created_at.timestamp(),
         }
     }
 }

@@ -12,9 +12,9 @@ pub struct Model {
     pub title: Option<String>,
     pub title_native: Option<String>,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: Option<chrono::DateTime<Utc>>,
+    pub created_at: chrono::DateTime<Utc>,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: Option<chrono::DateTime<Utc>>,
+    pub updated_at: chrono::DateTime<Utc>,
     #[sea_orm(column_type = "Timestamp")]
     pub deleted_at: Option<chrono::DateTime<Utc>>,
 

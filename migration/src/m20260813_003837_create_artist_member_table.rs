@@ -26,8 +26,18 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new("artist_id").big_unsigned().not_null())
                     .col(ColumnDef::new("member_id").big_unsigned().not_null())
                     .col(ColumnDef::new("relevance").integer().default(1).null())
-                    .col(ColumnDef::new("created_at").timestamp().null())
-                    .col(ColumnDef::new("updated_at").timestamp().null())
+                    .col(
+                        ColumnDef::new("created_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
+                    .col(
+                        ColumnDef::new("updated_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("artist_member_artist_id_foreign")

@@ -32,9 +32,9 @@ pub struct Me {
     /// The date the user verified their email
     pub email_verified_at: Option<DateTime<Utc>>,
     /// The date that the resource was created
-    pub created_at: Option<DateTime<Utc>>,
+    pub created_at: DateTime<Utc>,
     /// The date that the resource was updated
-    pub updated_at: Option<DateTime<Utc>>,
+    pub updated_at: DateTime<Utc>,
 }
 
 impl From<&user::Model> for Me {
