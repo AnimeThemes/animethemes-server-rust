@@ -6,6 +6,7 @@ pub mod content;
 pub mod document;
 pub mod list;
 pub mod loaders;
+pub mod user;
 
 pub fn group_by_query<'a, K, Q>(
     keys: &'a [K],

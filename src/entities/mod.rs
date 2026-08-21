@@ -8,6 +8,7 @@ pub mod auth;
 pub mod content;
 pub mod document;
 pub mod list;
+pub mod user;
 
 pub trait SoftDeleteEntity: EntityTrait {
     fn deleted_at_column() -> Self::Column;

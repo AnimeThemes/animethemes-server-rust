@@ -9,10 +9,12 @@ use crate::{
             user_permissions::UserPermissionsLoader,
             user_playlists::{UserPlaylistsLoader, UserPlaylistsLoaderKey},
             user_roles::UserRolesLoader,
+            user_watchhistory::UserWatchHistoryLoader,
         },
         types::{
             auth::{permission::Permission, role::Role},
             list::playlist::Playlist,
+            user::watchhistory::WatchHistory,
         },
     },
 };
@@ -79,5 +81,13 @@ impl Me {
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
         Ok(models.into_iter().map(Permission::from).collect())
+    }
+
+    async fn watch_history(&self, ctx: &Context<'_>) -> Result<Vec<WatchHistory>> {
+        let loader = ctx.data::<DataLoader<UserWatchHistoryLoader>>()?;
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(WatchHistory::from).collect())
     }
 }

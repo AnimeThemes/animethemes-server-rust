@@ -13,6 +13,7 @@ pub mod auth;
 pub mod content;
 pub mod document;
 pub mod list;
+pub mod user;
 
 #[derive(SimpleObject)]
 #[graphql(concrete(name = "AnimePagination", params(Anime)))]

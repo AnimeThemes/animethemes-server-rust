@@ -12,7 +12,7 @@ use crate::graphql::{
             role::role_permissions::RolePermissionsLoader,
             user::{
                 user_permissions::UserPermissionsLoader, user_playlists::UserPlaylistsLoader,
-                user_roles::UserRolesLoader,
+                user_roles::UserRolesLoader, user_watchhistory::UserWatchHistoryLoader,
             },
         },
         content::{
@@ -60,6 +60,10 @@ use crate::graphql::{
             track_entry::TrackEntryLoader, track_playlist::TrackPlaylistLoader,
             track_video::TrackVideoLoader,
         },
+        user::watchhistory::{
+            watchhistory_entry::WatchHistoryEntryLoader,
+            watchhistory_video::WatchHistoryVideoLoader,
+        },
     },
     mutation::Mutation,
 };
@@ -84,6 +88,9 @@ impl<Query> RegisterLoaders for SchemaBuilder<Query, Mutation, EmptySubscription
             .data(loader(UserPlaylistsLoader { db: db.clone() }))
             .data(loader(UserRolesLoader { db: db.clone() }))
             .data(loader(UserPermissionsLoader { db: db.clone() }))
+            .data(loader(UserWatchHistoryLoader { db: db.clone() }))
+            .data(loader(WatchHistoryEntryLoader { db: db.clone() }))
+            .data(loader(WatchHistoryVideoLoader { db: db.clone() }))
             .data(loader(AnimeSynonymsLoader { db: db.clone() }))
             .data(loader(AnimeThemesLoader { db: db.clone() }))
             .data(loader(AnimeThemeAnimeLoader { db: db.clone() }))

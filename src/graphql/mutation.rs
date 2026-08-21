@@ -3,7 +3,13 @@ use async_graphql::MergedObject;
 use crate::graphql::mutations::{
     auth::AuthMutation,
     list::{playlist::PlaylistMutation, track::PlaylistTrackMutation},
+    user::watch::WatchMutation,
 };
 
 #[derive(MergedObject, Default)]
-pub struct Mutation(AuthMutation, PlaylistMutation, PlaylistTrackMutation);
+pub struct Mutation(
+    AuthMutation,
+    PlaylistMutation,
+    PlaylistTrackMutation,
+    WatchMutation,
+);
