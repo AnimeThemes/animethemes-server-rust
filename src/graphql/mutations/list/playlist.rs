@@ -1,5 +1,5 @@
-use animethemes_server_rust::entities::list::playlist;
-use animethemes_server_rust::enums::list::playlistvisibility::PlaylistVisibility;
+use crate::entities::list::playlist;
+use crate::enums::list::playlistvisibility::PlaylistVisibility;
 use async_graphql::{Context, Error, InputObject, Object, Result};
 use sea_orm::ActiveValue::Set;
 use sea_orm::{

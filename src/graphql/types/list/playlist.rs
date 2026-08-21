@@ -1,4 +1,4 @@
-use animethemes_server_rust::enums::{LocalizedEnum, list::playlistvisibility::PlaylistVisibility};
+use crate::enums::{LocalizedEnum, list::playlistvisibility::PlaylistVisibility};
 use async_graphql::{
     ComplexObject, Context, Error, InputObject, Result, SimpleObject, dataloader::DataLoader,
 };

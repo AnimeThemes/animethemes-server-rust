@@ -1,4 +1,4 @@
-use animethemes_server_rust::enums::{
+use crate::enums::{
     LocalizedEnum,
     content::{videooverlap::VideoOverlap, videosource::VideoSource},
 };

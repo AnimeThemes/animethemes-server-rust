@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use animethemes_server_rust::entities::auth::{model_has_roles, role};
+use crate::entities::auth::{model_has_roles, role};
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 

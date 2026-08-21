@@ -12,7 +12,7 @@ use crate::{
         },
     },
 };
-use animethemes_server_rust::{
+use crate::{
     enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason, themetype::ThemeType},
     typesense::search::OffsetPageInfo as OffsetPageInfoTypesense,
 };

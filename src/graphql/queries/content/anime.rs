@@ -1,4 +1,4 @@
-use animethemes_server_rust::enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason};
+use crate::enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason};
 use async_graphql::{
     Context, InputObject, Object, Result,
     connection::{Connection, EmptyFields, OpaqueCursor},

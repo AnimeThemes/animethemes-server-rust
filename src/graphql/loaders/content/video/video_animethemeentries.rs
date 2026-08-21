@@ -1,4 +1,4 @@
-use animethemes_server_rust::entities::content::animethemeentry;
+use crate::entities::content::animethemeentry;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use std::collections::HashMap;

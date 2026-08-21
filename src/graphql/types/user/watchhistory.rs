@@ -1,4 +1,4 @@
-use animethemes_server_rust::entities::user::watchhistory;
+use crate::entities::user::watchhistory;
 use async_graphql::{Context, Error, Object, Result, dataloader::DataLoader};
 
 use crate::{

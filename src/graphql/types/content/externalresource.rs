@@ -1,4 +1,4 @@
-use animethemes_server_rust::enums::{LocalizedEnum, content::resourcesite::ResourceSite};
+use crate::enums::{LocalizedEnum, content::resourcesite::ResourceSite};
 use async_graphql::SimpleObject;
 
 use crate::entities::content::externalresource::{self};

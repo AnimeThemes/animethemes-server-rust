@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use animethemes_server_rust::entities::user::watchhistory;
+use crate::entities::user::watchhistory;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 

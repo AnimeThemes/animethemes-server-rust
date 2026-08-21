@@ -1,4 +1,4 @@
-use animethemes_server_rust::entities::content::video;
+use crate::entities::content::video;
 use async_graphql::{
     Context, InputObject, Object, Result,
     connection::{Connection, EmptyFields, OpaqueCursor},

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use animethemes_server_rust::{
+use crate::{
     entities::list::{playlist, track},
     enums::list::playlistvisibility::PlaylistVisibility,
 };

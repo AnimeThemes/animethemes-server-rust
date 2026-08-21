@@ -1,4 +1,4 @@
-use animethemes_server_rust::{
+use crate::{
     entities::content::{anime, animetheme, animethemeentry},
     enums::content::{animeformat::AnimeFormat, themetype::ThemeType},
     scopes::without_trashed,

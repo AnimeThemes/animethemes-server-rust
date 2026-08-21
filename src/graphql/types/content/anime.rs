@@ -1,4 +1,4 @@
-use animethemes_server_rust::enums::{
+use crate::enums::{
     LocalizedEnum,
     content::{animeformat::AnimeFormat, animeseason::AnimeSeason},
 };

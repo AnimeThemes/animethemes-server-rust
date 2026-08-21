@@ -1,4 +1,4 @@
-use animethemes_server_rust::enums::{LocalizedEnum, content::imagefacet::ImageFacet};
+use crate::enums::{LocalizedEnum, content::imagefacet::ImageFacet};
 use async_graphql::SimpleObject;
 
 use crate::entities::content::image::{self};

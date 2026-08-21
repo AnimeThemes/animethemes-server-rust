@@ -1,4 +1,4 @@
-use animethemes_server_rust::entities::auth::user;
+use crate::entities::auth::user;
 use async_graphql::{Context, Error, InputObject, Object, Result};
 use bcrypt::{hash, verify};
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, DatabaseConnection, SelectExt};

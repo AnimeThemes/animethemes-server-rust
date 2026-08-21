@@ -1,4 +1,4 @@
-use animethemes_server_rust::entities::content::series;
+use crate::entities::content::series;
 use async_graphql::Enum;
 use sea_orm::{EntityTrait, Order, QueryOrder, Select, sea_query::Expr};
 

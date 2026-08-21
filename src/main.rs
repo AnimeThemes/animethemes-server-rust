@@ -1,12 +1,16 @@
-mod actions;
-mod environment;
-mod graphql;
-mod middlewares;
-mod policies;
-mod schema;
-mod session;
-
-use animethemes_server_rust::{db, entities, enums, scopes, typesense};
+use animethemes_server_rust::db;
+// use crate::entities;
+// use crate::enums;
+// use crate::scopes;
+// use crate::traits;
+// use crate::typesense;
+// use crate::actions;
+// use crate::environment;
+// use crate::graphql;
+// use crate::middlewares;
+// use crate::policies;
+use animethemes_server_rust::schema;
+// use crate::session;
 
 use axum::{
     Router,
@@ -18,23 +22,17 @@ use axum::{
     routing::{get, post},
 };
 use dotenvy::dotenv;
-use sea_orm::DatabaseConnection;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use url::Url;
 
-use crate::{
+use animethemes_server_rust::{
+    AppState,
     middlewares::current_user::current_user_middleware,
-    schema::{AppSchema, graphiql, graphql_handler},
+    schema::{graphiql, graphql_handler},
     session::create_session_layer,
 };
 
 use std::env;
-
-#[derive(Clone)]
-pub struct AppState {
-    pub db: DatabaseConnection,
-    pub schema: AppSchema,
-}
 
 #[tokio::main]
 async fn main() {

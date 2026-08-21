@@ -1,4 +1,4 @@
-use animethemes_server_rust::entities::content::{artist, artist_members};
+use crate::entities::content::{artist, artist_members};
 use async_graphql::dataloader::Loader;
 use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QuerySelect, RelationTrait,

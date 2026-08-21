@@ -1,4 +1,4 @@
-use animethemes_server_rust::entities::auth::permission;
+use crate::entities::auth::permission;
 use async_graphql::SimpleObject;
 
 /// Represents an assignable label for users and roles that authorizes a particular action in AnimeThemes.

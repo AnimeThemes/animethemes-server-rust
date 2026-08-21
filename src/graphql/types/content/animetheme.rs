@@ -1,4 +1,4 @@
-use animethemes_server_rust::enums::{LocalizedEnum, content::themetype::ThemeType};
+use crate::enums::{LocalizedEnum, content::themetype::ThemeType};
 use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
 
 use crate::{
