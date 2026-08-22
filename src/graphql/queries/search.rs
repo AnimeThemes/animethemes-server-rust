@@ -25,7 +25,7 @@ use crate::{
     typesense::search::OffsetPageInfo as OffsetPageInfoTypesense,
 };
 use async_graphql::{Context, InputObject, Object, ObjectType, Result};
-use sea_orm::{DatabaseConnection, EntityTrait, ModelTrait};
+use sea_orm::{ActiveEnum, DatabaseConnection, EntityTrait, ModelTrait};
 
 use crate::graphql::types::{
     content::{
@@ -43,30 +43,107 @@ pub struct Search {
 
 #[derive(InputObject, Default)]
 struct SearchAnimeFilterInput {
-    title_romaji_like: Option<String>,
+    title_romaji_prefix: Option<String>,
     season: Option<AnimeSeason>,
     year: Option<i16>,
     format: Option<AnimeFormat>,
 }
 
+impl SearchAnimeFilterInput {
+    pub fn to_typesense_filter(&self) -> Option<String> {
+        let mut filters = Vec::new();
+
+        if let Some(title_prefix) = &self.title_romaji_prefix {
+            filters.push(format!("title:={}*", title_prefix));
+        }
+
+        if let Some(season) = self.season {
+            filters.push(format!("season:={}", season.to_value()));
+        }
+
+        if let Some(year) = self.year {
+            filters.push(format!("year:={}", year));
+        }
+
+        if let Some(format) = self.format {
+            filters.push(format!("format:={}", format.to_value()));
+        }
+
+        (!filters.is_empty()).then(|| filters.join(" && "))
+    }
+}
+
 #[derive(InputObject, Default)]
 struct SearchArtistFilterInput {
-    name_main_like: Option<String>,
+    name_main_prefix: Option<String>,
+}
+
+impl SearchArtistFilterInput {
+    pub fn to_typesense_filter(&self) -> Option<String> {
+        let mut filters = Vec::new();
+
+        if let Some(name_main_prefix) = &self.name_main_prefix {
+            filters.push(format!("name:={}*", name_main_prefix));
+        }
+
+        (!filters.is_empty()).then(|| filters.join(" && "))
+    }
 }
 
 #[derive(InputObject, Default)]
 struct SearchSeriesFilterInput {
-    title_romaji_like: Option<String>,
+    title_romaji_prefix: Option<String>,
+}
+
+impl SearchSeriesFilterInput {
+    pub fn to_typesense_filter(&self) -> Option<String> {
+        let mut filters = Vec::new();
+
+        if let Some(title_romaji_prefix) = &self.title_romaji_prefix {
+            filters.push(format!("title:={}*", title_romaji_prefix));
+        }
+
+        (!filters.is_empty()).then(|| filters.join(" && "))
+    }
 }
 
 #[derive(InputObject, Default)]
 struct SearchStudioFilterInput {
-    name_like: Option<String>,
+    name_prefix: Option<String>,
+}
+
+impl SearchStudioFilterInput {
+    pub fn to_typesense_filter(&self) -> Option<String> {
+        let mut filters = Vec::new();
+
+        if let Some(name_prefix) = &self.name_prefix {
+            filters.push(format!("name:={}*", name_prefix));
+        }
+
+        (!filters.is_empty()).then(|| filters.join(" && "))
+    }
 }
 
 #[derive(InputObject, Default)]
 struct SearchAnimeThemeFilterInput {
+    song_title_romaji_prefix: Option<String>,
     r#type: Option<ThemeType>,
+}
+
+impl SearchAnimeThemeFilterInput {
+    pub fn to_typesense_filter(&self) -> Option<String> {
+        let mut filters = Vec::new();
+
+        if let Some(song_title_romaji_prefix) = &self.song_title_romaji_prefix {
+            filters.push(format!("song_title:={}*", song_title_romaji_prefix));
+        }
+
+        if let Some(r#type) = &self.r#type {
+            filters.push(format!("type:{}", r#type.to_value()));
+        }
+
+        (!filters.is_empty()).then(|| filters.join(" && "))
+    }
 }
 
 /// Returns a listing of resources that match a given search term.
@@ -76,7 +153,7 @@ impl Search {
     async fn anime(
         &self,
         ctx: &Context<'_>,
-        _filter: Option<SearchAnimeFilterInput>,
+        filter: Option<SearchAnimeFilterInput>,
         sort: Option<Vec<SearchAnimeSort>>,
     ) -> Result<OffsetPagination<Anime>> {
         let db = ctx.data::<DatabaseConnection>()?;
@@ -98,6 +175,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            filter.as_ref().and_then(|f| f.to_typesense_filter()),
             sort_by,
         )
         .await?;
@@ -109,7 +187,7 @@ impl Search {
     async fn artists(
         &self,
         ctx: &Context<'_>,
-        _filter: Option<SearchArtistFilterInput>,
+        filter: Option<SearchArtistFilterInput>,
         sort: Option<Vec<SearchArtistSort>>,
     ) -> Result<OffsetPagination<Artist>> {
         let db = ctx.data::<DatabaseConnection>()?;
@@ -131,6 +209,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            filter.as_ref().and_then(|f| f.to_typesense_filter()),
             sort_by,
         )
         .await?;
@@ -142,7 +221,7 @@ impl Search {
     async fn animethemes(
         &self,
         ctx: &Context<'_>,
-        _filter: Option<SearchAnimeThemeFilterInput>,
+        filter: Option<SearchAnimeThemeFilterInput>,
         sort: Option<Vec<SearchAnimeThemeSort>>,
     ) -> Result<OffsetPagination<AnimeTheme>> {
         let db = ctx.data::<DatabaseConnection>()?;
@@ -164,6 +243,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            filter.as_ref().and_then(|f| f.to_typesense_filter()),
             sort_by,
         )
         .await?;
@@ -196,6 +276,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            None,
             sort_by,
         )
         .await?;
@@ -207,7 +288,7 @@ impl Search {
     async fn series(
         &self,
         ctx: &Context<'_>,
-        _filter: Option<SearchSeriesFilterInput>,
+        filter: Option<SearchSeriesFilterInput>,
         sort: Option<Vec<SearchSeriesSort>>,
     ) -> Result<OffsetPagination<Series>> {
         let db = ctx.data::<DatabaseConnection>()?;
@@ -229,6 +310,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            filter.as_ref().and_then(|f| f.to_typesense_filter()),
             sort_by,
         )
         .await?;
@@ -249,6 +331,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            None,
             vec![],
         )
         .await?;
@@ -260,7 +343,7 @@ impl Search {
     async fn studios(
         &self,
         ctx: &Context<'_>,
-        _filter: Option<SearchStudioFilterInput>,
+        filter: Option<SearchStudioFilterInput>,
         sort: Option<Vec<SearchStudioSort>>,
     ) -> Result<OffsetPagination<Studio>> {
         let db = ctx.data::<DatabaseConnection>()?;
@@ -282,6 +365,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            filter.as_ref().and_then(|f| f.to_typesense_filter()),
             sort_by,
         )
         .await?;
@@ -302,6 +386,7 @@ impl Search {
             self.term.clone(),
             self.first,
             self.page,
+            None,
             vec![],
         )
         .await?;

@@ -35,6 +35,7 @@ pub async fn search_anime(
     term: String,
     first: i32,
     page: i32,
+    filter_by: Option<String>,
     sort_by: Vec<String>,
 ) -> Result<OffsetPagination<anime::Model>> {
     search::<anime::Entity, AnimeDocument>(
@@ -45,6 +46,7 @@ pub async fn search_anime(
         term,
         first as u64,
         page as u64,
+        filter_by,
         sort_by,
         anime_document::QUERY_BY,
         anime_document::QUERY_BY_WEIGHTS,
@@ -59,6 +61,7 @@ pub async fn search_artists(
     term: String,
     first: i32,
     page: i32,
+    filter_by: Option<String>,
     sort_by: Vec<String>,
 ) -> Result<OffsetPagination<artist::Model>> {
     search::<artist::Entity, ArtistDocument>(
@@ -69,6 +72,7 @@ pub async fn search_artists(
         term,
         first as u64,
         page as u64,
+        filter_by,
         sort_by,
         artist_document::QUERY_BY,
         artist_document::QUERY_BY_WEIGHTS,
@@ -83,6 +87,7 @@ pub async fn search_animethemes(
     term: String,
     first: i32,
     page: i32,
+    filter_by: Option<String>,
     sort_by: Vec<String>,
 ) -> Result<OffsetPagination<animetheme::Model>> {
     search::<animetheme::Entity, AnimeThemeDocument>(
@@ -93,6 +98,7 @@ pub async fn search_animethemes(
         term,
         first as u64,
         page as u64,
+        filter_by,
         sort_by,
         animetheme_document::QUERY_BY,
         animetheme_document::QUERY_BY_WEIGHTS,
@@ -107,6 +113,7 @@ pub async fn search_playlists(
     term: String,
     first: i32,
     page: i32,
+    filter_by: Option<String>,
     sort_by: Vec<String>,
 ) -> Result<OffsetPagination<playlist::Model>> {
     search::<playlist::Entity, PlaylistDocument>(
@@ -117,6 +124,7 @@ pub async fn search_playlists(
         term,
         first as u64,
         page as u64,
+        filter_by,
         sort_by,
         playlist_document::QUERY_BY,
         playlist_document::QUERY_BY_WEIGHTS,
@@ -131,6 +139,7 @@ pub async fn search_series(
     term: String,
     first: i32,
     page: i32,
+    filter_by: Option<String>,
     sort_by: Vec<String>,
 ) -> Result<OffsetPagination<series::Model>> {
     search::<series::Entity, SeriesDocument>(
@@ -141,6 +150,7 @@ pub async fn search_series(
         term,
         first as u64,
         page as u64,
+        filter_by,
         sort_by,
         series_document::QUERY_BY,
         series_document::QUERY_BY_WEIGHTS,
@@ -155,6 +165,7 @@ pub async fn search_songs(
     term: String,
     first: i32,
     page: i32,
+    filter_by: Option<String>,
     sort_by: Vec<String>,
 ) -> Result<OffsetPagination<song::Model>> {
     search::<song::Entity, SongDocument>(
@@ -165,6 +176,7 @@ pub async fn search_songs(
         term,
         first as u64,
         page as u64,
+        filter_by,
         sort_by,
         song_document::QUERY_BY,
         song_document::QUERY_BY_WEIGHTS,
@@ -179,6 +191,7 @@ pub async fn search_studios(
     term: String,
     first: i32,
     page: i32,
+    filter_by: Option<String>,
     sort_by: Vec<String>,
 ) -> Result<OffsetPagination<studio::Model>> {
     search::<studio::Entity, StudioDocument>(
@@ -189,6 +202,7 @@ pub async fn search_studios(
         term,
         first as u64,
         page as u64,
+        filter_by,
         sort_by,
         studio_document::QUERY_BY,
         studio_document::QUERY_BY_WEIGHTS,
@@ -203,6 +217,7 @@ pub async fn search_videos(
     term: String,
     first: i32,
     page: i32,
+    filter_by: Option<String>,
     sort_by: Vec<String>,
 ) -> Result<OffsetPagination<video::Model>> {
     search::<video::Entity, VideoDocument>(
@@ -213,6 +228,7 @@ pub async fn search_videos(
         term,
         first as u64,
         page as u64,
+        filter_by,
         sort_by,
         video_document::QUERY_BY,
         video_document::QUERY_BY_WEIGHTS,
@@ -241,6 +257,7 @@ async fn search<E, D>(
     term: String,
     first: u64,
     page: u64,
+    filter_by: Option<String>,
     sort_by: Vec<String>,
     query_by: &str,
     query_by_weights: &str,
@@ -257,6 +274,7 @@ where
         .search(
             SearchParameters::builder()
                 .q(term)
+                .filter_by(filter_by.unwrap_or("".to_string()))
                 .sort_by(sort_by.join(","))
                 .query_by(query_by)
                 .query_by_weights(query_by_weights)
