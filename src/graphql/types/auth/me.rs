@@ -6,6 +6,7 @@ use crate::{
     graphql::{
         enums::sort::list::playlist_sort::PlaylistSort,
         loaders::auth::user::{
+            user_likes::UserLikesLoader,
             user_permissions::UserPermissionsLoader,
             user_playlists::{UserPlaylistsLoader, UserPlaylistsLoaderKey},
             user_roles::UserRolesLoader,
@@ -14,7 +15,7 @@ use crate::{
         types::{
             auth::{permission::Permission, role::Role},
             list::playlist::Playlist,
-            user::watchhistory::WatchHistory,
+            user::{like::Like, watchhistory::WatchHistory},
         },
     },
 };
@@ -89,5 +90,13 @@ impl Me {
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
         Ok(models.into_iter().map(WatchHistory::from).collect())
+    }
+
+    async fn likes(&self, ctx: &Context<'_>) -> Result<Vec<Like>> {
+        let loader = ctx.data::<DataLoader<UserLikesLoader>>()?;
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(Like::from).collect())
     }
 }
