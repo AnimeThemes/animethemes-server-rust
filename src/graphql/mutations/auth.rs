@@ -1,7 +1,14 @@
-use crate::entities::auth::user;
+use crate::{
+    actions::auth::{
+        register::{CreateUserParameters, Register},
+        update_user_information::{UpdateUserInformation, UpdateUserInformationParameters},
+        update_user_password::{UpdateUserPassword, UpdateUserPasswordParameters},
+    },
+    entities::auth::user,
+};
 use async_graphql::{Context, Error, InputObject, Object, Result};
-use bcrypt::{hash, verify};
-use sea_orm::{ActiveModelTrait, ActiveValue::Set, DatabaseConnection, SelectExt};
+use bcrypt::verify;
+use sea_orm::DatabaseConnection;
 use tower_sessions::Session;
 
 use crate::{
@@ -17,7 +24,7 @@ pub struct RegisterInput {
     #[graphql(validator(min_length = 8), secret)]
     password: String,
     #[graphql(validator(min_length = 8), secret)]
-    password_confirm: String,
+    password_confirmation: String,
     terms: bool,
 }
 
@@ -27,7 +34,7 @@ impl RegisterInput {
             return Err(Error::new("You must accept the Terms to proceed."));
         }
 
-        if self.password != self.password_confirm {
+        if self.password != self.password_confirmation {
             return Err(Error::new("The password confirmation does not match."));
         }
 
@@ -58,12 +65,12 @@ pub struct UpdatePasswordInput {
     #[graphql(validator(min_length = 8), secret)]
     new_password: String,
     #[graphql(validator(min_length = 8), secret)]
-    new_password_confirm: String,
+    new_password_confirmation: String,
 }
 
 impl UpdatePasswordInput {
     pub fn validate(&self) -> Result<()> {
-        if self.new_password != self.new_password_confirm {
+        if self.new_password != self.new_password_confirmation {
             return Err(Error::new("The password confirmation does not match."));
         }
 
@@ -81,28 +88,21 @@ impl AuthMutation {
 
         let db = ctx.data::<DatabaseConnection>()?;
 
-        let exists = user::Entity::find_by_email(input.email.clone())
-            .exists(db)
-            .await?;
-
-        if exists {
-            return Err(Error::new("User already exists with this email."));
-        }
+        let user = Register::register(
+            db,
+            CreateUserParameters {
+                name: input.name,
+                email: input.email,
+                password: input.password,
+            },
+        )
+        .await?;
 
         let session = ctx.data::<Session>()?;
 
-        let user_active = user::ActiveModel {
-            name: Set(input.name),
-            email: Set(input.email),
-            password: Set(hash(&input.password, 12)?),
-            ..Default::default()
-        };
-
-        let user: &user::Model = &user_active.insert(db).await?;
-
         session.insert("user_id", user.id).await?;
 
-        Ok(user.into())
+        Ok(Me::from(&user))
     }
 
     pub async fn login(&self, ctx: &Context<'_>, input: LoginInput) -> Result<Me> {
@@ -136,22 +136,19 @@ impl AuthMutation {
             .user
             .clone();
 
-        let mut user: user::ActiveModel = user.into();
-
-        if let Some(name) = input.name {
-            user.name = Set(name);
-        }
-
-        if let Some(email) = input.email {
-            user.email = Set(email);
-            user.email_verified_at = Set(None);
-        }
-
         let db = ctx.data::<DatabaseConnection>()?;
 
-        user.update(db).await?;
+        let result = UpdateUserInformation::update(
+            db,
+            user,
+            UpdateUserInformationParameters {
+                name: input.name,
+                email: input.email,
+            },
+        )
+        .await?;
 
-        Ok(true)
+        Ok(result)
     }
 
     pub async fn update_password(
@@ -167,19 +164,17 @@ impl AuthMutation {
             .user
             .clone();
 
-        if !verify(&input.current_password, &user.password)? {
-            return Err(Error::new("Invalid current password"));
-        }
-
-        let password_hash = hash(&input.new_password, 12)?;
-
-        let mut user: user::ActiveModel = user.clone().into();
-
-        user.password = Set(password_hash);
-
         let db = ctx.data::<DatabaseConnection>()?;
 
-        user.update(db).await?;
+        UpdateUserPassword::update(
+            db,
+            user,
+            UpdateUserPasswordParameters {
+                current_password: input.current_password,
+                new_password: input.new_password,
+            },
+        )
+        .await?;
 
         Ok(true)
     }

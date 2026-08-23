@@ -1,11 +1,15 @@
-use crate::entities::list::{playlist, track};
+use crate::{
+    actions::entities::list::track::{
+        delete_track::DeleteTrackAction,
+        insert_track::{InsertTrackAction, InsertTrackActionParameters},
+        update_track::{UpdateTrackAction, UpdateTrackActionParameters},
+    },
+    entities::list::{playlist, track},
+};
 use async_graphql::{Context, Error, InputObject, Object, Result};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::{
-    actions::entities::list::track::{
-        InsertTrackActionParameters, PlaylistTrackAction, UpdateTrackActionParameters,
-    },
     graphql::types::list::track::PlaylistTrack,
     middlewares::current_user::CurrentUser,
     policies::{AppError, Policy, PolicyAction, list::track::PlaylistTrackPolicy},
@@ -53,7 +57,7 @@ impl PlaylistTrackMutation {
         PlaylistTrackPolicy::check(Some(user), PolicyAction::Create, Some(&playlist))
             .authorize()?;
 
-        let track = PlaylistTrackAction::insert(
+        let track = InsertTrackAction::insert(
             db,
             playlist,
             InsertTrackActionParameters {
@@ -95,7 +99,7 @@ impl PlaylistTrackMutation {
             .await?
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
-        let track = PlaylistTrackAction::update(
+        let track = UpdateTrackAction::update(
             &db,
             track,
             UpdateTrackActionParameters {
@@ -136,7 +140,7 @@ impl PlaylistTrackMutation {
             .await?
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
-        PlaylistTrackAction::remove(&db, track).await?;
+        DeleteTrackAction::delete(&db, track).await?;
 
         Ok(true)
     }

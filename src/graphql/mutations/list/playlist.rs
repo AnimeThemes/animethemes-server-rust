@@ -1,10 +1,14 @@
+use crate::actions::entities::list::playlist::create_playlist::{
+    CreatePlaylistAction, CreatePlaylistActionParameters,
+};
+use crate::actions::entities::list::playlist::delete_playlist::DeletePlaylistAction;
+use crate::actions::entities::list::playlist::update_playlist::{
+    UpdatePlaylistAction, UpdatePlaylistActionParameters,
+};
 use crate::entities::list::playlist;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
 use async_graphql::{Context, Error, InputObject, Object, Result};
-use sea_orm::ActiveValue::Set;
-use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter,
-};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::graphql::types::list::playlist::Playlist;
 use crate::middlewares::current_user::CurrentUser;
@@ -47,15 +51,16 @@ impl PlaylistMutation {
 
         let db = ctx.data::<DatabaseConnection>()?;
 
-        let playlist = playlist::ActiveModel {
-            name: Set(input.name),
-            description: Set(input.description),
-            visibility: Set(input.visibility),
-            user_id: Set(user.user.clone().id),
-            ..Default::default()
-        };
-
-        let playlist = playlist.insert(db).await?;
+        let playlist = CreatePlaylistAction::create(
+            db,
+            CreatePlaylistActionParameters {
+                name: input.name,
+                description: input.description,
+                visibility: input.visibility,
+                user_id: user.user.clone().id,
+            },
+        )
+        .await?;
 
         Ok(playlist.into())
     }
@@ -80,24 +85,16 @@ impl PlaylistMutation {
 
         PlaylistPolicy::check(Some(user), PolicyAction::Update, Some(&playlist)).authorize()?;
 
-        let mut playlist = playlist::ActiveModel {
-            id: Set(playlist.id),
-            ..Default::default()
-        };
-
-        if let Some(name) = input.name {
-            playlist.name = Set(name);
-        }
-
-        if let Some(description) = input.description {
-            playlist.description = Set(Some(description));
-        }
-
-        if let Some(visibility) = input.visibility {
-            playlist.visibility = Set(visibility);
-        }
-
-        let playlist = playlist.update(db).await?;
+        let playlist = UpdatePlaylistAction::update(
+            db,
+            playlist,
+            UpdatePlaylistActionParameters {
+                name: input.name,
+                description: input.description,
+                visibility: input.visibility,
+            },
+        )
+        .await?;
 
         Ok(playlist.into())
     }
@@ -117,8 +114,8 @@ impl PlaylistMutation {
 
         PlaylistPolicy::check(Some(user), PolicyAction::Delete, Some(&playlist)).authorize()?;
 
-        let result = playlist.delete(db).await?;
+        let result = DeletePlaylistAction::delete(db, playlist).await?;
 
-        Ok(result.rows_affected > 0)
+        Ok(result)
     }
 }

@@ -1,7 +1,6 @@
-use crate::entities::user::watchhistory;
+use crate::actions::entities::user::watch::{MarkAsWatchedAction, MarkAsWatchedActionParameters};
 use async_graphql::{Context, Error, Object, Result};
-use sea_orm::ActiveValue::Set;
-use sea_orm::{ActiveModelTrait, DatabaseConnection};
+use sea_orm::DatabaseConnection;
 
 use crate::graphql::types::user::watchhistory::WatchHistory;
 use crate::middlewares::current_user::CurrentUser;
@@ -20,14 +19,15 @@ impl WatchMutation {
 
         let db = ctx.data::<DatabaseConnection>()?;
 
-        let model = watchhistory::ActiveModel {
-            entry_id: Set(entry_id),
-            video_id: Set(video_id),
-            user_id: Set(user.user.clone().id),
-            ..Default::default()
-        };
-
-        let model = model.insert(db).await?;
+        let model = MarkAsWatchedAction::create(
+            db,
+            MarkAsWatchedActionParameters {
+                entry_id,
+                video_id,
+                user_id: user.user.clone().id,
+            },
+        )
+        .await?;
 
         Ok(model.into())
     }
