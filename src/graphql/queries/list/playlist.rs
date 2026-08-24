@@ -5,6 +5,7 @@ use async_graphql::{
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
 use crate::{
+    AppError,
     entities::list::playlist,
     graphql::{
         cursor::{CursorSort, PaginationCursor, cursor_paginate},
@@ -13,7 +14,7 @@ use crate::{
         types::list::playlist::Playlist,
     },
     middlewares::current_user::CurrentUser,
-    policies::{AppError, Policy, PolicyAction, list::playlist::PlaylistPolicy},
+    policies::{Policy, PolicyAction, list::playlist::PlaylistPolicy},
     scopes::list::playlist::public_playlists,
 };
 

@@ -1,5 +1,6 @@
 pub mod cursor;
 pub mod enums;
+pub mod errors;
 pub mod inputs;
 pub mod loaders;
 pub mod mutation;

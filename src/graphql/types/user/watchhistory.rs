@@ -1,15 +1,11 @@
-use crate::entities::user::watchhistory;
+use crate::{AppError, entities::user::watchhistory};
 use async_graphql::{Context, Error, Object, Result, dataloader::DataLoader};
 
-use crate::{
-    graphql::{
-        loaders::user::watchhistory::{
-            watchhistory_entry::WatchHistoryEntryLoader,
-            watchhistory_video::WatchHistoryVideoLoader,
-        },
-        types::content::{animethemeentry::AnimeThemeEntry, video::Video},
+use crate::graphql::{
+    loaders::user::watchhistory::{
+        watchhistory_entry::WatchHistoryEntryLoader, watchhistory_video::WatchHistoryVideoLoader,
     },
-    policies::AppError,
+    types::content::{animethemeentry::AnimeThemeEntry, video::Video},
 };
 
 /// Represents the watch history of the authenticated user.

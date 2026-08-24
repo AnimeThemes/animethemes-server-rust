@@ -1,6 +1,7 @@
 use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject, dataloader::DataLoader};
 
 use crate::{
+    AppError,
     entities::list::track,
     graphql::{
         loaders::list::playlist::{
@@ -12,7 +13,6 @@ use crate::{
             list::playlist::Playlist,
         },
     },
-    policies::AppError,
 };
 
 /// Represents an entry in a playlist.

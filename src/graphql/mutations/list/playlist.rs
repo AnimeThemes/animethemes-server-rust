@@ -1,3 +1,4 @@
+use crate::AppError;
 use crate::actions::entities::list::playlist::create_playlist::{
     CreatePlaylistAction, CreatePlaylistActionParameters,
 };
@@ -13,7 +14,7 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use crate::graphql::types::list::playlist::Playlist;
 use crate::middlewares::current_user::CurrentUser;
 use crate::policies::list::playlist::PlaylistPolicy;
-use crate::policies::{AppError, Policy, PolicyAction};
+use crate::policies::{Policy, PolicyAction};
 
 #[derive(InputObject)]
 struct CreatePlaylistInput {

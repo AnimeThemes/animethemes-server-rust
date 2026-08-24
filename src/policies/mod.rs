@@ -1,4 +1,7 @@
-use crate::entities::auth::role::{self, Roles};
+use crate::{
+    AppError,
+    entities::auth::role::{self, Roles},
+};
 use sea_orm::EntityTrait;
 
 use crate::middlewares::current_user::CurrentUser;
@@ -84,18 +87,6 @@ impl PolicyResponse {
             }
         }
     }
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum AppError {
-    #[error("Unauthenticated")]
-    Unauthenticated,
-    #[error("Forbidden")]
-    Forbidden,
-    #[error("Not Found")]
-    NotFound,
-    #[error("{0}")]
-    ForbiddenWithMessage(String),
 }
 
 pub fn has_any_role(user_roles: &[role::Model], roles: &[Roles]) -> bool {

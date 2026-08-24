@@ -1,4 +1,7 @@
-use crate::enums::{LocalizedEnum, list::playlistvisibility::PlaylistVisibility};
+use crate::{
+    AppError,
+    enums::{LocalizedEnum, list::playlistvisibility::PlaylistVisibility},
+};
 use async_graphql::{
     ComplexObject, Context, Error, InputObject, Result, SimpleObject, dataloader::DataLoader,
 };
@@ -14,7 +17,6 @@ use crate::{
         },
         types::{auth::user::User, list::track::PlaylistTrack},
     },
-    policies::AppError,
 };
 
 #[derive(InputObject, Clone, Debug, PartialEq, Eq, Hash)]

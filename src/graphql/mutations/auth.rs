@@ -1,4 +1,5 @@
 use crate::{
+    AppError,
     actions::auth::{
         register::{CreateUserParameters, Register},
         update_user_information::{UpdateUserInformation, UpdateUserInformationParameters},
@@ -6,40 +7,23 @@ use crate::{
     },
     entities::auth::user,
 };
-use async_graphql::{Context, Error, InputObject, Object, Result};
+use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
 use bcrypt::verify;
 use sea_orm::DatabaseConnection;
 use tower_sessions::Session;
 
-use crate::{
-    graphql::types::auth::me::Me, middlewares::current_user::CurrentUser, policies::AppError,
-};
+use crate::{graphql::types::auth::me::Me, middlewares::current_user::CurrentUser};
 
 #[derive(InputObject)]
 pub struct RegisterInput {
-    #[graphql(validator(min_length = 1, max_length = 35))]
     name: String,
-    #[graphql(validator(email, max_length = 255))]
+    #[graphql(validator(email))]
     email: String,
-    #[graphql(validator(min_length = 8), secret)]
+    #[graphql(secret)]
     password: String,
-    #[graphql(validator(min_length = 8), secret)]
+    #[graphql(secret)]
     password_confirmation: String,
     terms: bool,
-}
-
-impl RegisterInput {
-    pub fn validate(&self) -> Result<()> {
-        if !self.terms {
-            return Err(Error::new("You must accept the Terms to proceed."));
-        }
-
-        if self.password != self.password_confirmation {
-            return Err(Error::new("The password confirmation does not match."));
-        }
-
-        Ok(())
-    }
 }
 
 #[derive(InputObject)]
@@ -52,9 +36,8 @@ pub struct LoginInput {
 
 #[derive(InputObject)]
 pub struct UpdateUserInformationInput {
-    #[graphql(validator(min_length = 1, max_length = 35))]
     name: Option<String>,
-    #[graphql(validator(email, max_length = 255))]
+    #[graphql(validator(email))]
     email: Option<String>,
 }
 
@@ -62,20 +45,10 @@ pub struct UpdateUserInformationInput {
 pub struct UpdatePasswordInput {
     #[graphql(secret)]
     current_password: String,
-    #[graphql(validator(min_length = 8), secret)]
+    #[graphql(secret)]
     new_password: String,
-    #[graphql(validator(min_length = 8), secret)]
+    #[graphql(secret)]
     new_password_confirmation: String,
-}
-
-impl UpdatePasswordInput {
-    pub fn validate(&self) -> Result<()> {
-        if self.new_password != self.new_password_confirmation {
-            return Err(Error::new("The password confirmation does not match."));
-        }
-
-        Ok(())
-    }
 }
 
 #[derive(Default)]
@@ -84,8 +57,6 @@ pub struct AuthMutation;
 #[Object]
 impl AuthMutation {
     pub async fn register(&self, ctx: &Context<'_>, input: RegisterInput) -> Result<Me> {
-        input.validate()?;
-
         let db = ctx.data::<DatabaseConnection>()?;
 
         let user = Register::register(
@@ -94,9 +65,12 @@ impl AuthMutation {
                 name: input.name,
                 email: input.email,
                 password: input.password,
+                password_confirmation: input.password_confirmation,
+                terms: input.terms,
             },
         )
-        .await?;
+        .await
+        .extend()?;
 
         let session = ctx.data::<Session>()?;
 
@@ -114,7 +88,7 @@ impl AuthMutation {
             .ok_or_else(|| Error::new("Invalid credentials"))?
             .into();
 
-        if !verify(input.password, &user.password)? {
+        if !verify(input.password, &user.password).map_err(AppError::internal)? {
             return Err(Error::new("Invalid credentials"));
         }
 
@@ -146,7 +120,8 @@ impl AuthMutation {
                 email: input.email,
             },
         )
-        .await?;
+        .await
+        .extend()?;
 
         Ok(result)
     }
@@ -156,8 +131,6 @@ impl AuthMutation {
         ctx: &Context<'_>,
         input: UpdatePasswordInput,
     ) -> Result<bool> {
-        input.validate()?;
-
         let user = ctx
             .data::<CurrentUser>()
             .map_err(|_| Error::from(AppError::Unauthenticated))?
@@ -172,9 +145,11 @@ impl AuthMutation {
             UpdateUserPasswordParameters {
                 current_password: input.current_password,
                 new_password: input.new_password,
+                new_password_confirmation: input.new_password_confirmation,
             },
         )
-        .await?;
+        .await
+        .extend()?;
 
         Ok(true)
     }

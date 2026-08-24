@@ -1,4 +1,5 @@
 use crate::{
+    AppError,
     actions::entities::list::track::{
         delete_track::DeleteTrackAction,
         insert_track::{InsertTrackAction, InsertTrackActionParameters},
@@ -12,7 +13,7 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use crate::{
     graphql::types::list::track::PlaylistTrack,
     middlewares::current_user::CurrentUser,
-    policies::{AppError, Policy, PolicyAction, list::track::PlaylistTrackPolicy},
+    policies::{Policy, PolicyAction, list::track::PlaylistTrackPolicy},
 };
 
 #[derive(InputObject)]

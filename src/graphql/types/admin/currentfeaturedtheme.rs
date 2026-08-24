@@ -2,6 +2,7 @@ use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject, dataloa
 use chrono::{DateTime, Utc};
 
 use crate::{
+    AppError,
     entities::admin::featuredtheme,
     graphql::{
         loaders::admin::{
@@ -15,7 +16,6 @@ use crate::{
         },
         utils::format_option_datetime,
     },
-    policies::AppError,
 };
 
 /// Represents the current featured theme on the homepage of the site.

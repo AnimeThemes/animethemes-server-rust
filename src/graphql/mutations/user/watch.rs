@@ -1,10 +1,10 @@
+use crate::AppError;
 use crate::actions::entities::user::watch::{MarkAsWatchedAction, MarkAsWatchedActionParameters};
 use async_graphql::{Context, Error, Object, Result};
 use sea_orm::DatabaseConnection;
 
 use crate::graphql::types::user::watchhistory::WatchHistory;
 use crate::middlewares::current_user::CurrentUser;
-use crate::policies::AppError;
 
 #[derive(Default)]
 pub struct WatchMutation;

@@ -1,4 +1,5 @@
 use crate::{
+    AppError,
     entities::user::like,
     graphql::{
         loaders::user::like::{like_entry::LikeEntryLoader, like_user::LikeUserLoader},
@@ -7,7 +8,7 @@ use crate::{
 };
 use async_graphql::{Context, Error, Object, Result, dataloader::DataLoader};
 
-use crate::{graphql::types::content::animethemeentry::AnimeThemeEntry, policies::AppError};
+use crate::graphql::types::content::animethemeentry::AnimeThemeEntry;
 
 /// Represents a like of a user.
 pub struct Like {

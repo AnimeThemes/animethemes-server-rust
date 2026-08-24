@@ -3,8 +3,8 @@ use crate::graphql::types::user::like::Like;
 use async_graphql::{Context, Error, Object, OneofObject, Result};
 use sea_orm::DatabaseConnection;
 
+use crate::AppError;
 use crate::middlewares::current_user::CurrentUser;
-use crate::policies::AppError;
 
 #[derive(OneofObject)]
 enum LikeableType {
