@@ -12,6 +12,8 @@ use animethemes_server_rust::db;
 use animethemes_server_rust::schema;
 // use crate::session;
 
+use animethemes_server_rust::typesense::client::create_typesense_client;
+use animethemes_server_rust::typesense::client::init_typesense;
 use axum::{
     Router,
     http::{
@@ -39,6 +41,10 @@ async fn main() {
     dotenv().ok();
 
     let db = db::connect().await;
+
+    let typesense = create_typesense_client();
+
+    init_typesense(typesense.clone());
 
     let schema = schema::create_schema(db.clone());
 

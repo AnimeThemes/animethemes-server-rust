@@ -1,7 +1,15 @@
-use anyhow::Result;
+use anyhow::Context;
 use sea_orm::{ActiveModelTrait, DatabaseConnection};
 
-use crate::{entities::list::playlist, enums::list::playlistvisibility::PlaylistVisibility};
+use crate::{
+    AppError,
+    entities::list::playlist,
+    enums::list::playlistvisibility::PlaylistVisibility,
+    typesense::{
+        client::typesense,
+        documents::playlist_document::{PlaylistDocument, build_playlist_documents},
+    },
+};
 use sea_orm::ActiveValue::Set;
 
 pub struct CreatePlaylistActionParameters {
@@ -17,7 +25,7 @@ impl CreatePlaylistAction {
     pub async fn create(
         db: &DatabaseConnection,
         params: CreatePlaylistActionParameters,
-    ) -> Result<playlist::Model> {
+    ) -> Result<playlist::Model, AppError> {
         let playlist = playlist::ActiveModel {
             name: Set(params.name),
             description: Set(params.description),
@@ -28,6 +36,36 @@ impl CreatePlaylistAction {
 
         let playlist = playlist.insert(db).await?;
 
+        Self::update_search(db, &playlist).await?;
+
         Ok(playlist)
+    }
+
+    async fn update_search(
+        db: &DatabaseConnection,
+        playlist: &playlist::Model,
+    ) -> Result<(), AppError> {
+        if playlist.visibility != PlaylistVisibility::Public {
+            return Ok(());
+        }
+
+        let document = build_playlist_documents(vec![playlist.clone()], db)
+            .await
+            .map_err(AppError::internal)?
+            .into_iter()
+            .next()
+            .context("Failed")
+            .map_err(AppError::internal)?;
+
+        let typesense = typesense();
+
+        typesense
+            .collection::<PlaylistDocument>()
+            .documents()
+            .create(&document, None)
+            .await
+            .map_err(AppError::internal)?;
+
+        Ok(())
     }
 }

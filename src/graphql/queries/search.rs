@@ -12,6 +12,7 @@ use crate::{
         },
         types::{OffsetPageInfo, OffsetPagination},
     },
+    scopes::list::playlist::public_playlists,
     typesense::{
         client::TypesenseClient,
         search::{
@@ -25,7 +26,7 @@ use crate::{
     typesense::search::OffsetPageInfo as OffsetPageInfoTypesense,
 };
 use async_graphql::{Context, InputObject, Object, ObjectType, Result};
-use sea_orm::{ActiveEnum, DatabaseConnection, EntityTrait, ModelTrait};
+use sea_orm::{ActiveEnum, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter};
 
 use crate::graphql::types::{
     content::{
@@ -269,10 +270,12 @@ impl Search {
             })
             .unwrap_or_default();
 
+        let builder = playlist::Entity::find().filter(public_playlists());
+
         let result = search_playlists(
             db,
             typesense,
-            playlist::Entity::find(),
+            builder,
             self.term.clone(),
             self.first,
             self.page,

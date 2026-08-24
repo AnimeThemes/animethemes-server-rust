@@ -1,8 +1,20 @@
-use std::{env, sync::Arc, time::Duration};
+use std::{
+    env,
+    sync::{Arc, OnceLock},
+    time::Duration,
+};
 
 use typesense::{Client, ExponentialBackoff};
 
 pub type TypesenseClient = Arc<Client>;
+
+static TYPESENSE: OnceLock<TypesenseClient> = OnceLock::new();
+
+pub fn typesense() -> &'static TypesenseClient {
+    TYPESENSE
+        .get()
+        .expect("Typesense client was not initialized")
+}
 
 pub fn create_typesense_client() -> TypesenseClient {
     let host = env::var("TYPESENSE_HOST").expect("TYPESENSE_HOST is required");
@@ -24,4 +36,10 @@ pub fn create_typesense_client() -> TypesenseClient {
         .expect("Error on building Typesense client");
 
     Arc::new(client)
+}
+
+pub fn init_typesense(client: TypesenseClient) {
+    TYPESENSE
+        .set(client)
+        .expect("Typesense client was already initialized");
 }

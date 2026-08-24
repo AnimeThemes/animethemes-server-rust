@@ -22,7 +22,7 @@ pub struct CreateUserParameters {
 pub struct Register;
 
 impl Register {
-    pub async fn validate(
+    async fn validate(
         db: &DatabaseConnection,
         params: &CreateUserParameters,
     ) -> Result<(), AppError> {

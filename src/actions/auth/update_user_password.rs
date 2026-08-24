@@ -13,7 +13,7 @@ pub struct UpdateUserPasswordParameters {
 pub struct UpdateUserPassword;
 
 impl UpdateUserPassword {
-    pub async fn validate(
+    async fn validate(
         user: &user::Model,
         params: &UpdateUserPasswordParameters,
     ) -> Result<(), AppError> {

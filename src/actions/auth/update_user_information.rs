@@ -14,7 +14,7 @@ pub struct UpdateUserInformationParameters {
 pub struct UpdateUserInformation;
 
 impl UpdateUserInformation {
-    pub async fn validate(
+    async fn validate(
         db: &DatabaseConnection,
         user: &user::Model,
         params: &UpdateUserInformationParameters,
