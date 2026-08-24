@@ -10,7 +10,7 @@ use crate::{
 
 pub struct PlaylistTrackPolicy;
 
-impl Policy<playlist::Entity, playlist::Model> for PlaylistTrackPolicy {
+impl Policy<&playlist::Model> for PlaylistTrackPolicy {
     fn authorize(
         user: Option<&CurrentUser>,
         action: &PolicyAction,

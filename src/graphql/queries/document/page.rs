@@ -5,14 +5,16 @@ use async_graphql::{
 use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
 use crate::{
-    entities::document::page,
+    entities::{auth::role, document::page},
     graphql::{
         cursor::{CursorSort, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, document::page_sort::PageSort},
         inputs::pagination_input::PaginationInput,
         types::document::page::Page,
     },
-    scopes::without_trashed,
+    middlewares::current_user::CurrentUser,
+    policies::{Policy, PolicyAction, document::page::PagePolicy},
+    scopes::{document::page::public_pages, without_trashed},
 };
 
 #[derive(InputObject, Default)]
@@ -28,13 +30,25 @@ impl PageQuery {
     async fn page(&self, ctx: &Context<'_>, slug: String) -> Result<Option<Page>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
-        let page = page::Entity::find()
+        let user = ctx.data::<CurrentUser>().ok();
+
+        let pages = page::Entity::find()
+            .find_with_related(role::Entity)
             .filter(without_trashed::<page::Entity>())
             .filter(page::Column::Slug.eq(slug))
-            .one(db)
+            .all(db)
             .await?;
 
-        Ok(page.map(Into::into))
+        if let Some((page, page_roles)) = pages.into_iter().next() {
+            if !PagePolicy::check(user, PolicyAction::View, Some((&page, &page_roles))).is_allowed()
+            {
+                return Ok(None);
+            }
+
+            return Ok(Some(page.into()));
+        }
+
+        Ok(None)
     }
 
     async fn page_connection(
@@ -43,7 +57,12 @@ impl PageQuery {
         pagination: Option<PaginationInput>,
         filter: Option<PageFilterInput>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Page, EmptyFields, EmptyFields>> {
-        let mut query = page::Entity::find().filter(without_trashed::<page::Entity>());
+        let user = ctx.data::<CurrentUser>().ok();
+        let user_roles = user.as_ref().map(|u| u.roles.clone()).unwrap_or_default();
+
+        let mut query = page::Entity::find()
+            .filter(without_trashed::<page::Entity>())
+            .filter(public_pages(&user_roles));
 
         let filter = filter.unwrap_or_default();
 
@@ -65,7 +84,12 @@ impl PageQuery {
         pagination: Option<PaginationInput>,
         sort: Option<Vec<PageSort>>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Page, EmptyFields, EmptyFields>> {
-        let mut query = page::Entity::find().filter(without_trashed::<page::Entity>());
+        let user = ctx.data::<CurrentUser>().ok();
+        let user_roles = user.as_ref().map(|u| u.roles.clone()).unwrap_or_default();
+
+        let mut query = page::Entity::find()
+            .filter(without_trashed::<page::Entity>())
+            .filter(public_pages(&user_roles));
 
         query = query.filter(
             Condition::any()

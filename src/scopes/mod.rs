@@ -3,6 +3,7 @@ use sea_orm::{ColumnTrait, Condition, sea_query::IntoCondition};
 use crate::entities::SoftDeleteEntity;
 
 pub mod admin;
+pub mod document;
 pub mod list;
 
 pub fn without_trashed<E: SoftDeleteEntity>() -> Condition {

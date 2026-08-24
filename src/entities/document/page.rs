@@ -1,8 +1,9 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::SoftDeleteEntity;
+use crate::entities::{SoftDeleteEntity, auth::role};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
 #[sea_orm(table_name = "pages")]
 pub struct Model {
@@ -19,6 +20,9 @@ pub struct Model {
     pub updated_at: chrono::DateTime<Utc>,
     #[sea_orm(column_type = "Timestamp")]
     pub deleted_at: Option<chrono::DateTime<Utc>>,
+
+    #[sea_orm(has_many, via = "page_roles")]
+    pub roles: HasMany<role::Entity>,
 }
 
 impl SoftDeleteEntity for Entity {
@@ -26,8 +30,5 @@ impl SoftDeleteEntity for Entity {
         Column::DeletedAt
     }
 }
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}

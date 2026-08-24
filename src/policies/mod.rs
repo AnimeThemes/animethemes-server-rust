@@ -2,10 +2,10 @@ use crate::{
     AppError,
     entities::auth::role::{self, Roles},
 };
-use sea_orm::EntityTrait;
 
 use crate::middlewares::current_user::CurrentUser;
 
+pub mod document;
 pub mod list;
 
 #[derive(Debug, Clone, Copy)]
@@ -17,10 +17,7 @@ pub enum PolicyAction {
     Delete,
 }
 
-pub trait Policy<E, Model>
-where
-    E: EntityTrait,
-{
+pub trait Policy<T: Copy> {
     fn before(user: Option<&CurrentUser>, _action: &PolicyAction) -> Option<PolicyResponse> {
         if let Some(user) = user
             && has_any_role(&user.roles, &vec![Roles::SuperAdmin])
@@ -34,23 +31,19 @@ where
     fn authorize(
         user: Option<&CurrentUser>,
         action: &PolicyAction,
-        model: Option<&Model>,
+        model: Option<T>,
     ) -> PolicyResponse;
 
     fn after(
         _user: Option<&CurrentUser>,
         _action: &PolicyAction,
-        _model: Option<&Model>,
+        _model: Option<T>,
         _result: &PolicyResponse,
     ) -> Option<PolicyResponse> {
         None
     }
 
-    fn check(
-        user: Option<&CurrentUser>,
-        action: PolicyAction,
-        model: Option<&Model>,
-    ) -> PolicyResponse {
+    fn check(user: Option<&CurrentUser>, action: PolicyAction, model: Option<T>) -> PolicyResponse {
         if let Some(response) = Self::before(user, &action) {
             return response;
         }
@@ -73,7 +66,7 @@ pub enum PolicyResponse {
 }
 
 impl PolicyResponse {
-    pub fn _is_allowed(&self) -> bool {
+    pub fn is_allowed(&self) -> bool {
         matches!(self, Self::Allow)
     }
 
