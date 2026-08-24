@@ -51,6 +51,18 @@ pub struct UpdatePasswordInput {
     new_password_confirmation: String,
 }
 
+#[derive(InputObject)]
+pub struct ResetPasswordInput {
+    #[graphql(validator(email))]
+    email: String,
+    #[graphql(secret)]
+    password: String,
+    #[graphql(secret)]
+    password_confirmation: String,
+    #[graphql(secret)]
+    token: String,
+}
+
 #[derive(Default)]
 pub struct AuthMutation;
 
@@ -152,6 +164,22 @@ impl AuthMutation {
         .extend()?;
 
         Ok(true)
+    }
+
+    pub async fn forgot_password(&self, _ctx: &Context<'_>, _email: String) -> Result<bool> {
+        todo!()
+    }
+
+    pub async fn reset_password(
+        &self,
+        _ctx: &Context<'_>,
+        _input: ResetPasswordInput,
+    ) -> Result<bool> {
+        todo!()
+    }
+
+    pub async fn resend_email_verification(&self, _ctx: &Context<'_>) -> Result<bool> {
+        todo!()
     }
 
     pub async fn logout(&self, ctx: &Context<'_>) -> Result<bool> {
