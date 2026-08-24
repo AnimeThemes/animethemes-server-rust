@@ -57,10 +57,7 @@ impl UpdateUserPassword {
         }
 
         if params.new_password != params.new_password_confirmation {
-            errors.push(ValidationError::new(
-                "password_confirmation",
-                vec!["The password confirmation does not match."],
-            ));
+            password_errors.push("The password confirmation does not match.");
         }
 
         if !password_errors.is_empty() {

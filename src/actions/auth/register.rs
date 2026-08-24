@@ -71,15 +71,12 @@ impl Register {
             password_errors.push("The password must contain at least one symbol.");
         }
 
-        if !password_errors.is_empty() {
-            errors.push(ValidationError::new("password", password_errors));
+        if params.password != params.password_confirmation {
+            password_errors.push("The password confirmation does not match.");
         }
 
-        if params.password != params.password_confirmation {
-            errors.push(ValidationError::new(
-                "password_confirmation",
-                vec!["The password confirmation does not match."],
-            ));
+        if !password_errors.is_empty() {
+            errors.push(ValidationError::new("password", password_errors));
         }
 
         let exists = user::Entity::find()

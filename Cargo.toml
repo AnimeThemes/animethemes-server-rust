@@ -17,6 +17,7 @@ async-graphql-axum = "7.2.1"
 axum = "0.8"
 bcrypt = "0.19.3"
 chrono = "0.4.45"
+convert_case = "0.11.0"
 dotenvy = "0.15"
 hash-ids = "0.3.1"
 sea-orm = { version = "2.0.0", features = ["sqlx-mysql", "runtime-tokio-rustls", "serde"] }

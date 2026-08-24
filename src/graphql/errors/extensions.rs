@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use async_graphql::{Error, ErrorExtensions};
 
-use crate::AppError;
+use crate::{AppError, rules::validation_error::ValidationError};
 
 impl ErrorExtensions for AppError {
     fn extend(&self) -> Error {
@@ -13,7 +13,7 @@ impl ErrorExtensions for AppError {
 
                     let mut validation: BTreeMap<String, Vec<String>> = BTreeMap::new();
 
-                    for error in errors {
+                    for error in errors.into_iter().map(ValidationError::to_camel_case) {
                         validation
                             .entry(error.field.clone())
                             .or_default()
