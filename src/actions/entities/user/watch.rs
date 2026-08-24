@@ -1,7 +1,7 @@
 use crate::entities::user::watchhistory;
 use anyhow::Result;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{ActiveModelTrait, DatabaseConnection};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 pub struct MarkAsWatchedActionParameters {
     pub entry_id: u64,
@@ -26,5 +26,14 @@ impl MarkAsWatchedAction {
         let model = model.insert(db).await?;
 
         Ok(model)
+    }
+
+    pub async fn delete_all(db: &DatabaseConnection, user_id: u64) -> Result<()> {
+        watchhistory::Entity::delete_many()
+            .filter(watchhistory::Column::UserId.eq(user_id))
+            .exec(db)
+            .await?;
+
+        Ok(())
     }
 }

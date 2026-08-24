@@ -11,7 +11,7 @@ pub struct WatchMutation;
 
 #[Object]
 impl WatchMutation {
-    /// Mark a video as watched.
+    /// Mark a video as watched for the authenticated user.
     async fn watch(&self, ctx: &Context<'_>, entry_id: u64, video_id: u64) -> Result<WatchHistory> {
         let user = ctx
             .data::<CurrentUser>()
@@ -30,5 +30,18 @@ impl WatchMutation {
         .await?;
 
         Ok(model.into())
+    }
+
+    /// Clear the watch history for the authenticated user.
+    async fn clear_watch_history(&self, ctx: &Context<'_>) -> Result<bool> {
+        let user = ctx
+            .data::<CurrentUser>()
+            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let db = ctx.data::<DatabaseConnection>()?;
+
+        MarkAsWatchedAction::delete_all(db, user.user.clone().id).await?;
+
+        Ok(true)
     }
 }
