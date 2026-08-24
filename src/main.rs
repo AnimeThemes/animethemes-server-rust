@@ -1,16 +1,6 @@
 use animethemes_server_rust::db;
-// use crate::entities;
-// use crate::enums;
-// use crate::scopes;
-// use crate::traits;
-// use crate::typesense;
-// use crate::actions;
-// use crate::environment;
-// use crate::graphql;
-// use crate::middlewares;
-// use crate::policies;
+use animethemes_server_rust::middlewares::features::features_middleware;
 use animethemes_server_rust::schema;
-// use crate::session;
 
 use animethemes_server_rust::typesense::client::create_typesense_client;
 use animethemes_server_rust::typesense::client::init_typesense;
@@ -78,6 +68,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(graphiql))
         .route("/graphql", post(graphql_handler))
+        .layer(from_fn_with_state(state.clone(), features_middleware))
         .layer(from_fn_with_state(state.clone(), current_user_middleware))
         .layer(session_layer)
         .layer(cors)

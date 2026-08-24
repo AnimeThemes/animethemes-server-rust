@@ -6,8 +6,10 @@ use crate::{
         update_track::{UpdateTrackAction, UpdateTrackActionParameters},
     },
     entities::list::{playlist, track},
+    enums::features::Feature,
+    features::functions::FeatureManager,
 };
-use async_graphql::{Context, Error, InputObject, Object, Result};
+use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::{
@@ -47,6 +49,13 @@ impl PlaylistTrackMutation {
             .data::<CurrentUser>()
             .map_err(|_| Error::from(AppError::Unauthenticated))?;
 
+        let feature_manager = ctx.data::<FeatureManager>()?;
+
+        feature_manager
+            .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
+            .await
+            .extend()?;
+
         let db = ctx.data::<DatabaseConnection>()?;
 
         let playlist = playlist::Entity::find()
@@ -82,6 +91,13 @@ impl PlaylistTrackMutation {
         let user = ctx
             .data::<CurrentUser>()
             .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let feature_manager = ctx.data::<FeatureManager>()?;
+
+        feature_manager
+            .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
+            .await
+            .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
 
@@ -123,6 +139,13 @@ impl PlaylistTrackMutation {
         let user = ctx
             .data::<CurrentUser>()
             .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let feature_manager = ctx.data::<FeatureManager>()?;
+
+        feature_manager
+            .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
+            .await
+            .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
 

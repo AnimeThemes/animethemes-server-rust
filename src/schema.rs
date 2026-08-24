@@ -7,6 +7,7 @@ use tower_sessions::Session;
 
 use crate::{
     AppState,
+    features::functions::FeatureManager,
     graphql::{loaders::loaders::RegisterLoaders, mutation::Mutation, query::Query},
     middlewares::current_user::CurrentUser,
     typesense::client::create_typesense_client,
@@ -28,6 +29,7 @@ pub async fn graphql_handler(
     State(state): State<AppState>,
     session: Session,
     current_user: Option<Extension<CurrentUser>>,
+    Extension(feature_manager): Extension<FeatureManager>,
     req: GraphQLBatchRequest,
 ) -> GraphQLResponse {
     let mut request = req.into_inner().data(session);
@@ -35,6 +37,8 @@ pub async fn graphql_handler(
     if let Some(Extension(current_user)) = current_user {
         request = request.data(current_user);
     }
+
+    request = request.data(feature_manager);
 
     state.schema.execute_batch(request).await.into()
 }

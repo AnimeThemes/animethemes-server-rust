@@ -7,8 +7,10 @@ use crate::actions::entities::list::playlist::update_playlist::{
     UpdatePlaylistAction, UpdatePlaylistActionParameters,
 };
 use crate::entities::list::playlist;
+use crate::enums::features::Feature;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
-use async_graphql::{Context, Error, InputObject, Object, Result};
+use crate::features::functions::FeatureManager;
+use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::graphql::types::list::playlist::Playlist;
@@ -48,6 +50,13 @@ impl PlaylistMutation {
             .data::<CurrentUser>()
             .map_err(|_| Error::from(AppError::Unauthenticated))?;
 
+        let feature_manager = ctx.data::<FeatureManager>()?;
+
+        feature_manager
+            .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
+            .await
+            .extend()?;
+
         PlaylistPolicy::check(Some(user), PolicyAction::Create, None).authorize()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
@@ -75,6 +84,13 @@ impl PlaylistMutation {
         let user = ctx
             .data::<CurrentUser>()
             .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let feature_manager = ctx.data::<FeatureManager>()?;
+
+        feature_manager
+            .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
+            .await
+            .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
 
@@ -104,6 +120,13 @@ impl PlaylistMutation {
         let user = ctx
             .data::<CurrentUser>()
             .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let feature_manager = ctx.data::<FeatureManager>()?;
+
+        feature_manager
+            .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
+            .await
+            .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
 

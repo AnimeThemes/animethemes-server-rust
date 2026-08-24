@@ -6,6 +6,8 @@ use crate::{
         update_user_password::{UpdateUserPassword, UpdateUserPasswordParameters},
     },
     entities::auth::user,
+    enums::features::Feature,
+    features::functions::FeatureManager,
 };
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
 use bcrypt::verify;
@@ -69,6 +71,13 @@ pub struct AuthMutation;
 #[Object]
 impl AuthMutation {
     pub async fn register(&self, ctx: &Context<'_>, input: RegisterInput) -> Result<Me> {
+        let feature_manager = ctx.data::<FeatureManager>()?;
+
+        feature_manager
+            .enabled(Feature::Registration, None)
+            .await
+            .extend()?;
+
         let db = ctx.data::<DatabaseConnection>()?;
 
         let user = Register::register(

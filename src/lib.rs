@@ -7,6 +7,7 @@ pub mod db;
 pub mod entities;
 pub mod enums;
 pub mod environment;
+pub mod features;
 pub mod graphql;
 pub mod middlewares;
 pub mod policies;

@@ -29,6 +29,7 @@ mod m20260813_024141_create_imageables_table;
 mod m20260813_024405_create_synonyms_table;
 mod m20260813_024620_create_roles_table;
 mod m20260813_025156_create_page_roles_table;
+mod m20260824_174646_create_feature_flags_table;
 
 pub struct Migrator;
 
@@ -65,6 +66,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260813_024405_create_synonyms_table::Migration),
             Box::new(m20260813_024620_create_roles_table::Migration),
             Box::new(m20260813_025156_create_page_roles_table::Migration),
+            Box::new(m20260824_174646_create_feature_flags_table::Migration),
         ]
     }
 }
