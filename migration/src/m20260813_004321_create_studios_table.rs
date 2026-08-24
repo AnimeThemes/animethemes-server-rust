@@ -38,6 +38,12 @@ impl MigrationTrait for Migration {
                             .default(Expr::current_timestamp()),
                     )
                     .col(ColumnDef::new("deleted_at").timestamp().null())
+                    .index(
+                        Index::create()
+                            .name("cursor_index")
+                            .col("created_at")
+                            .col("studio_id"),
+                    )
                     .to_owned(),
             )
             .await?;

@@ -60,6 +60,17 @@ impl MigrationTrait for Migration {
                     .from("playlist_tracks", "video_id")
                     .to("videos", "video_id")
                     .on_delete(ForeignKeyAction::SetNull),
+            )
+            .index(
+                Index::create()
+                    .name("playlist_tracks_position_index")
+                    .col("position"),
+            )
+            .index(
+                Index::create()
+                    .name("playlist_tracks_playlist_id_position_index")
+                    .col("playlist_id")
+                    .col("position"),
             );
 
         if manager.get_database_backend() == DbBackend::MySql {
