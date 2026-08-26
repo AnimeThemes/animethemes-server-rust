@@ -4,11 +4,10 @@ use axum::{
     middleware::Next,
     response::Response,
 };
-use sea_orm::EntityTrait;
+use loco_rs::app::AppContext;
+use sea_orm::{DatabaseConnection, EntityTrait};
 
 use tower_sessions::Session;
-
-use crate::AppState;
 
 #[derive(Clone)]
 pub struct CurrentUser {
@@ -17,12 +16,15 @@ pub struct CurrentUser {
 }
 
 pub async fn current_user_middleware(
-    State(state): State<AppState>,
+    State(ctx): State<AppContext>,
     session: Session,
     mut request: Request,
     next: Next,
 ) -> Response {
-    let db = state.db;
+    let db = ctx
+        .shared_store
+        .get::<DatabaseConnection>()
+        .expect("Database not initialized");
 
     let Some(user_id) = session.get::<u64>("user_id").await.ok().flatten() else {
         return next.run(request).await;

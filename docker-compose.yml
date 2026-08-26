@@ -1,7 +1,30 @@
 services:
+    rust:
+        build:
+            context: .
+            target: development
+        container_name: animethemes-server-rust-rust
+        working_dir: /app
+        volumes:
+            - .:/app
+            - cargo-target:/app/target
+            - cargo-registry:/usr/local/cargo/registry
+            - cargo-git:/usr/local/cargo/git
+        env_file:
+            - .env
+        depends_on:
+            mysql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            typesense:
+                condition: service_healthy
+            mailpit:
+                condition: service_started
     server:
         build:
             context: .
+            target: runtime
         container_name: animethemes-server-rust
         ports:
             - '${APP_PORT:-80}:80'
@@ -74,6 +97,9 @@ services:
             timeout: 7s
 
 volumes:
+    cargo-target:
+    cargo-registry:
+    cargo-git:
     mysql_data:
     redis-data:
     typesense-data:

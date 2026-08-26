@@ -1,12 +1,12 @@
 use async_graphql::{EmptySubscription, Schema, http::GraphiQLSource};
 
 use async_graphql_axum::{GraphQLBatchRequest, GraphQLResponse};
-use axum::{Extension, extract::State, response::Html};
+use axum::{Extension, response::Html};
+use loco_rs::prelude::SharedStore;
 use sea_orm::DatabaseConnection;
 use tower_sessions::Session;
 
 use crate::{
-    AppState,
     features::functions::FeatureManager,
     graphql::{loaders::loaders::RegisterLoaders, mutation::Mutation, query::Query},
     middlewares::current_user::CurrentUser,
@@ -26,7 +26,7 @@ pub fn create_schema(db: DatabaseConnection) -> AppSchema {
 }
 
 pub async fn graphql_handler(
-    State(state): State<AppState>,
+    SharedStore(schema): SharedStore<AppSchema>,
     session: Session,
     current_user: Option<Extension<CurrentUser>>,
     Extension(feature_manager): Extension<FeatureManager>,
@@ -40,7 +40,7 @@ pub async fn graphql_handler(
 
     request = request.data(feature_manager);
 
-    state.schema.execute_batch(request).await.into()
+    schema.execute_batch(request).await.into()
 }
 
 pub async fn graphiql() -> Html<String> {

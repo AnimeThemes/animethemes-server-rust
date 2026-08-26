@@ -5,7 +5,7 @@ use std::env;
 pub async fn connect() -> DatabaseConnection {
     dotenv().ok();
 
-    let database_url = env::var("DATABASE_URL_DOCKER").unwrap_or_else(|_| {
+    let database_url = env::var("DATABASE_URL").unwrap_or_else(|_| {
         let db_host = env::var("DB_HOST").expect("DB_HOST is required");
 
         let db_port = env::var("DB_PORT")

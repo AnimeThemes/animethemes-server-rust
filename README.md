@@ -27,7 +27,15 @@ cd animethemes-server-rust
 
 # Copy the .env.example to .env and change it for your needs.
 cp .env.example .env
+```
 
+Open the `/etc/hosts` file and paste the contents there:
+
+```
+127.0.0.1 animethemes-rust.test
+```
+
+```bash
 # Generate a new APP_KEY
 openssl rand -hex 32
 
@@ -40,15 +48,7 @@ docker compose up -d --build
 docker exec -i animethemes-server-rust-mysql mysql -u root animethemes < content.sql
 
 # Run the migrations
-cd migration
-docker exec -it animethemes-server-rust cargo run
-cd ..
-```
-
-Open the `/etc/hosts` file and paste the contents there:
-
-```
-127.0.0.1 animethemes-rust.test
+docker compose exec -w /app/migration rust cargo run -- up
 ```
 
 ### Running
@@ -67,21 +67,15 @@ TODO: Waiting feature implementation
 Import models into our indices using:
 
 ```sh
-docker compose run --rm server index_anime
-docker compose run --rm server index_animetheme
-docker compose run --rm server index_animethemeentry
-docker compose run --rm server index_artist
-docker compose run --rm server index_playlist
-docker compose run --rm server index_series
-docker compose run --rm server index_song
-docker compose run --rm server index_studio
-docker compose run --rm server index_video
-```
-
-### Binaries
-
-```bash
-docker compose run --rm server {bin_name}
+docker compose exec server animethemes-server-rust task search:index_anime
+docker compose exec server animethemes-server-rust task search:index_animetheme
+docker compose exec server animethemes-server-rust task search:index_animethemeentry
+docker compose exec server animethemes-server-rust task search:index_artist
+docker compose exec server animethemes-server-rust task search:index_playlist
+docker compose exec server animethemes-server-rust task search:index_series
+docker compose exec server animethemes-server-rust task search:index_song
+docker compose exec server animethemes-server-rust task search:index_studio
+docker compose exec server animethemes-server-rust task search:index_video
 ```
 
 ### MySQL Terminal
