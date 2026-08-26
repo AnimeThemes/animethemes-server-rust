@@ -1,3 +1,4 @@
+use animethemes_server_rust::api::verify_email::verify_email;
 use animethemes_server_rust::db;
 use animethemes_server_rust::middlewares::features::features_middleware;
 use animethemes_server_rust::schema;
@@ -17,6 +18,8 @@ use dotenvy::dotenv;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use url::Url;
 
+use tracing_subscriber::EnvFilter;
+
 use animethemes_server_rust::{
     AppState,
     middlewares::current_user::current_user_middleware,
@@ -29,6 +32,12 @@ use std::env;
 #[tokio::main]
 async fn main() {
     dotenv().ok();
+
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
+        .init();
 
     let db = db::connect().await;
 
@@ -66,6 +75,7 @@ async fn main() {
     let session_layer = create_session_layer().await;
 
     let app = Router::new()
+        .route("/api/auth/email/verify/{id}", get(verify_email))
         .route("/", get(graphiql))
         .route("/graphql", post(graphql_handler))
         .layer(from_fn_with_state(state.clone(), features_middleware))

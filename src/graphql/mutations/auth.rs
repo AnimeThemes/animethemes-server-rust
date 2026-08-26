@@ -1,9 +1,12 @@
 use crate::{
     AppError,
     actions::auth::{
+        forgot_password::ForgotPassword,
         register::{CreateUserParameters, Register},
+        reset_password::{ResetPassword, ResetPasswordParams},
         update_user_information::{UpdateUserInformation, UpdateUserInformationParameters},
         update_user_password::{UpdateUserPassword, UpdateUserPasswordParameters},
+        verify_email::VerifyEmail,
     },
     entities::auth::user,
     enums::features::Feature,
@@ -11,7 +14,7 @@ use crate::{
 };
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
 use bcrypt::verify;
-use sea_orm::DatabaseConnection;
+use sea_orm::{DatabaseConnection, EntityTrait};
 use tower_sessions::Session;
 
 use crate::{graphql::types::auth::me::Me, middlewares::current_user::CurrentUser};
@@ -175,20 +178,50 @@ impl AuthMutation {
         Ok(true)
     }
 
-    pub async fn forgot_password(&self, _ctx: &Context<'_>, _email: String) -> Result<bool> {
-        todo!()
+    pub async fn forgot_password(&self, ctx: &Context<'_>, email: String) -> Result<bool> {
+        let db = ctx.data::<DatabaseConnection>()?;
+
+        ForgotPassword::send_reset_password_email(&db, email).await?;
+
+        Ok(true)
     }
 
     pub async fn reset_password(
         &self,
-        _ctx: &Context<'_>,
-        _input: ResetPasswordInput,
+        ctx: &Context<'_>,
+        input: ResetPasswordInput,
     ) -> Result<bool> {
-        todo!()
+        let db = ctx.data::<DatabaseConnection>()?;
+
+        ResetPassword::reset_password(
+            db,
+            ResetPasswordParams {
+                email: input.email,
+                password: input.password,
+                password_confirmation: input.password_confirmation,
+                token: input.token,
+            },
+        )
+        .await?;
+
+        Ok(true)
     }
 
-    pub async fn resend_email_verification(&self, _ctx: &Context<'_>) -> Result<bool> {
-        todo!()
+    pub async fn resend_email_verification(&self, ctx: &Context<'_>) -> Result<bool> {
+        let user = ctx
+            .data::<CurrentUser>()
+            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let db = ctx.data::<DatabaseConnection>()?;
+
+        let user = user::Entity::find_by_id(user.user.id)
+            .one(db)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        VerifyEmail::send_verification_email(&user).await?;
+
+        Ok(true)
     }
 
     pub async fn logout(&self, ctx: &Context<'_>) -> Result<bool> {

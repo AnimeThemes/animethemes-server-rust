@@ -6,6 +6,7 @@ use sea_orm::{
 
 use crate::{
     AppError,
+    actions::auth::verify_email::VerifyEmail,
     entities::auth::user::{self},
     rules::validation_error::ValidationError,
 };
@@ -22,6 +23,43 @@ pub struct CreateUserParameters {
 pub struct Register;
 
 impl Register {
+    pub fn get_password_errors<'a>(
+        password: &'a String,
+        password_confirmation: &'a String,
+    ) -> Vec<&'a str> {
+        let mut errors = Vec::new();
+
+        if password.chars().count() < 8 {
+            errors.push("The password must be at least 8 characters.");
+        }
+
+        if !password.chars().any(|c| c.is_uppercase()) {
+            errors.push("The password must contain at least one uppercase letter.");
+        }
+
+        if !password.chars().any(|c| c.is_lowercase()) {
+            errors.push("The password must contain at least one lowercase letter.");
+        }
+
+        if !password.chars().any(|c| c.is_alphabetic()) {
+            errors.push("The password must contain at least one letter.");
+        }
+
+        if !password.chars().any(|c| c.is_numeric()) {
+            errors.push("The password must contain at least one number.");
+        }
+
+        if !password.chars().any(|c| c.is_ascii_punctuation()) {
+            errors.push("The password must contain at least one symbol.");
+        }
+
+        if password != password_confirmation {
+            errors.push("The password confirmation does not match.");
+        }
+
+        errors
+    }
+
     async fn validate(
         db: &DatabaseConnection,
         params: &CreateUserParameters,
@@ -30,7 +68,8 @@ impl Register {
 
         let mut name_errors = Vec::new();
         let mut email_errors = Vec::new();
-        let mut password_errors = Vec::new();
+        let password_errors =
+            Self::get_password_errors(&params.password, &params.password_confirmation);
 
         if !(1usize..=35).contains(&params.name.chars().count()) {
             name_errors.push("The name must be between 1 and 35 characters.");
@@ -45,34 +84,6 @@ impl Register {
                 "terms",
                 vec!["You must accept the terms and conditions."],
             ));
-        }
-
-        if params.password.chars().count() < 8 {
-            password_errors.push("The password must be at least 8 characters.");
-        }
-
-        if !params.password.chars().any(|c| c.is_uppercase()) {
-            password_errors.push("The password must contain at least one uppercase letter.");
-        }
-
-        if !params.password.chars().any(|c| c.is_lowercase()) {
-            password_errors.push("The password must contain at least one lowercase letter.");
-        }
-
-        if !params.password.chars().any(|c| c.is_alphabetic()) {
-            password_errors.push("The password must contain at least one letter.");
-        }
-
-        if !params.password.chars().any(|c| c.is_numeric()) {
-            password_errors.push("The password must contain at least one number.");
-        }
-
-        if !params.password.chars().any(|c| c.is_ascii_punctuation()) {
-            password_errors.push("The password must contain at least one symbol.");
-        }
-
-        if params.password != params.password_confirmation {
-            password_errors.push("The password confirmation does not match.");
         }
 
         if !password_errors.is_empty() {
@@ -122,6 +133,8 @@ impl Register {
         };
 
         let user = model.insert(db).await?;
+
+        VerifyEmail::send_verification_email(&user).await?;
 
         Ok(user)
     }

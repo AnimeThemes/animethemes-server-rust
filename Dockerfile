@@ -23,6 +23,10 @@ RUN cargo build --release --bins \
 FROM debian:trixie-slim AS runtime
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/bin/ /usr/local/bin/
 
 CMD ["animethemes-server-rust"]

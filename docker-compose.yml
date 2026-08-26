@@ -10,6 +10,7 @@ services:
         depends_on:
             - mysql
             - redis
+            - mailpit
             - typesense
     mysql:
         image: mysql:8.4
@@ -46,6 +47,12 @@ services:
                 - ping
             retries: 3
             timeout: 5s
+    mailpit:
+        image: 'axllent/mailpit:latest'
+        container_name: animethemes-server-rust-mailpit
+        ports:
+            - '${FORWARD_MAILPIT_PORT:-1025}:1025'
+            - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
     typesense:
         image: 'typesense/typesense:30.2'
         container_name: animethemes-server-rust-typesense

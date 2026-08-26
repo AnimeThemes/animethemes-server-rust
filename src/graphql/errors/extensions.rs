@@ -2,7 +2,11 @@ use std::collections::BTreeMap;
 
 use async_graphql::{Error, ErrorExtensions};
 
-use crate::{AppError, rules::validation_error::ValidationError};
+use crate::{
+    AppError,
+    environment::{Environment, get_environment},
+    rules::validation_error::ValidationError,
+};
 
 impl ErrorExtensions for AppError {
     fn extend(&self) -> Error {
@@ -41,8 +45,20 @@ impl ErrorExtensions for AppError {
             AppError::NotFound => Error::new(self.to_string()).extend_with(|_, extensions| {
                 extensions.set("code", "NOT_FOUND");
             }),
-            AppError::Database(_) => Error::new("Internal server error"),
-            AppError::Internal(_) => Error::new("Internal server error"),
+            AppError::Database(source) => {
+                if matches!(get_environment(), Environment::Development) {
+                    Error::new(format!("DEV INTERNAL => {}", source.to_string()))
+                } else {
+                    Error::new("Internal Server Error")
+                }
+            }
+            AppError::Internal(source) => {
+                if matches!(get_environment(), Environment::Development) {
+                    Error::new(format!("INTERNAL => {source:#}"))
+                } else {
+                    Error::new("Internal Server Error")
+                }
+            }
         }
     }
 }

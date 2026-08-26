@@ -3,7 +3,10 @@ use sea_orm::{
     QueryFilter, SelectExt,
 };
 
-use crate::{AppError, entities::auth::user, rules::validation_error::ValidationError};
+use crate::{
+    AppError, actions::auth::verify_email::VerifyEmail, entities::auth::user,
+    rules::validation_error::ValidationError,
+};
 
 #[derive(Clone)]
 pub struct UpdateUserInformationParameters {
@@ -73,18 +76,29 @@ impl UpdateUserInformation {
     ) -> Result<bool, AppError> {
         Self::validate(db, &user, &params).await?;
 
-        let mut user: user::ActiveModel = user.into();
+        let current_email = user.email.clone();
+
+        let mut active_user: user::ActiveModel = user.into();
 
         if let Some(name) = params.name {
-            user.name = Set(name);
+            active_user.name = Set(name);
         }
 
-        if let Some(email) = params.email {
-            user.email = Set(email);
-            user.email_verified_at = Set(None);
+        let email_has_changed = matches!(
+            params.email.as_deref(),
+            Some(email) if email != current_email
+        );
+
+        if email_has_changed {
+            active_user.email = Set(params.email.unwrap());
+            active_user.email_verified_at = Set(None);
         }
 
-        user.update(db).await?;
+        let user = active_user.update(db).await?;
+
+        if email_has_changed {
+            VerifyEmail::send_verification_email(&user).await?;
+        }
 
         Ok(true)
     }

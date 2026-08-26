@@ -28,6 +28,11 @@ cd animethemes-server-rust
 # Copy the .env.example to .env and change it for your needs.
 cp .env.example .env
 
+# Generate a new APP_KEY
+openssl rand -hex 32
+
+# Set the APP_KEY in the .env file
+
 # Build the containers
 docker compose up -d --build
 
