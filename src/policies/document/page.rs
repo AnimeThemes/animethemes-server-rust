@@ -44,7 +44,8 @@ impl PagePolicy {
         if let Some(user) = user
             && has_any_role(
                 &user.roles,
-                &page_roles
+                page_roles
+                    .clone()
                     .iter()
                     .filter_map(|role| Roles::from_str(&role.name).ok())
                     .collect::<Vec<_>>(),

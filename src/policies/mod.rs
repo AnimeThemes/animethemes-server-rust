@@ -20,7 +20,7 @@ pub enum PolicyAction {
 pub trait Policy<T: Copy> {
     fn before(user: Option<&CurrentUser>, _action: &PolicyAction) -> Option<PolicyResponse> {
         if let Some(user) = user
-            && has_any_role(&user.roles, &vec![Roles::Admin])
+            && has_any_role(&user.roles, vec![Roles::Admin])
         {
             return Some(PolicyResponse::Allow);
         }
@@ -82,7 +82,7 @@ impl PolicyResponse {
     }
 }
 
-pub fn has_any_role(user_roles: &[role::Model], roles: &[Roles]) -> bool {
+pub fn has_any_role(user_roles: &[role::Model], roles: Vec<Roles>) -> bool {
     user_roles.iter().any(|role| {
         role.name
             .parse::<Roles>()

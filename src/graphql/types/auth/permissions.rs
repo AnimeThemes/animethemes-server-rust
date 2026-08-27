@@ -2,8 +2,9 @@ use async_graphql::{Context, Object, SimpleObject};
 
 use crate::{
     AppError,
+    entities::auth::role::Roles,
     middlewares::current_user::CurrentUser,
-    policies::{Policy, PolicyAction, list::playlist::PlaylistPolicy},
+    policies::{Policy, PolicyAction, has_any_role, list::playlist::PlaylistPolicy},
 };
 
 #[derive(SimpleObject)]
@@ -18,6 +19,14 @@ pub struct Permissions;
 
 #[Object]
 impl Permissions {
+    async fn can_revalidate_pages(&self, ctx: &Context<'_>) -> bool {
+        let Some(user) = ctx.data_opt::<CurrentUser>() else {
+            return false;
+        };
+
+        has_any_role(&user.roles, vec![Roles::Admin])
+    }
+
     async fn can_create_playlist(&self, ctx: &Context<'_>) -> PermissionsResult {
         let Some(user) = ctx.data_opt::<CurrentUser>() else {
             return PermissionsResult {

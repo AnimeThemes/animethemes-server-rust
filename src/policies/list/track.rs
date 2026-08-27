@@ -65,7 +65,7 @@ impl PlaylistTrackPolicy {
     }
 
     fn create(user: &CurrentUser, playlist: &playlist::Model) -> PolicyResponse {
-        let has_role = has_any_role(&user.roles, &vec![Roles::Verified]);
+        let has_role = has_any_role(&user.roles, vec![Roles::Verified]);
 
         if has_role && playlist.user_id == user.user.id {
             return PolicyResponse::Allow;
@@ -75,7 +75,7 @@ impl PlaylistTrackPolicy {
     }
 
     fn update(user: &CurrentUser, playlist: &playlist::Model) -> PolicyResponse {
-        let has_role = has_any_role(&user.roles, &vec![Roles::Verified]);
+        let has_role = has_any_role(&user.roles, vec![Roles::Verified]);
 
         if has_role && playlist.user_id == user.user.id {
             return PolicyResponse::Allow;
@@ -85,7 +85,7 @@ impl PlaylistTrackPolicy {
     }
 
     fn delete(user: &CurrentUser, playlist: &playlist::Model) -> PolicyResponse {
-        let has_role = has_any_role(&user.roles, &vec![Roles::Verified]);
+        let has_role = has_any_role(&user.roles, vec![Roles::Verified]);
 
         if has_role && playlist.user_id == user.user.id {
             return PolicyResponse::Allow;
