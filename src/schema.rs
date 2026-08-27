@@ -10,14 +10,12 @@ use crate::{
     features::functions::FeatureManager,
     graphql::{loaders::loaders::RegisterLoaders, mutation::Mutation, query::Query},
     middlewares::current_user::CurrentUser,
-    typesense::client::create_typesense_client,
+    typesense::client::TypesenseClient,
 };
 
 pub type AppSchema = Schema<Query, Mutation, EmptySubscription>;
 
-pub fn create_schema(db: DatabaseConnection) -> AppSchema {
-    let typesense = create_typesense_client();
-
+pub fn create_schema(db: DatabaseConnection, typesense: TypesenseClient) -> AppSchema {
     Schema::build(Query::default(), Mutation::default(), EmptySubscription)
         .data(db.clone())
         .data(typesense)

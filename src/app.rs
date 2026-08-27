@@ -31,7 +31,7 @@ use crate::{
     middlewares::{current_user::current_user_middleware, features::features_middleware},
     schema::{self, graphiql, graphql_handler},
     session::create_session_layer,
-    typesense::client::create_typesense_client,
+    typesense::client::{create_typesense_client, init_typesense},
 };
 
 pub struct App;
@@ -64,7 +64,9 @@ impl Hooks for App {
 
         let typesense = create_typesense_client();
 
-        let schema = schema::create_schema(db.clone());
+        init_typesense(typesense.clone());
+
+        let schema = schema::create_schema(db.clone(), typesense.clone());
 
         ctx.shared_store.insert(db);
         ctx.shared_store.insert(schema);

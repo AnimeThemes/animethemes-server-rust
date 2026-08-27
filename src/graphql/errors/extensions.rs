@@ -47,9 +47,11 @@ impl ErrorExtensions for AppError {
             }),
             AppError::Database(source) => {
                 if matches!(get_environment(), Environment::Development) {
-                    Error::new(format!("DEV INTERNAL => {}", source.to_string())).extend_with(|_, extensions| {
-                        extensions.set("code", 500);
-                    })
+                    Error::new(format!("DEV INTERNAL => {}", source.to_string())).extend_with(
+                        |_, extensions| {
+                            extensions.set("code", 500);
+                        },
+                    )
                 } else {
                     Error::new("Internal Server Error").extend_with(|_, extensions| {
                         extensions.set("code", 500);
@@ -58,15 +60,13 @@ impl ErrorExtensions for AppError {
             }
             AppError::Internal(source) => {
                 if matches!(get_environment(), Environment::Development) {
-                    Error::new(format!("INTERNAL => {source:#}"))
-                        .extend_with(|_, extensions| {
-                            extensions.set("code", 500);
-                        })
+                    Error::new(format!("INTERNAL => {source:#}")).extend_with(|_, extensions| {
+                        extensions.set("code", 500);
+                    })
                 } else {
-                    Error::new("Internal Server Error")
-                        .extend_with(|_, extensions| {
-                            extensions.set("code", 500);
-                        })
+                    Error::new("Internal Server Error").extend_with(|_, extensions| {
+                        extensions.set("code", 500);
+                    })
                 }
             }
         }
