@@ -8,3 +8,5 @@ pub mod search_index_series;
 pub mod search_index_song;
 pub mod search_index_studio;
 pub mod search_index_video;
+
+pub mod clear_reset_passwords;

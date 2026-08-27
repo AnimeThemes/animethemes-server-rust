@@ -25,7 +25,10 @@ services:
         build:
             context: .
             target: runtime
+        image: animethemes-server-rust
+        pull_policy: build
         container_name: animethemes-server-rust
+        command: ["animethemes-server-rust", "start"]
         ports:
             - '${APP_PORT:-80}:80'
         env_file:
@@ -35,6 +38,30 @@ services:
             - redis
             - mailpit
             - typesense
+    scheduler:
+        image: animethemes-server-rust
+        pull_policy: never
+        command: ["animethemes-server-rust", "scheduler"]
+        restart: unless-stopped
+        env_file:
+            - .env
+        depends_on:
+            mysql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+    worker:
+        image: animethemes-server-rust
+        pull_policy: never
+        command: ["animethemes-server-rust", "start", "--worker"]
+        restart: unless-stopped
+        env_file:
+            - .env
+        depends_on:
+            mysql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
     mysql:
         image: mysql:8.4
         container_name: animethemes-server-rust-mysql

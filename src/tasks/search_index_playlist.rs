@@ -18,7 +18,7 @@ pub struct SearchIndexPlaylist;
 impl Task for SearchIndexPlaylist {
     fn task(&self) -> TaskInfo {
         TaskInfo {
-            name: "search:index_playlist".to_string(),
+            name: "search:index-playlist".to_string(),
             detail: "Import playlists from the database into the search index".to_string(),
         }
     }

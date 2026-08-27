@@ -67,15 +67,15 @@ TODO: Waiting feature implementation
 Import models into our indices using:
 
 ```sh
-docker compose exec server animethemes-server-rust task search:index_anime
-docker compose exec server animethemes-server-rust task search:index_animetheme
-docker compose exec server animethemes-server-rust task search:index_animethemeentry
-docker compose exec server animethemes-server-rust task search:index_artist
-docker compose exec server animethemes-server-rust task search:index_playlist
-docker compose exec server animethemes-server-rust task search:index_series
-docker compose exec server animethemes-server-rust task search:index_song
-docker compose exec server animethemes-server-rust task search:index_studio
-docker compose exec server animethemes-server-rust task search:index_video
+docker compose exec server animethemes-server-rust task search:index-anime
+docker compose exec server animethemes-server-rust task search:index-animetheme
+docker compose exec server animethemes-server-rust task search:index-animethemeentry
+docker compose exec server animethemes-server-rust task search:index-artist
+docker compose exec server animethemes-server-rust task search:index-playlist
+docker compose exec server animethemes-server-rust task search:index-series
+docker compose exec server animethemes-server-rust task search:index-song
+docker compose exec server animethemes-server-rust task search:index-studio
+docker compose exec server animethemes-server-rust task search:index-video
 ```
 
 ### MySQL Terminal

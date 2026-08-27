@@ -19,7 +19,7 @@ pub struct SearchIndexSeries;
 impl Task for SearchIndexSeries {
     fn task(&self) -> TaskInfo {
         TaskInfo {
-            name: "search:index_series".to_string(),
+            name: "search:index-series".to_string(),
             detail: "Import series from the database into the search index".to_string(),
         }
     }

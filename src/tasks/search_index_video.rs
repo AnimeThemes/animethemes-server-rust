@@ -19,7 +19,7 @@ pub struct SearchIndexVideo;
 impl Task for SearchIndexVideo {
     fn task(&self) -> TaskInfo {
         TaskInfo {
-            name: "search:index_video".to_string(),
+            name: "search:index-video".to_string(),
             detail: "Import videos from the database into the search index".to_string(),
         }
     }

@@ -19,7 +19,7 @@ pub struct SearchIndexStudio;
 impl Task for SearchIndexStudio {
     fn task(&self) -> TaskInfo {
         TaskInfo {
-            name: "search:index_studio".to_string(),
+            name: "search:index-studio".to_string(),
             detail: "Import studios from the database into the search index".to_string(),
         }
     }

@@ -17,7 +17,7 @@ default-run = "animethemes-server-rust"
 loco-rs = { version = "1.1", default-features = false }
 
 [dependencies]
-loco-rs = { workspace = true , features = ["cli", "cache_redis", "cache_inmem"] }
+loco-rs = { workspace = true , features = ["cli", "worker_redis", "cache_redis", "cache_inmem"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
 tokio = { version = "1.45", default-features = false, features = [

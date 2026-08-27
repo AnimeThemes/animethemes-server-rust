@@ -19,7 +19,7 @@ pub struct SearchIndexSong;
 impl Task for SearchIndexSong {
     fn task(&self) -> TaskInfo {
         TaskInfo {
-            name: "search:index_song".to_string(),
+            name: "search:index-song".to_string(),
             detail: "Import songs from the database into the search index".to_string(),
         }
     }

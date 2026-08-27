@@ -19,7 +19,7 @@ pub struct SearchIndexAnime;
 impl Task for SearchIndexAnime {
     fn task(&self) -> TaskInfo {
         TaskInfo {
-            name: "search:index_anime".to_string(),
+            name: "search:index-anime".to_string(),
             detail: "Import anime from the database into the search index".to_string(),
         }
     }

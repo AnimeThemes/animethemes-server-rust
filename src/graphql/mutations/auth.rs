@@ -181,10 +181,6 @@ impl AuthMutation {
     }
 
     pub async fn forgot_password(&self, ctx: &Context<'_>, email: String) -> Result<bool> {
-        ctx.data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))
-            .extend()?;
-
         let db = ctx.data::<DatabaseConnection>()?;
 
         ForgotPassword::send_reset_password_email(&db, email)
