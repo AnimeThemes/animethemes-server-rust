@@ -8,10 +8,7 @@ impl Messages {
         let mut templates = Environment::new();
 
         templates
-            .add_template(
-                "verification",
-                include_str!("templates/verification.html"),
-            )
+            .add_template("verification", include_str!("templates/verification.html"))
             .expect("failed to load verification email template");
 
         let html = templates

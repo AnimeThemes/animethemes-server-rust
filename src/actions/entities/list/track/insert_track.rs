@@ -4,7 +4,9 @@ use sea_orm::{
 };
 
 use crate::{
+    AppError,
     entities::list::{playlist, track},
+    rules::validation_error::ValidationError,
     traits::sortable::Sortable,
 };
 use sea_orm::ActiveValue::Set;
@@ -18,11 +20,35 @@ pub struct InsertTrackActionParameters {
 pub struct InsertTrackAction {}
 
 impl InsertTrackAction {
+    fn validate(params: &InsertTrackActionParameters) -> Result<(), AppError> {
+        let mut errors = Vec::new();
+
+        let mut position_errors = Vec::new();
+
+        if let Some(position) = params.position {
+            if position < 1 {
+                position_errors.push("The position must be greater than 0.");
+            }
+        }
+
+        if !position_errors.is_empty() {
+            errors.push(ValidationError::new("position", position_errors));
+        }
+
+        if !errors.is_empty() {
+            return Err(AppError::Validation(errors));
+        }
+
+        Ok(())
+    }
+
     pub async fn insert(
         db: &DatabaseConnection,
         playlist: playlist::Model,
         params: InsertTrackActionParameters,
-    ) -> Result<track::Model, DbErr> {
+    ) -> Result<track::Model, AppError> {
+        Self::validate(&params)?;
+
         let txn = db.begin().await?;
 
         let max_position: i32 = track::Entity::find()
@@ -48,7 +74,9 @@ impl InsertTrackAction {
 
         if let Some(position) = params.position {
             if position > max_position {
-                return Err(DbErr::Custom(format!("Invalid track position: {position}")));
+                return Err(AppError::Database(DbErr::Custom(format!(
+                    "Invalid track position: {position}"
+                ))));
             }
 
             if position != max_position {

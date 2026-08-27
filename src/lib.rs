@@ -1,17 +1,21 @@
-use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
-use sea_orm::DatabaseConnection;
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
 
-use crate::{rules::validation_error::ValidationError, schema::AppSchema};
+use crate::rules::validation_error::ValidationError;
 
 pub mod actions;
-pub mod api;
+pub mod app;
+pub mod controllers;
+pub mod data;
 pub mod db;
 pub mod entities;
 pub mod enums;
 pub mod environment;
 pub mod features;
 pub mod graphql;
+pub mod initializers;
 pub mod mail;
 pub mod middlewares;
 pub mod policies;
@@ -19,14 +23,11 @@ pub mod rules;
 pub mod schema;
 pub mod scopes;
 pub mod session;
+pub mod tasks;
 pub mod traits;
 pub mod typesense;
-
-#[derive(Clone)]
-pub struct AppState {
-    pub db: DatabaseConnection,
-    pub schema: AppSchema,
-}
+pub mod views;
+pub mod workers;
 
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {

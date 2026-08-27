@@ -22,7 +22,6 @@ use crate::{
 struct CreatePlaylistTrackInput {
     entry_id: u64,
     video_id: u64,
-    #[graphql(validator(minimum = 1))]
     position: Option<i32>,
 }
 
@@ -30,7 +29,6 @@ struct CreatePlaylistTrackInput {
 struct UpdatePlaylistTrackInput {
     entry_id: Option<u64>,
     video_id: Option<u64>,
-    #[graphql(validator(minimum = 1))]
     position: Option<i32>,
 }
 
@@ -47,7 +45,8 @@ impl PlaylistTrackMutation {
     ) -> Result<PlaylistTrack> {
         let user = ctx
             .data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?;
 
         let feature_manager = ctx.data::<FeatureManager>()?;
 
@@ -65,7 +64,8 @@ impl PlaylistTrackMutation {
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
         PlaylistTrackPolicy::check(Some(user), PolicyAction::Create, Some(&playlist))
-            .authorize()?;
+            .authorize()
+            .extend()?;
 
         let track = InsertTrackAction::insert(
             db,
@@ -76,7 +76,8 @@ impl PlaylistTrackMutation {
                 position: input.position,
             },
         )
-        .await?;
+        .await
+        .extend()?;
 
         Ok(track.into())
     }
@@ -90,7 +91,8 @@ impl PlaylistTrackMutation {
     ) -> Result<PlaylistTrack> {
         let user = ctx
             .data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?;
 
         let feature_manager = ctx.data::<FeatureManager>()?;
 
@@ -108,7 +110,8 @@ impl PlaylistTrackMutation {
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
         PlaylistTrackPolicy::check(Some(user), PolicyAction::Update, Some(&playlist))
-            .authorize()?;
+            .authorize()
+            .extend()?;
 
         let track = track::Entity::find()
             .filter(track::Column::Hashid.eq(id))
@@ -125,7 +128,8 @@ impl PlaylistTrackMutation {
                 position: input.position,
             },
         )
-        .await?;
+        .await
+        .extend()?;
 
         Ok(track.into())
     }
@@ -138,7 +142,8 @@ impl PlaylistTrackMutation {
     ) -> Result<bool> {
         let user = ctx
             .data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?;
 
         let feature_manager = ctx.data::<FeatureManager>()?;
 
@@ -156,7 +161,8 @@ impl PlaylistTrackMutation {
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
         PlaylistTrackPolicy::check(Some(user), PolicyAction::Delete, Some(&playlist))
-            .authorize()?;
+            .authorize()
+            .extend()?;
 
         let track = track::Entity::find()
             .filter(track::Column::Hashid.eq(id))
@@ -164,7 +170,7 @@ impl PlaylistTrackMutation {
             .await?
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
-        DeleteTrackAction::delete(&db, track).await?;
+        DeleteTrackAction::delete(&db, track).await.extend()?;
 
         Ok(true)
     }

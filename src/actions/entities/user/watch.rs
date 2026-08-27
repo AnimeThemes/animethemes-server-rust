@@ -1,5 +1,5 @@
+use crate::AppError;
 use crate::entities::user::watchhistory;
-use anyhow::Result;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
@@ -15,7 +15,7 @@ impl MarkAsWatchedAction {
     pub async fn create(
         db: &DatabaseConnection,
         params: MarkAsWatchedActionParameters,
-    ) -> Result<watchhistory::Model> {
+    ) -> Result<watchhistory::Model, AppError> {
         let model = watchhistory::ActiveModel {
             entry_id: Set(params.entry_id),
             video_id: Set(params.video_id),
@@ -28,7 +28,7 @@ impl MarkAsWatchedAction {
         Ok(model)
     }
 
-    pub async fn delete_all(db: &DatabaseConnection, user_id: u64) -> Result<()> {
+    pub async fn delete_all(db: &DatabaseConnection, user_id: u64) -> Result<(), AppError> {
         watchhistory::Entity::delete_many()
             .filter(watchhistory::Column::UserId.eq(user_id))
             .exec(db)

@@ -1,6 +1,7 @@
 use bcrypt::hash;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait,
+    IntoActiveModel, ModelTrait, QueryFilter,
 };
 use sha2::{Digest, Sha256};
 

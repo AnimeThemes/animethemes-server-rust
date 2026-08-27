@@ -1,6 +1,6 @@
 use crate::AppError;
 use crate::actions::entities::user::watch::{MarkAsWatchedAction, MarkAsWatchedActionParameters};
-use async_graphql::{Context, Error, Object, Result};
+use async_graphql::{Context, Error, Object, Result, ResultExt};
 use sea_orm::DatabaseConnection;
 
 use crate::graphql::types::user::watchhistory::WatchHistory;
@@ -15,7 +15,8 @@ impl WatchMutation {
     async fn watch(&self, ctx: &Context<'_>, entry_id: u64, video_id: u64) -> Result<WatchHistory> {
         let user = ctx
             .data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
 
@@ -27,7 +28,8 @@ impl WatchMutation {
                 user_id: user.user.clone().id,
             },
         )
-        .await?;
+        .await
+        .extend()?;
 
         Ok(model.into())
     }
@@ -36,11 +38,14 @@ impl WatchMutation {
     async fn clear_watch_history(&self, ctx: &Context<'_>) -> Result<bool> {
         let user = ctx
             .data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
 
-        MarkAsWatchedAction::delete_all(db, user.user.clone().id).await?;
+        MarkAsWatchedAction::delete_all(db, user.user.clone().id)
+            .await
+            .extend()?;
 
         Ok(true)
     }

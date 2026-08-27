@@ -130,7 +130,8 @@ impl AuthMutation {
     ) -> Result<bool> {
         let user = ctx
             .data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))?
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?
             .user
             .clone();
 
@@ -157,7 +158,8 @@ impl AuthMutation {
     ) -> Result<bool> {
         let user = ctx
             .data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))?
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?
             .user
             .clone();
 
@@ -179,9 +181,15 @@ impl AuthMutation {
     }
 
     pub async fn forgot_password(&self, ctx: &Context<'_>, email: String) -> Result<bool> {
+        ctx.data::<CurrentUser>()
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?;
+
         let db = ctx.data::<DatabaseConnection>()?;
 
-        ForgotPassword::send_reset_password_email(&db, email).await?;
+        ForgotPassword::send_reset_password_email(&db, email)
+            .await
+            .extend()?;
 
         Ok(true)
     }
@@ -191,6 +199,10 @@ impl AuthMutation {
         ctx: &Context<'_>,
         input: ResetPasswordInput,
     ) -> Result<bool> {
+        ctx.data::<CurrentUser>()
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?;
+
         let db = ctx.data::<DatabaseConnection>()?;
 
         ResetPassword::reset_password(
@@ -202,7 +214,8 @@ impl AuthMutation {
                 token: input.token,
             },
         )
-        .await?;
+        .await
+        .extend()?;
 
         Ok(true)
     }
@@ -210,7 +223,8 @@ impl AuthMutation {
     pub async fn resend_email_verification(&self, ctx: &Context<'_>) -> Result<bool> {
         let user = ctx
             .data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
 
@@ -219,7 +233,7 @@ impl AuthMutation {
             .await?
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
-        VerifyEmail::send_verification_email(&user).await?;
+        VerifyEmail::send_verification_email(&user).await.extend()?;
 
         Ok(true)
     }

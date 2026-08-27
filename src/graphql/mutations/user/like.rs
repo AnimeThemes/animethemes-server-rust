@@ -1,6 +1,6 @@
 use crate::actions::entities::user::like::{LikeAction, ToggleLikeActionParameters};
 use crate::graphql::types::user::like::Like;
-use async_graphql::{Context, Error, Object, OneofObject, Result};
+use async_graphql::{Context, Error, Object, OneofObject, Result, ResultExt};
 use sea_orm::DatabaseConnection;
 
 use crate::AppError;
@@ -19,7 +19,8 @@ impl LikeMutation {
     async fn toggle_like(&self, ctx: &Context<'_>, like: LikeableType) -> Result<Option<Like>> {
         let user = ctx
             .data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
 
@@ -35,7 +36,8 @@ impl LikeMutation {
                 user_id: user.user.clone().id,
             },
         )
-        .await?;
+        .await
+        .extend()?;
 
         Ok(model.map(Into::into))
     }

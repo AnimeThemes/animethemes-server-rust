@@ -1,24 +1,26 @@
 use std::env;
 
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Path, Query},
     response::Redirect,
 };
 use chrono::Utc;
-use sea_orm::{ActiveModelTrait, EntityTrait, Set};
+use loco_rs::prelude::*;
+use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use serde::Deserialize;
 
-use crate::{AppError, AppState, actions::auth::verify_email::VerifyEmail, entities::auth::user};
+use crate::{AppError, actions::auth::verify_email::VerifyEmail, entities::auth::user};
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct VerifyEmailQuery {
     token: String,
     expires: i64,
     signature: String,
 }
 
+#[debug_handler(state = AppContext)]
 pub async fn verify_email(
-    State(state): State<AppState>,
+    SharedStore(db): SharedStore<DatabaseConnection>,
     Path(user_id): Path<u64>,
     Query(query): Query<VerifyEmailQuery>,
 ) -> Result<Redirect, AppError> {
@@ -29,7 +31,7 @@ pub async fn verify_email(
     }
 
     let user = user::Entity::find_by_id(user_id)
-        .one(&state.db)
+        .one(&db)
         .await?
         .ok_or(AppError::Forbidden)?;
 
@@ -42,15 +44,21 @@ pub async fn verify_email(
     )?;
 
     if user.email_verified_at.is_none() {
-        let mut user: user::ActiveModel = user.into();
+        let mut active_user: user::ActiveModel = user.into();
 
-        user.email_verified_at = Set(Some(Utc::now()));
+        active_user.email_verified_at = Set(Some(Utc::now()));
 
-        user.update(&state.db).await?;
+        active_user.update(&db).await?;
     }
 
-    let redirect =
-        env::var("CLIENT_PROFILE_URL").unwrap_or("https://animethemes.moe/profile".to_string());
+    let redirect = env::var("CLIENT_PROFILE_URL")
+        .unwrap_or_else(|_| "https://animethemes.moe/profile".to_string());
 
-    Ok(Redirect::to(redirect.as_str()))
+    Ok(Redirect::to(&redirect))
+}
+
+pub fn routes() -> Routes {
+    Routes::new()
+        .prefix("/api/auth/email")
+        .add("/verify/{user_id}", get(verify_email))
 }

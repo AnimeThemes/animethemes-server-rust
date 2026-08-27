@@ -4,19 +4,21 @@ use axum::{
     middleware::Next,
     response::Response,
 };
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+use loco_rs::app::AppContext;
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use tower_sessions::Session;
 
-use crate::AppState;
-
 pub async fn features_middleware(
-    State(state): State<AppState>,
+    State(ctx): State<AppContext>,
     _session: Session,
     mut request: Request,
     next: Next,
 ) -> Response {
-    let db = state.db;
+    let db = ctx
+        .shared_store
+        .get::<DatabaseConnection>()
+        .expect("Database not initialized");
 
     let flags = feature::Entity::find()
         .filter(feature::Column::ScopeType.eq("global"))
