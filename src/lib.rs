@@ -9,7 +9,6 @@ pub mod actions;
 pub mod app;
 pub mod controllers;
 pub mod data;
-pub mod db;
 pub mod entities;
 pub mod enums;
 pub mod features;

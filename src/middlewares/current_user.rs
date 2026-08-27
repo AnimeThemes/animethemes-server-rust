@@ -5,7 +5,7 @@ use axum::{
     response::Response,
 };
 use loco_rs::app::AppContext;
-use sea_orm::{DatabaseConnection, EntityTrait};
+use sea_orm::EntityTrait;
 
 use tower_sessions::Session;
 
@@ -21,10 +21,7 @@ pub async fn current_user_middleware(
     mut request: Request,
     next: Next,
 ) -> Response {
-    let db = ctx
-        .shared_store
-        .get::<DatabaseConnection>()
-        .expect("Database not initialized");
+    let db = ctx.db;
 
     let Some(user_id) = session.get::<u64>("user_id").await.ok().flatten() else {
         return next.run(request).await;

@@ -1,5 +1,5 @@
 use loco_rs::prelude::*;
-use sea_orm::{DatabaseConnection, EntityTrait};
+use sea_orm::EntityTrait;
 use std::error::Error as StdError;
 use typesense::prelude::Document;
 
@@ -24,11 +24,6 @@ impl Task for SearchIndexPlaylist {
     }
 
     async fn run(&self, app_context: &AppContext, _vars: &task::Vars) -> Result<()> {
-        let database = app_context
-            .shared_store
-            .get::<DatabaseConnection>()
-            .expect("Database not initialized");
-
         let typesense = app_context
             .shared_store
             .get::<TypesenseClient>()
@@ -56,7 +51,7 @@ impl Task for SearchIndexPlaylist {
         let builder = playlist::Entity::find();
 
         index_document::<playlist::Entity, PlaylistDocument, _>(
-            &database,
+            &app_context.db,
             &typesense,
             builder,
             build_playlist_documents,

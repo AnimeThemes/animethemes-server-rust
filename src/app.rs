@@ -1,4 +1,6 @@
+use migration::Migrator;
 use std::env;
+use std::path::Path;
 
 use async_trait::async_trait;
 use axum::{
@@ -27,7 +29,6 @@ use url::Url;
 #[allow(unused_imports)]
 use crate::{controllers, tasks, workers::downloader::DownloadWorker};
 use crate::{
-    db::connect,
     middlewares::{current_user::current_user_middleware, features::features_middleware},
     schema::{self, graphiql, graphql_handler},
     session::create_session_layer,
@@ -56,19 +57,16 @@ impl Hooks for App {
         environment: &Environment,
         config: Config,
     ) -> Result<BootResult> {
-        create_app::<Self>(mode, environment, config).await
+        create_app::<Self, Migrator>(mode, environment, config).await
     }
 
     async fn after_context(ctx: AppContext) -> Result<AppContext> {
-        let db = connect().await;
-
         let typesense = create_typesense_client();
 
         init_typesense(typesense.clone());
 
-        let schema = schema::create_schema(ctx.clone(), db.clone(), typesense.clone());
+        let schema = schema::create_schema(ctx.clone(), typesense.clone());
 
-        ctx.shared_store.insert(db);
         ctx.shared_store.insert(schema);
         ctx.shared_store.insert(typesense);
 
@@ -138,5 +136,13 @@ impl Hooks for App {
         tasks.register(tasks::search_index_video::SearchIndexVideo);
         tasks.register(tasks::clear_reset_passwords::ClearResetPasswords);
         // tasks-inject (do not remove)
+    }
+
+    async fn truncate(_ctx: &AppContext) -> Result<()> {
+        Ok(())
+    }
+
+    async fn seed(_ctx: &AppContext, _base: &Path) -> Result<()> {
+        Ok(())
     }
 }

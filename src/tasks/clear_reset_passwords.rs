@@ -1,7 +1,7 @@
 use chrono::{Duration, Utc};
 use loco_rs::Error as LocoError;
 use loco_rs::prelude::*;
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 
 use crate::entities::auth::password_reset_tokens;
 
@@ -17,14 +17,9 @@ impl Task for ClearResetPasswords {
     }
 
     async fn run(&self, app_context: &AppContext, _vars: &task::Vars) -> Result<()> {
-        let db = app_context
-            .shared_store
-            .get::<DatabaseConnection>()
-            .ok_or_else(|| LocoError::InternalServerError)?;
-
         password_reset_tokens::Entity::delete_many()
             .filter(password_reset_tokens::Column::CreatedAt.lt(Utc::now() - Duration::hours(1)))
-            .exec(&db)
+            .exec(&app_context.db)
             .await
             .map_err(|_| LocoError::InternalServerError)?;
 

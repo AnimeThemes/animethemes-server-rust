@@ -1,5 +1,5 @@
 use loco_rs::prelude::*;
-use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{EntityTrait, QueryFilter};
 use std::error::Error as StdError;
 use typesense::prelude::Document;
 
@@ -25,11 +25,6 @@ impl Task for SearchIndexVideo {
     }
 
     async fn run(&self, app_context: &AppContext, _vars: &task::Vars) -> Result<()> {
-        let database = app_context
-            .shared_store
-            .get::<DatabaseConnection>()
-            .expect("Database not initialized");
-
         let typesense = app_context
             .shared_store
             .get::<TypesenseClient>()
@@ -57,7 +52,7 @@ impl Task for SearchIndexVideo {
         let builder = video::Entity::find().filter(without_trashed::<video::Entity>());
 
         index_document::<video::Entity, VideoDocument, _>(
-            &database,
+            &app_context.db,
             &typesense,
             builder,
             build_video_documents,

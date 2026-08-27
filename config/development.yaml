@@ -1,5 +1,16 @@
 # Loco configuration file documentation
 
+database:
+  uri: <%= get_env(name="DATABASE_URL", default="sqlite://myapp_development.sqlite?mode=rwc") %>
+  enable_logging: true
+  connect_timeout: 500
+  idle_timeout: 500
+  min_connections: 1
+  max_connections: 10
+  auto_migrate: false
+  dangerously_truncate: false
+  dangerously_recreate: false
+
 # Application logging configuration
 logger:
   # Enable or disable logging.
