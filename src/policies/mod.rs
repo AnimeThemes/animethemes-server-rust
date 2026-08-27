@@ -20,7 +20,7 @@ pub enum PolicyAction {
 pub trait Policy<T: Copy> {
     fn before(user: Option<&CurrentUser>, _action: &PolicyAction) -> Option<PolicyResponse> {
         if let Some(user) = user
-            && has_any_role(&user.roles, &vec![Roles::SuperAdmin])
+            && has_any_role(&user.roles, &vec![Roles::Admin])
         {
             return Some(PolicyResponse::Allow);
         }
@@ -62,7 +62,7 @@ pub enum PolicyResponse {
     Allow,
     Deny,
     DenyAsNotFound,
-    _DenyWithMessage(String),
+    DenyWithMessage(String),
 }
 
 impl PolicyResponse {
@@ -75,7 +75,7 @@ impl PolicyResponse {
             PolicyResponse::Allow => Ok(()),
             PolicyResponse::Deny => Err(AppError::Forbidden),
             PolicyResponse::DenyAsNotFound => Err(AppError::NotFound),
-            PolicyResponse::_DenyWithMessage(message) => {
+            PolicyResponse::DenyWithMessage(message) => {
                 Err(AppError::ForbiddenWithMessage(message))
             }
         }

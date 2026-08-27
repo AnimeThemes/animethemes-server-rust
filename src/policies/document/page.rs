@@ -27,11 +27,11 @@ impl Policy<(&page::Model, &Vec<role::Model>)> for PagePolicy {
 }
 
 impl PagePolicy {
-    pub fn view_any() -> PolicyResponse {
+    fn view_any() -> PolicyResponse {
         PolicyResponse::Allow
     }
 
-    pub fn view(
+    fn view(
         user: Option<&CurrentUser>,
         models: (&page::Model, &Vec<role::Model>),
     ) -> PolicyResponse {

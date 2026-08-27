@@ -100,17 +100,16 @@ impl AuthMutation {
 
         session.insert("user_id", user.id).await?;
 
-        Ok(Me::from(&user))
+        Ok(Me::from(user))
     }
 
     pub async fn login(&self, ctx: &Context<'_>, input: LoginInput) -> Result<Me> {
         let db = ctx.data::<DatabaseConnection>()?;
 
-        let user: &user::Model = &user::Entity::find_by_email(input.email)
+        let user = user::Entity::find_by_email(input.email)
             .one(db)
             .await?
-            .ok_or_else(|| Error::new("Invalid credentials"))?
-            .into();
+            .ok_or_else(|| Error::new("Invalid credentials"))?;
 
         if !verify(input.password, &user.password).map_err(AppError::internal)? {
             return Err(Error::new("Invalid credentials"));

@@ -33,8 +33,7 @@ impl PlaylistQuery {
 
         let db = ctx.data::<DatabaseConnection>()?;
 
-        let playlist = playlist::Entity::find()
-            .filter(playlist::Column::Hashid.eq(id))
+        let playlist = playlist::Entity::find_by_hashid(id)
             .one(db)
             .await?
             .ok_or_else(|| Error::from(AppError::NotFound))?;

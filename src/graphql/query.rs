@@ -14,7 +14,7 @@ use crate::{
             list::playlist::PlaylistQuery,
             search::SearchQuery,
         },
-        types::auth::me::Me,
+        types::auth::{me::Me, permissions::Permissions},
     },
     middlewares::current_user::CurrentUser,
 };
@@ -44,12 +44,14 @@ struct RootQuery;
 #[Object]
 impl RootQuery {
     async fn me(&self, ctx: &Context<'_>) -> Result<Option<Me>> {
-        let user = ctx.data::<CurrentUser>().ok();
+        let Some(user) = ctx.data_opt::<CurrentUser>() else {
+            return Ok(None);
+        };
 
-        if let Some(user) = user {
-            return Ok(Some(Me::from(&user.user)));
-        }
+        Ok(Some(Me::from(user.user.clone())))
+    }
 
-        Ok(None)
+    async fn permissions(&self, _ctx: &Context<'_>) -> Permissions {
+        Permissions
     }
 }

@@ -14,6 +14,7 @@ use crate::{
 pub struct Model {
     #[sea_orm(primary_key, column_name = "playlist_id")]
     pub id: u64,
+    #[sea_orm(unique)]
     pub hashid: Option<String>,
     pub description: Option<String>,
     pub name: String,

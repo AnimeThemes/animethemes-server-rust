@@ -1,9 +1,15 @@
 use crate::{
     AppError,
     enums::{LocalizedEnum, list::playlistvisibility::PlaylistVisibility},
+    middlewares::current_user::CurrentUser,
+    policies::{
+        Policy, PolicyAction,
+        list::{playlist::PlaylistPolicy, track::PlaylistTrackPolicy},
+    },
 };
 use async_graphql::{
-    ComplexObject, Context, Error, InputObject, Result, SimpleObject, dataloader::DataLoader,
+    ComplexObject, Context, Error, InputObject, Object, Result, SimpleObject,
+    dataloader::DataLoader,
 };
 
 use crate::{
@@ -46,6 +52,8 @@ pub struct Playlist {
     pub visibility: PlaylistVisibility,
     /// The localized string value of the visibility field
     pub visibility_localized: String,
+    #[graphql(skip)]
+    pub model: playlist::Model,
 }
 
 #[ComplexObject]
@@ -91,11 +99,18 @@ impl Playlist {
 
         Ok(models.into_iter().map(PlaylistTrack::from).collect())
     }
+
+    async fn permissions(&self, _ctx: &Context<'_>) -> PlaylistPermissions {
+        PlaylistPermissions {
+            playlist: self.model.clone(),
+        }
+    }
 }
 
 impl From<playlist::Model> for Playlist {
     fn from(model: playlist::Model) -> Self {
         Self {
+            model: model.clone(),
             hashid: model.hashid.unwrap(),
             id: model.id,
             user_id: model.user_id,
@@ -103,6 +118,52 @@ impl From<playlist::Model> for Playlist {
             description: model.description,
             visibility: model.visibility,
             visibility_localized: model.visibility.localize().to_string(),
+        }
+    }
+}
+
+struct PlaylistPermissions {
+    playlist: playlist::Model,
+}
+
+#[Object]
+impl PlaylistPermissions {
+    async fn can_update(&self, ctx: &Context<'_>) -> bool {
+        let Some(user) = ctx.data_opt::<CurrentUser>() else {
+            return false;
+        };
+
+        match PlaylistPolicy::check(Some(&user), PolicyAction::Update, Some(&self.playlist))
+            .authorize()
+        {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
+
+    async fn can_delete(&self, ctx: &Context<'_>) -> bool {
+        let Some(user) = ctx.data_opt::<CurrentUser>() else {
+            return false;
+        };
+
+        match PlaylistPolicy::check(Some(&user), PolicyAction::Delete, Some(&self.playlist))
+            .authorize()
+        {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
+
+    async fn can_reorder_tracks(&self, ctx: &Context<'_>) -> bool {
+        let Some(user) = ctx.data_opt::<CurrentUser>() else {
+            return false;
+        };
+
+        match PlaylistTrackPolicy::check(Some(&user), PolicyAction::Update, Some(&self.playlist))
+            .authorize()
+        {
+            Ok(_) => true,
+            Err(_) => false,
         }
     }
 }

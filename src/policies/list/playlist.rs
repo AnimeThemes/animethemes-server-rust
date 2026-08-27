@@ -33,11 +33,11 @@ impl Policy<&playlist::Model> for PlaylistPolicy {
 }
 
 impl PlaylistPolicy {
-    pub fn view_any() -> PolicyResponse {
+    fn view_any() -> PolicyResponse {
         PolicyResponse::Allow
     }
 
-    pub fn view(user: Option<&CurrentUser>, playlist: &playlist::Model) -> PolicyResponse {
+    fn view(user: Option<&CurrentUser>, playlist: &playlist::Model) -> PolicyResponse {
         if playlist.visibility == PlaylistVisibility::Public {
             return PolicyResponse::Allow;
         }
@@ -51,18 +51,18 @@ impl PlaylistPolicy {
         PolicyResponse::DenyAsNotFound
     }
 
-    pub fn create(user: &CurrentUser) -> PolicyResponse {
-        let has_role = has_any_role(&user.roles, &vec![Roles::Admin, Roles::Verified]);
+    fn create(user: &CurrentUser) -> PolicyResponse {
+        let has_role = has_any_role(&user.roles, &vec![Roles::Verified]);
 
         if has_role {
             return PolicyResponse::Allow;
         }
 
-        PolicyResponse::Deny
+        PolicyResponse::DenyWithMessage("Please verify your email to create a playlist".to_string())
     }
 
-    pub fn update(user: &CurrentUser, playlist: &playlist::Model) -> PolicyResponse {
-        let has_role = has_any_role(&user.roles, &vec![Roles::Admin, Roles::Verified]);
+    fn update(user: &CurrentUser, playlist: &playlist::Model) -> PolicyResponse {
+        let has_role = has_any_role(&user.roles, &vec![Roles::Verified]);
 
         if has_role && playlist.user_id == user.user.id {
             return PolicyResponse::Allow;
@@ -71,8 +71,8 @@ impl PlaylistPolicy {
         PolicyResponse::DenyAsNotFound
     }
 
-    pub fn delete(user: &CurrentUser, playlist: &playlist::Model) -> PolicyResponse {
-        let has_role = has_any_role(&user.roles, &vec![Roles::Admin, Roles::Verified]);
+    fn delete(user: &CurrentUser, playlist: &playlist::Model) -> PolicyResponse {
+        let has_role = has_any_role(&user.roles, &vec![Roles::Verified]);
 
         if has_role && playlist.user_id == user.user.id {
             return PolicyResponse::Allow;

@@ -38,12 +38,12 @@ pub struct Me {
     pub updated_at: DateTime<Utc>,
 }
 
-impl From<&user::Model> for Me {
-    fn from(model: &user::Model) -> Self {
+impl From<user::Model> for Me {
+    fn from(model: user::Model) -> Self {
         Self {
             id: model.id,
-            name: model.name.clone(),
-            email: model.email.clone(),
+            name: model.name,
+            email: model.email,
             email_verified_at: model.email_verified_at,
             created_at: model.created_at,
             updated_at: model.updated_at,

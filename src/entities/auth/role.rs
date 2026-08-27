@@ -33,7 +33,6 @@ impl ActiveModelBehavior for ActiveModel {}
 
 #[derive(PartialEq, Eq)]
 pub enum Roles {
-    SuperAdmin,
     Admin,
     Encoder,
     Developer,
@@ -48,7 +47,6 @@ impl FromStr for Roles {
 
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
-            "Super Admin" => Ok(Roles::SuperAdmin),
             "Admin" => Ok(Roles::Admin),
             "Encoder" => Ok(Roles::Encoder),
             "Developer" => Ok(Roles::Developer),
@@ -64,7 +62,6 @@ impl FromStr for Roles {
 impl fmt::Display for Roles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let value = match self {
-            Roles::SuperAdmin => "Super Admin",
             Roles::Admin => "Admin",
             Roles::Encoder => "Encoder",
             Roles::Developer => "Developer",
