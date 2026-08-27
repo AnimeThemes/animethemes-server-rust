@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt, str::FromStr};
 
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
@@ -11,6 +11,7 @@ use crate::entities::auth::{permission, user};
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: u64,
+    #[sea_orm(unique)]
     pub name: String,
     pub priority: i32,
     pub color: Option<String>,
@@ -57,5 +58,22 @@ impl FromStr for Roles {
             "Verified" => Ok(Roles::Verified),
             _ => Err(()),
         }
+    }
+}
+
+impl fmt::Display for Roles {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let value = match self {
+            Roles::SuperAdmin => "Super Admin",
+            Roles::Admin => "Admin",
+            Roles::Encoder => "Encoder",
+            Roles::Developer => "Developer",
+            Roles::ContentModerator => "Content Moderator",
+            Roles::Patron => "Patron",
+            Roles::Contributor => "Contributor",
+            Roles::Verified => "Verified",
+        };
+
+        f.write_str(value)
     }
 }

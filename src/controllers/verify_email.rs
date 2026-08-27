@@ -9,7 +9,11 @@ use loco_rs::prelude::*;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use serde::Deserialize;
 
-use crate::{AppError, actions::auth::verify_email::VerifyEmail, entities::auth::user};
+use crate::{
+    AppError,
+    actions::auth::{roles::RoleAction, verify_email::VerifyEmail},
+    entities::auth::{role::Roles, user},
+};
 
 #[derive(Debug, Deserialize)]
 pub struct VerifyEmailQuery {
@@ -48,7 +52,9 @@ pub async fn verify_email(
 
         active_user.email_verified_at = Set(Some(Utc::now()));
 
-        active_user.update(&db).await?;
+        let user = active_user.update(&db).await?;
+
+        RoleAction::assign_role(&db, &user, Roles::Verified).await?;
     }
 
     let redirect = env::var("CLIENT_PROFILE_URL")
