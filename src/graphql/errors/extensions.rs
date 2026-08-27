@@ -26,11 +26,10 @@ impl ErrorExtensions for AppError {
                     }
                 })
             }
-            AppError::Unauthenticated => {
-                Error::new(self.to_string()).extend_with(|_, extensions| {
+            AppError::Unauthenticated | AppError::Unauthorized => Error::new(self.to_string())
+                .extend_with(|_, extensions| {
                     extensions.set("code", 401);
-                })
-            }
+                }),
             AppError::Forbidden => Error::new(self.to_string()).extend_with(|_, extensions| {
                 extensions.set("code", 403);
             }),
