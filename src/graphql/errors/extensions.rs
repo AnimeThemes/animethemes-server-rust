@@ -13,7 +13,7 @@ impl ErrorExtensions for AppError {
         match self {
             AppError::Validation(errors) => {
                 Error::new("Validation").extend_with(|_, extensions| {
-                    extensions.set("code", "VALIDATION");
+                    extensions.set("code", 422);
 
                     let mut validation: BTreeMap<String, Vec<String>> = BTreeMap::new();
 
@@ -31,32 +31,42 @@ impl ErrorExtensions for AppError {
             }
             AppError::Unauthenticated => {
                 Error::new(self.to_string()).extend_with(|_, extensions| {
-                    extensions.set("code", "UNAUTHENTICATED");
+                    extensions.set("code", 401);
                 })
             }
             AppError::Forbidden => Error::new(self.to_string()).extend_with(|_, extensions| {
-                extensions.set("code", "FORBIDDEN");
+                extensions.set("code", 403);
             }),
             AppError::ForbiddenWithMessage(message) => {
                 Error::new(message).extend_with(|_, extensions| {
-                    extensions.set("code", "FORBIDDEN");
+                    extensions.set("code", 403);
                 })
             }
             AppError::NotFound => Error::new(self.to_string()).extend_with(|_, extensions| {
-                extensions.set("code", "NOT_FOUND");
+                extensions.set("code", 404);
             }),
             AppError::Database(source) => {
                 if matches!(get_environment(), Environment::Development) {
-                    Error::new(format!("DEV INTERNAL => {}", source.to_string()))
+                    Error::new(format!("DEV INTERNAL => {}", source.to_string())).extend_with(|_, extensions| {
+                        extensions.set("code", 500);
+                    })
                 } else {
-                    Error::new("Internal Server Error")
+                    Error::new("Internal Server Error").extend_with(|_, extensions| {
+                        extensions.set("code", 500);
+                    })
                 }
             }
             AppError::Internal(source) => {
                 if matches!(get_environment(), Environment::Development) {
                     Error::new(format!("INTERNAL => {source:#}"))
+                        .extend_with(|_, extensions| {
+                            extensions.set("code", 500);
+                        })
                 } else {
                     Error::new("Internal Server Error")
+                        .extend_with(|_, extensions| {
+                            extensions.set("code", 500);
+                        })
                 }
             }
         }
