@@ -2,7 +2,7 @@ use async_graphql::{EmptySubscription, Schema, http::GraphiQLSource};
 
 use async_graphql_axum::{GraphQLBatchRequest, GraphQLResponse};
 use axum::{Extension, response::Html};
-use loco_rs::prelude::SharedStore;
+use loco_rs::{app::AppContext, prelude::SharedStore};
 use sea_orm::DatabaseConnection;
 use tower_sessions::Session;
 
@@ -15,8 +15,13 @@ use crate::{
 
 pub type AppSchema = Schema<Query, Mutation, EmptySubscription>;
 
-pub fn create_schema(db: DatabaseConnection, typesense: TypesenseClient) -> AppSchema {
+pub fn create_schema(
+    ctx: AppContext,
+    db: DatabaseConnection,
+    typesense: TypesenseClient,
+) -> AppSchema {
     Schema::build(Query::default(), Mutation::default(), EmptySubscription)
+        .data(ctx)
         .data(db.clone())
         .data(typesense)
         .register_loaders(db)

@@ -48,7 +48,10 @@ workers:
   #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
   mode: BackgroundAsync
 
-  
+cache:
+  kind: Redis
+  uri: <%= get_env(name="REDIS_URL", default="redis://redis:6379") %>/2
+  max_size: 10
 
 # Initializers Configuration
 # initializers:

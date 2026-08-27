@@ -31,7 +31,8 @@ workers:
   #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
   mode: ForegroundBlocking
 
-  
+cache:
+  kind: InMem    
 
 # Initializers Configuration
 # initializers:

@@ -66,7 +66,7 @@ impl Hooks for App {
 
         init_typesense(typesense.clone());
 
-        let schema = schema::create_schema(db.clone(), typesense.clone());
+        let schema = schema::create_schema(ctx.clone(), db.clone(), typesense.clone());
 
         ctx.shared_store.insert(db);
         ctx.shared_store.insert(schema);
