@@ -20,18 +20,14 @@ use crate::policies::{Policy, PolicyAction};
 
 #[derive(InputObject)]
 struct CreatePlaylistInput {
-    #[graphql(validator(min_length = 1, max_length = 192))]
     name: String,
-    #[graphql(validator(min_length = 1, max_length = 1000))]
     description: Option<String>,
     visibility: PlaylistVisibility,
 }
 
 #[derive(InputObject)]
 struct UpdatePlaylistInput {
-    #[graphql(validator(min_length = 1, max_length = 192))]
     name: Option<String>,
-    #[graphql(validator(min_length = 1, max_length = 1000))]
     description: Option<String>,
     visibility: Option<PlaylistVisibility>,
 }
@@ -57,7 +53,9 @@ impl PlaylistMutation {
             .await
             .extend()?;
 
-        PlaylistPolicy::check(Some(user), PolicyAction::Create, None).authorize()?;
+        PlaylistPolicy::check(Some(user), PolicyAction::Create, None)
+            .authorize()
+            .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
 
@@ -70,7 +68,8 @@ impl PlaylistMutation {
                 user_id: user.user.clone().id,
             },
         )
-        .await?;
+        .await
+        .extend()?;
 
         Ok(playlist.into())
     }
@@ -100,7 +99,9 @@ impl PlaylistMutation {
             .await?
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
-        PlaylistPolicy::check(Some(user), PolicyAction::Update, Some(&playlist)).authorize()?;
+        PlaylistPolicy::check(Some(user), PolicyAction::Update, Some(&playlist))
+            .authorize()
+            .extend()?;
 
         let playlist = UpdatePlaylistAction::update(
             db,
@@ -111,7 +112,8 @@ impl PlaylistMutation {
                 visibility: input.visibility,
             },
         )
-        .await?;
+        .await
+        .extend()?;
 
         Ok(playlist.into())
     }
@@ -119,7 +121,8 @@ impl PlaylistMutation {
     async fn delete_playlist(&self, ctx: &Context<'_>, id: String) -> Result<bool> {
         let user = ctx
             .data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+            .map_err(|_| Error::from(AppError::Unauthenticated))
+            .extend()?;
 
         let feature_manager = ctx.data::<FeatureManager>()?;
 
@@ -136,9 +139,11 @@ impl PlaylistMutation {
             .await?
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
-        PlaylistPolicy::check(Some(user), PolicyAction::Delete, Some(&playlist)).authorize()?;
+        PlaylistPolicy::check(Some(user), PolicyAction::Delete, Some(&playlist))
+            .authorize()
+            .extend()?;
 
-        let result = DeletePlaylistAction::delete(db, playlist).await?;
+        let result = DeletePlaylistAction::delete(db, playlist).await.extend()?;
 
         Ok(result)
     }

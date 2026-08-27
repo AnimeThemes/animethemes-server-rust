@@ -5,6 +5,7 @@ use crate::{
     AppError,
     entities::list::playlist,
     enums::list::playlistvisibility::PlaylistVisibility,
+    rules::validation_error::ValidationError,
     typesense::{
         client::typesense,
         documents::playlist_document::{PlaylistDocument, build_playlist_documents},
@@ -22,10 +23,43 @@ pub struct CreatePlaylistActionParameters {
 pub struct CreatePlaylistAction;
 
 impl CreatePlaylistAction {
+    fn validate(params: &CreatePlaylistActionParameters) -> Result<(), AppError> {
+        let mut errors = Vec::new();
+
+        let mut name_errors = Vec::new();
+        let mut description_errors = Vec::new();
+
+        if !(1usize..=192).contains(&params.name.chars().count()) {
+            name_errors.push("The name must be between 1 and 192 characters.");
+        }
+
+        if let Some(description) = &params.description {
+            if !(1usize..=1000).contains(&description.chars().count()) {
+                description_errors.push("The description must be between 1 and 1000 characters.");
+            }
+        }
+
+        if !name_errors.is_empty() {
+            errors.push(ValidationError::new("name", name_errors));
+        }
+
+        if !description_errors.is_empty() {
+            errors.push(ValidationError::new("description", description_errors));
+        }
+
+        if !errors.is_empty() {
+            return Err(AppError::Validation(errors));
+        }
+
+        Ok(())
+    }
+
     pub async fn create(
         db: &DatabaseConnection,
         params: CreatePlaylistActionParameters,
     ) -> Result<playlist::Model, AppError> {
+        Self::validate(&params)?;
+
         let playlist = playlist::ActiveModel {
             name: Set(params.name),
             description: Set(params.description),

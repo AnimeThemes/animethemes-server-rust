@@ -1,4 +1,3 @@
-use anyhow::Result;
 use sea_orm::{DatabaseConnection, ModelTrait};
 
 use crate::{
@@ -11,7 +10,10 @@ use crate::{
 pub struct DeletePlaylistAction;
 
 impl DeletePlaylistAction {
-    pub async fn delete(db: &DatabaseConnection, playlist: playlist::Model) -> Result<bool> {
+    pub async fn delete(
+        db: &DatabaseConnection,
+        playlist: playlist::Model,
+    ) -> Result<bool, AppError> {
         let result = playlist.clone().delete(db).await?;
 
         Self::update_search(&playlist).await?;

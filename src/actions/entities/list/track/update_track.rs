@@ -1,6 +1,9 @@
-use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, TransactionTrait};
+use sea_orm::{ActiveModelTrait, DatabaseConnection, TransactionTrait};
 
-use crate::{entities::list::track, traits::sortable::Sortable};
+use crate::{
+    AppError, entities::list::track, rules::validation_error::ValidationError,
+    traits::sortable::Sortable,
+};
 use sea_orm::ActiveValue::Set;
 
 pub struct UpdateTrackActionParameters {
@@ -12,11 +15,35 @@ pub struct UpdateTrackActionParameters {
 pub struct UpdateTrackAction {}
 
 impl UpdateTrackAction {
+    fn validate(params: &UpdateTrackActionParameters) -> Result<(), AppError> {
+        let mut errors = Vec::new();
+
+        let mut position_errors = Vec::new();
+
+        if let Some(position) = params.position {
+            if position < 1 {
+                position_errors.push("The position must be greater than 0.");
+            }
+        }
+
+        if !position_errors.is_empty() {
+            errors.push(ValidationError::new("position", position_errors));
+        }
+
+        if !errors.is_empty() {
+            return Err(AppError::Validation(errors));
+        }
+
+        Ok(())
+    }
+
     pub async fn update(
         db: &DatabaseConnection,
         track: track::Model,
         params: UpdateTrackActionParameters,
-    ) -> Result<track::Model, DbErr> {
+    ) -> Result<track::Model, AppError> {
+        Self::validate(&params)?;
+
         let txn = db.begin().await?;
 
         let mut active_model: track::ActiveModel = track.clone().into();

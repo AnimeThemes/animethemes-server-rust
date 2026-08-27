@@ -1,5 +1,5 @@
+use crate::AppError;
 use crate::entities::user::like;
-use anyhow::Result;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter,
@@ -17,7 +17,7 @@ impl LikeAction {
     pub async fn toggle(
         db: &DatabaseConnection,
         params: ToggleLikeActionParameters<'_>,
-    ) -> Result<Option<like::Model>> {
+    ) -> Result<Option<like::Model>, AppError> {
         let existing = like::Entity::find()
             .filter(like::Column::UserId.eq(params.user_id))
             .filter(like::Column::LikeableType.eq(params.likeable_type))
