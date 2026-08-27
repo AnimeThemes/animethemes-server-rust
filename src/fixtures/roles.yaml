@@ -1,0 +1,43 @@
+---
+ - id: 1
+   name: Admin
+   guard_name: web
+   default: false
+   color: "#1F8B4C"
+   priority: 250000
+ - id: 2
+   name: Content Moderator
+   guard_name: web
+   default: false
+   color: "#2E5A88"
+   priority: 100000
+ - id: 3
+   name: Encoder
+   guard_name: web
+   default: false
+   color: "#FFC107"
+   priority: 150000
+ - id: 4
+   name: Developer
+   guard_name: web
+   default: false
+   color: "#FF69B4"
+   priority: 125000
+ - id: 5
+   name: Verified
+   guard_name: web
+   default: true
+   color: null
+   priority: 0
+ - id: 6
+   name: Patron
+   guard_name: web
+   default: false
+   color: "#E74C3C"
+   priority: 75000
+ - id: 7
+   name: Contributor
+   guard_name: web
+   default: false
+   color: "#052C41"
+   priority: 50000

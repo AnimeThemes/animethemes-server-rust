@@ -31,6 +31,7 @@ use crate::{controllers, tasks, workers::downloader::DownloadWorker};
 use crate::{
     middlewares::{current_user::current_user_middleware, features::features_middleware},
     schema::{self, graphiql, graphql_handler},
+    seeds,
     session::create_session_layer,
     typesense::client::{create_typesense_client, init_typesense},
 };
@@ -142,7 +143,9 @@ impl Hooks for App {
         Ok(())
     }
 
-    async fn seed(_ctx: &AppContext, _base: &Path) -> Result<()> {
+    async fn seed(ctx: &AppContext, base: &Path) -> Result<()> {
+        seeds::role_seeder::seed_roles(ctx, base).await?;
+
         Ok(())
     }
 }

@@ -33,8 +33,18 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new("color").string().null())
                     .col(ColumnDef::new("priority").integer().not_null().default(0))
-                    .col(ColumnDef::new("created_at").timestamp().null())
-                    .col(ColumnDef::new("updated_at").timestamp().null())
+                    .col(
+                        ColumnDef::new("created_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
+                    .col(
+                        ColumnDef::new("updated_at")
+                            .timestamp()
+                            .not_null()
+                            .default(Expr::current_timestamp()),
+                    )
                     .index(
                         Index::create()
                             .name("roles_name_guard_name_unique")

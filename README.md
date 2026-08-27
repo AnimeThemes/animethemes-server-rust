@@ -49,6 +49,9 @@ docker exec -i animethemes-server-rust-mysql mysql -u root animethemes < content
 
 # Run the migrations
 docker compose exec -w /app/migration rust cargo run -- up
+
+# Seed the database
+docker compose exec rust cargo loco db seed
 ```
 
 ### Running

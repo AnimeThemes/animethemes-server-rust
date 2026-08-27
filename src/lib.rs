@@ -20,6 +20,7 @@ pub mod policies;
 pub mod rules;
 pub mod schema;
 pub mod scopes;
+pub mod seeds;
 pub mod session;
 pub mod tasks;
 pub mod traits;

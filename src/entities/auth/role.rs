@@ -2,11 +2,12 @@ use std::{fmt, str::FromStr};
 
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::entities::auth::{permission, user};
 
 #[sea_orm::model]
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "roles")]
 pub struct Model {
     #[sea_orm(primary_key)]
@@ -22,9 +23,11 @@ pub struct Model {
     #[sea_orm(column_type = "Timestamp")]
     pub updated_at: Option<chrono::DateTime<Utc>>,
 
+    #[serde(skip)]
     #[sea_orm(has_many, via = "role_has_permissions")]
     pub permissions: HasMany<permission::Entity>,
 
+    #[serde(skip)]
     #[sea_orm(has_many, via = "model_has_roles")]
     pub users: HasMany<user::Entity>,
 }
