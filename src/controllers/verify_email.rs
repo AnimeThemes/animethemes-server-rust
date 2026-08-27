@@ -6,7 +6,7 @@ use axum::{
 };
 use chrono::Utc;
 use loco_rs::prelude::*;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
+use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 use serde::Deserialize;
 
 use crate::{
@@ -24,7 +24,7 @@ pub struct VerifyEmailQuery {
 
 #[debug_handler(state = AppContext)]
 pub async fn verify_email(
-    SharedStore(db): SharedStore<DatabaseConnection>,
+    State(ctx): State<AppContext>,
     Path(user_id): Path<u64>,
     Query(query): Query<VerifyEmailQuery>,
 ) -> Result<Redirect, AppError> {
@@ -35,7 +35,7 @@ pub async fn verify_email(
     }
 
     let user = user::Entity::find_by_id(user_id)
-        .one(&db)
+        .one(&ctx.db)
         .await?
         .ok_or(AppError::Forbidden)?;
 
@@ -52,9 +52,9 @@ pub async fn verify_email(
 
         active_user.email_verified_at = Set(Some(Utc::now()));
 
-        let user = active_user.update(&db).await?;
+        let user = active_user.update(&ctx.db).await?;
 
-        RoleAction::assign_role(&db, &user, Roles::Verified).await?;
+        RoleAction::assign_role(&ctx.db, &user, Roles::Verified).await?;
     }
 
     let redirect = env::var("CLIENT_PROFILE_URL")
