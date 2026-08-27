@@ -38,7 +38,7 @@ pub struct Performance {
 #[ComplexObject]
 impl Performance {
     async fn artist(&self, ctx: &Context<'_>) -> Result<Artist> {
-        let loader = ctx.data::<DataLoader<PerformanceArtistLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<PerformanceArtistLoader>>();
 
         let artist = loader
             .load_one(self.artist_id)
@@ -53,13 +53,13 @@ impl Performance {
             return Ok(None);
         };
 
-        let loader = ctx.data::<DataLoader<PerformanceMemberLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<PerformanceMemberLoader>>();
 
         Ok(loader.load_one(member_id).await?.map(Into::into))
     }
 
     async fn song(&self, ctx: &Context<'_>) -> Result<Song> {
-        let loader = ctx.data::<DataLoader<PerformanceSongLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<PerformanceSongLoader>>();
 
         let song = loader
             .load_one(self.song_id)

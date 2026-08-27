@@ -24,13 +24,13 @@ impl Like {
             return Ok(None);
         }
 
-        let loader = ctx.data::<DataLoader<LikeEntryLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<LikeEntryLoader>>();
 
         Ok(loader.load_one(self.likeable_id).await?.map(Into::into))
     }
 
     async fn user(&self, ctx: &Context<'_>) -> Result<User> {
-        let loader = ctx.data::<DataLoader<LikeUserLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<LikeUserLoader>>();
 
         Ok(loader
             .load_one(self.user_id)

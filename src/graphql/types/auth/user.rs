@@ -35,7 +35,7 @@ impl User {
         ctx: &Context<'_>,
         sort: Option<Vec<PlaylistSort>>,
     ) -> Result<Vec<Playlist>> {
-        let loader = ctx.data::<DataLoader<UserPlaylistsLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<UserPlaylistsLoader>>();
 
         let models = loader
             .load_one(UserPlaylistsLoaderKey::new(self.id, sort))

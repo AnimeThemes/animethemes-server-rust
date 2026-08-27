@@ -58,7 +58,7 @@ impl Me {
         ctx: &Context<'_>,
         sort: Option<Vec<PlaylistSort>>,
     ) -> Result<Vec<Playlist>> {
-        let loader = ctx.data::<DataLoader<UserPlaylistsLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<UserPlaylistsLoader>>();
 
         let models = loader
             .load_one(UserPlaylistsLoaderKey::new(self.id, sort))
@@ -69,7 +69,7 @@ impl Me {
     }
 
     async fn roles(&self, ctx: &Context<'_>) -> Result<Vec<Role>> {
-        let loader = ctx.data::<DataLoader<UserRolesLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<UserRolesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -77,7 +77,7 @@ impl Me {
     }
 
     async fn permissions(&self, ctx: &Context<'_>) -> Result<Vec<Permission>> {
-        let loader = ctx.data::<DataLoader<UserPermissionsLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<UserPermissionsLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -85,7 +85,7 @@ impl Me {
     }
 
     async fn watch_history(&self, ctx: &Context<'_>) -> Result<Vec<WatchHistory>> {
-        let loader = ctx.data::<DataLoader<UserWatchHistoryLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<UserWatchHistoryLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -93,7 +93,7 @@ impl Me {
     }
 
     async fn likes(&self, ctx: &Context<'_>) -> Result<Vec<Like>> {
-        let loader = ctx.data::<DataLoader<UserLikesLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<UserLikesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 

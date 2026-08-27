@@ -53,7 +53,7 @@ pub struct AnimeThemeEntry {
 #[ComplexObject]
 impl AnimeThemeEntry {
     async fn animetheme(&self, ctx: &Context<'_>) -> Result<AnimeTheme> {
-        let loader = ctx.data::<DataLoader<AnimeThemeEntryThemeLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<AnimeThemeEntryThemeLoader>>();
 
         let theme = loader
             .load_one(self.theme_id)
@@ -76,7 +76,7 @@ impl AnimeThemeEntry {
             AnimeThemeEntryVideoEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<AnimeThemeEntryVideosLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<AnimeThemeEntryVideosLoader>>();
 
         let rows = loader.load_one(self.id).await?.unwrap_or_default();
 

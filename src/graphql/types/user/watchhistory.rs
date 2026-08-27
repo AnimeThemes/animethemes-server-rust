@@ -17,7 +17,7 @@ pub struct WatchHistory {
 #[Object]
 impl WatchHistory {
     async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<AnimeThemeEntry> {
-        let loader = ctx.data::<DataLoader<WatchHistoryEntryLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<WatchHistoryEntryLoader>>();
 
         Ok(loader
             .load_one(self.entry_id)
@@ -27,7 +27,7 @@ impl WatchHistory {
     }
 
     async fn video(&self, ctx: &Context<'_>) -> Result<Video> {
-        let loader = ctx.data::<DataLoader<WatchHistoryVideoLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<WatchHistoryVideoLoader>>();
 
         Ok(loader
             .load_one(self.video_id)

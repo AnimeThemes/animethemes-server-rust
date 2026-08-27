@@ -44,7 +44,7 @@ pub struct AnimeTheme {
 #[ComplexObject]
 impl AnimeTheme {
     async fn anime(&self, ctx: &Context<'_>) -> Result<Anime> {
-        let loader = ctx.data::<DataLoader<AnimeThemeAnimeLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<AnimeThemeAnimeLoader>>();
 
         let anime = loader
             .load_one(self.anime_id)
@@ -55,7 +55,7 @@ impl AnimeTheme {
     }
 
     async fn animethemeentries(&self, ctx: &Context<'_>) -> Result<Vec<AnimeThemeEntry>> {
-        let loader = ctx.data::<DataLoader<AnimeThemeEntriesLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<AnimeThemeEntriesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -67,7 +67,7 @@ impl AnimeTheme {
             return Ok(None);
         };
 
-        let loader = ctx.data::<DataLoader<AnimeThemeSongLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<AnimeThemeSongLoader>>();
 
         Ok(loader.load_one(song_id).await?.map(Into::into))
     }
@@ -77,7 +77,7 @@ impl AnimeTheme {
             return Ok(None);
         };
 
-        let loader = ctx.data::<DataLoader<AnimeThemeGroupLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<AnimeThemeGroupLoader>>();
 
         Ok(loader.load_one(group_id).await?.map(Into::into))
     }

@@ -80,7 +80,7 @@ pub struct Anime {
 #[ComplexObject]
 impl Anime {
     async fn synonyms(&self, ctx: &Context<'_>) -> Result<Vec<Synonym>> {
-        let loader = ctx.data::<DataLoader<AnimeSynonymsLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<AnimeSynonymsLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -88,7 +88,7 @@ impl Anime {
     }
 
     async fn animethemes(&self, ctx: &Context<'_>) -> Result<Vec<AnimeTheme>> {
-        let loader = ctx.data::<DataLoader<AnimeThemesLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<AnimeThemesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -108,7 +108,7 @@ impl Anime {
             ImageableEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<ImageableLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ImageableLoader>>();
 
         let rows = loader
             .load_one(ImageableKey {
@@ -148,7 +148,7 @@ impl Anime {
             ResourceableEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<ResourceableLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ResourceableLoader>>();
 
         let rows = loader
             .load_one(ResourceableKey {
@@ -188,7 +188,7 @@ impl Anime {
             AnimeSeriesEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<AnimeSeriesLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<AnimeSeriesLoader>>();
 
         let rows = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -221,7 +221,7 @@ impl Anime {
             AnimeStudioEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<AnimeStudiosLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<AnimeStudiosLoader>>();
 
         let rows = loader.load_one(self.id).await?.unwrap_or_default();
 

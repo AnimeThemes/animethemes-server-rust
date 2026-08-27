@@ -47,7 +47,7 @@ impl Page {
             return Ok(None);
         };
 
-        let loader = ctx.data::<DataLoader<PagePageLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<PagePageLoader>>();
 
         Ok(loader.load_one(previous_id).await?.map(Into::into))
     }
@@ -57,7 +57,7 @@ impl Page {
             return Ok(None);
         };
 
-        let loader = ctx.data::<DataLoader<PagePageLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<PagePageLoader>>();
 
         Ok(loader.load_one(next_id).await?.map(Into::into))
     }

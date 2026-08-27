@@ -52,7 +52,7 @@ impl Studio {
             StudioAnimeEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<StudioAnimeLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<StudioAnimeLoader>>();
 
         let rows = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -85,7 +85,7 @@ impl Studio {
             ImageableEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<ImageableLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ImageableLoader>>();
 
         let rows = loader
             .load_one(ImageableKey {
@@ -125,7 +125,7 @@ impl Studio {
             ResourceableEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<ResourceableLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ResourceableLoader>>();
 
         let rows = loader
             .load_one(ResourceableKey {

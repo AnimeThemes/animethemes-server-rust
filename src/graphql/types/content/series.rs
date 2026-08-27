@@ -57,7 +57,7 @@ impl Series {
             SeriesAnimeEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<SeriesAnimeLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<SeriesAnimeLoader>>();
 
         let rows = loader.load_one(self.id).await?.unwrap_or_default();
 

@@ -49,7 +49,7 @@ impl CurrentFeaturedTheme {
     }
 
     async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<AnimeThemeEntry> {
-        let loader = ctx.data::<DataLoader<FeaturedThemeEntryLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<FeaturedThemeEntryLoader>>();
 
         let model = loader
             .load_one(self.entry_id)
@@ -60,7 +60,7 @@ impl CurrentFeaturedTheme {
     }
 
     async fn video(&self, ctx: &Context<'_>) -> Result<Video> {
-        let loader = ctx.data::<DataLoader<FeaturedThemeVideoLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<FeaturedThemeVideoLoader>>();
 
         let model = loader
             .load_one(self.video_id)
@@ -75,7 +75,7 @@ impl CurrentFeaturedTheme {
             return Ok(None);
         };
 
-        let loader = ctx.data::<DataLoader<FeaturedThemeUserLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<FeaturedThemeUserLoader>>();
 
         Ok(loader.load_one(user_id).await?.map(Into::into))
     }

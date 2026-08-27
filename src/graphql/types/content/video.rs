@@ -89,7 +89,7 @@ impl Video {
             VideoAnimeThemeEntryEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<VideoAnimeThemeEntriesLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<VideoAnimeThemeEntriesLoader>>();
 
         let rows = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -114,13 +114,13 @@ impl Video {
             return Ok(None);
         };
 
-        let loader = ctx.data::<DataLoader<VideoAudioLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<VideoAudioLoader>>();
 
         Ok(loader.load_one(audio_id).await?.map(Into::into))
     }
 
     async fn videoscript(&self, ctx: &Context<'_>) -> Result<Option<VideoScript>> {
-        let loader = ctx.data::<DataLoader<VideoScriptLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<VideoScriptLoader>>();
 
         let script = loader.load_one(self.id).await?;
 
@@ -128,7 +128,7 @@ impl Video {
     }
 
     async fn tracks(&self, ctx: &Context<'_>) -> Result<Vec<PlaylistTrack>> {
-        let loader = ctx.data::<DataLoader<VideoTracksLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<VideoTracksLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 

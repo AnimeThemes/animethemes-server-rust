@@ -37,7 +37,7 @@ impl From<role::Model> for Role {
 #[ComplexObject]
 impl Role {
     async fn permissions(&self, ctx: &Context<'_>) -> Result<Vec<Permission>> {
-        let loader = ctx.data::<DataLoader<RolePermissionsLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<RolePermissionsLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 

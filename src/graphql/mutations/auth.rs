@@ -74,7 +74,7 @@ pub struct AuthMutation;
 #[Object]
 impl AuthMutation {
     pub async fn register(&self, ctx: &Context<'_>, input: RegisterInput) -> Result<Me> {
-        let feature_manager = ctx.data::<FeatureManager>()?;
+        let feature_manager = ctx.data_unchecked::<FeatureManager>();
 
         feature_manager
             .enabled(Feature::Registration, None)

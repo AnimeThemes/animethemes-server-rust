@@ -39,7 +39,7 @@ pub struct PlaylistTrack {
 #[ComplexObject]
 impl PlaylistTrack {
     async fn playlist(&self, ctx: &Context<'_>) -> Result<Playlist> {
-        let loader = ctx.data::<DataLoader<TrackPlaylistLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<TrackPlaylistLoader>>();
 
         Ok(loader
             .load_one(self.playlist_id)
@@ -49,7 +49,7 @@ impl PlaylistTrack {
     }
 
     async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<AnimeThemeEntry> {
-        let loader = ctx.data::<DataLoader<TrackEntryLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<TrackEntryLoader>>();
 
         Ok(loader
             .load_one(self.entry_id)
@@ -59,7 +59,7 @@ impl PlaylistTrack {
     }
 
     async fn video(&self, ctx: &Context<'_>) -> Result<Video> {
-        let loader = ctx.data::<DataLoader<TrackVideoLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<TrackVideoLoader>>();
 
         Ok(loader
             .load_one(self.video_id)

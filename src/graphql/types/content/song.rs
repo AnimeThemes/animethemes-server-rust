@@ -42,7 +42,7 @@ pub struct Song {
 #[ComplexObject]
 impl Song {
     async fn animethemes(&self, ctx: &Context<'_>) -> Result<Vec<AnimeTheme>> {
-        let loader = ctx.data::<DataLoader<SongAnimeThemesLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<SongAnimeThemesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -50,7 +50,7 @@ impl Song {
     }
 
     async fn performances(&self, ctx: &Context<'_>) -> Result<Vec<Performance>> {
-        let loader = ctx.data::<DataLoader<SongPerformancesLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<SongPerformancesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 

@@ -48,7 +48,7 @@ impl PlaylistTrackMutation {
             .map_err(|_| Error::from(AppError::Unauthenticated))
             .extend()?;
 
-        let feature_manager = ctx.data::<FeatureManager>()?;
+        let feature_manager = ctx.data_unchecked::<FeatureManager>();
 
         feature_manager
             .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
@@ -94,7 +94,7 @@ impl PlaylistTrackMutation {
             .map_err(|_| Error::from(AppError::Unauthenticated))
             .extend()?;
 
-        let feature_manager = ctx.data::<FeatureManager>()?;
+        let feature_manager = ctx.data_unchecked::<FeatureManager>();
 
         feature_manager
             .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
@@ -145,7 +145,7 @@ impl PlaylistTrackMutation {
             .map_err(|_| Error::from(AppError::Unauthenticated))
             .extend()?;
 
-        let feature_manager = ctx.data::<FeatureManager>()?;
+        let feature_manager = ctx.data_unchecked::<FeatureManager>();
 
         feature_manager
             .enabled(Feature::AllowPlaylistManagement, Some(&user.user))

@@ -65,7 +65,7 @@ pub struct Artist {
 #[ComplexObject]
 impl Artist {
     async fn synonyms(&self, ctx: &Context<'_>) -> Result<Vec<Synonym>> {
-        let loader = ctx.data::<DataLoader<ArtistSynonymsLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ArtistSynonymsLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -85,7 +85,7 @@ impl Artist {
             ArtistMemberEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<ArtistMembersLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ArtistMembersLoader>>();
 
         let rows = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -122,7 +122,7 @@ impl Artist {
             ArtistMemberEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<ArtistGroupsLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ArtistGroupsLoader>>();
 
         let rows = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -147,7 +147,7 @@ impl Artist {
     }
 
     async fn performances(&self, ctx: &Context<'_>) -> Result<Vec<Performance>> {
-        let loader = ctx.data::<DataLoader<ArtistPerformancesLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ArtistPerformancesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -155,7 +155,7 @@ impl Artist {
     }
 
     async fn member_performances(&self, ctx: &Context<'_>) -> Result<Vec<Performance>> {
-        let loader = ctx.data::<DataLoader<ArtistMemberPerformancesLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ArtistMemberPerformancesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -175,7 +175,7 @@ impl Artist {
             ImageableEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<ImageableLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ImageableLoader>>();
 
         let rows = loader
             .load_one(ImageableKey {
@@ -215,7 +215,7 @@ impl Artist {
             ResourceableEdge,
         >,
     > {
-        let loader = ctx.data::<DataLoader<ResourceableLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<ResourceableLoader>>();
 
         let rows = loader
             .load_one(ResourceableKey {

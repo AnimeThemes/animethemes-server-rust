@@ -59,7 +59,7 @@ pub struct Playlist {
 #[ComplexObject]
 impl Playlist {
     async fn tracks_count(&self, ctx: &Context<'_>) -> Result<i32> {
-        let loader = ctx.data::<DataLoader<PlaylistTracksCountLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<PlaylistTracksCountLoader>>();
 
         let count = loader.load_one(self.id).await?.unwrap_or(0);
 
@@ -67,7 +67,7 @@ impl Playlist {
     }
 
     async fn tracks_exists(&self, ctx: &Context<'_>) -> Result<bool> {
-        let loader = ctx.data::<DataLoader<PlaylistTracksCountLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<PlaylistTracksCountLoader>>();
 
         let count = loader.load_one(self.id).await?.unwrap_or(0);
 
@@ -75,7 +75,7 @@ impl Playlist {
     }
 
     async fn user(&self, ctx: &Context<'_>) -> Result<User> {
-        let loader = ctx.data::<DataLoader<PlaylistUserLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<PlaylistUserLoader>>();
 
         Ok(loader
             .load_one(self.user_id)
@@ -90,7 +90,7 @@ impl Playlist {
         filter: Option<PlaylistTracksFilterInput>,
         sort: Option<Vec<PlaylistTrackSort>>,
     ) -> Result<Vec<PlaylistTrack>> {
-        let loader = ctx.data::<DataLoader<PlaylistTracksLoader>>()?;
+        let loader = ctx.data_unchecked::<DataLoader<PlaylistTracksLoader>>();
 
         let models = loader
             .load_one(PlaylistTracksLoaderKey::new(self.id, filter, sort))

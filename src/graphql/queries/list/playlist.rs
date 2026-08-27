@@ -29,7 +29,7 @@ pub struct PlaylistQuery;
 #[Object]
 impl PlaylistQuery {
     async fn playlist(&self, ctx: &Context<'_>, id: String) -> Result<Option<Playlist>> {
-        let user = ctx.data::<CurrentUser>().ok();
+        let user = ctx.data_opt::<CurrentUser>();
 
         let db = ctx.data::<DatabaseConnection>()?;
 
@@ -51,7 +51,7 @@ impl PlaylistQuery {
         sort: Option<Vec<PlaylistSort>>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Playlist, EmptyFields, EmptyFields>>
     {
-        let user = ctx.data::<CurrentUser>().ok();
+        let user = ctx.data_opt::<CurrentUser>();
 
         PlaylistPolicy::check(user, PolicyAction::ViewAny, None).authorize()?;
 

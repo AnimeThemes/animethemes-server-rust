@@ -30,7 +30,7 @@ impl PageQuery {
     async fn page(&self, ctx: &Context<'_>, slug: String) -> Result<Option<Page>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
-        let user = ctx.data::<CurrentUser>().ok();
+        let user = ctx.data_opt::<CurrentUser>();
 
         let pages = page::Entity::find()
             .find_with_related(role::Entity)
@@ -57,7 +57,7 @@ impl PageQuery {
         pagination: Option<PaginationInput>,
         filter: Option<PageFilterInput>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Page, EmptyFields, EmptyFields>> {
-        let user = ctx.data::<CurrentUser>().ok();
+        let user = ctx.data_opt::<CurrentUser>();
         let user_roles = user.as_ref().map(|u| u.roles.clone()).unwrap_or_default();
 
         let mut query = page::Entity::find()
@@ -84,7 +84,7 @@ impl PageQuery {
         pagination: Option<PaginationInput>,
         sort: Option<Vec<PageSort>>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Page, EmptyFields, EmptyFields>> {
-        let user = ctx.data::<CurrentUser>().ok();
+        let user = ctx.data_opt::<CurrentUser>();
         let user_roles = user.as_ref().map(|u| u.roles.clone()).unwrap_or_default();
 
         let mut query = page::Entity::find()
