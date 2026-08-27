@@ -110,7 +110,7 @@ impl Hooks for App {
             .allow_headers([CONTENT_TYPE, AUTHORIZATION])
             .allow_credentials(true);
 
-        let session_layer = create_session_layer().await;
+        let session_layer = create_session_layer(&ctx).await;
 
         Ok(router
             .layer(from_fn_with_state(ctx.clone(), features_middleware))

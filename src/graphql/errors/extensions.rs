@@ -1,12 +1,9 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, str::FromStr};
 
 use async_graphql::{Error, ErrorExtensions};
+use loco_rs::environment::{Environment, resolve_from_env};
 
-use crate::{
-    AppError,
-    environment::{Environment, get_environment},
-    rules::validation_error::ValidationError,
-};
+use crate::{AppError, rules::validation_error::ValidationError};
 
 impl ErrorExtensions for AppError {
     fn extend(&self) -> Error {
@@ -71,4 +68,8 @@ impl ErrorExtensions for AppError {
             }
         }
     }
+}
+
+fn get_environment() -> Environment {
+    Environment::from_str(resolve_from_env().as_str()).unwrap_or(Environment::Development)
 }
