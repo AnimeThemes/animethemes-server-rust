@@ -2,6 +2,7 @@ use crate::{
     AppError,
     actions::auth::{
         forgot_password::ForgotPassword,
+        login::{LoginAction, LoginActionParameters},
         register::{CreateUserParameters, Register},
         reset_password::{ResetPassword, ResetPasswordParams},
         update_user_information::{UpdateUserInformation, UpdateUserInformationParameters},
@@ -13,7 +14,6 @@ use crate::{
     features::functions::FeatureManager,
 };
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
-use bcrypt::verify;
 use sea_orm::{DatabaseConnection, EntityTrait};
 use tower_sessions::Session;
 
@@ -106,18 +106,18 @@ impl AuthMutation {
     pub async fn login(&self, ctx: &Context<'_>, input: LoginInput) -> Result<Me> {
         let db = ctx.data::<DatabaseConnection>()?;
 
-        let user = user::Entity::find_by_email(input.email)
-            .one(db)
-            .await?
-            .ok_or_else(|| Error::new("Invalid credentials"))?;
-
-        if !verify(input.password, &user.password).map_err(AppError::internal)? {
-            return Err(Error::new("Invalid credentials"));
-        }
-
         let session = ctx.data::<Session>()?;
 
-        session.insert("user_id", user.id).await?;
+        let user = LoginAction::login(
+            db,
+            LoginActionParameters {
+                email: input.email,
+                password: input.password,
+                session: &session,
+            },
+        )
+        .await
+        .extend()?;
 
         Ok(user.into())
     }
@@ -194,10 +194,6 @@ impl AuthMutation {
         ctx: &Context<'_>,
         input: ResetPasswordInput,
     ) -> Result<bool> {
-        ctx.data::<CurrentUser>()
-            .map_err(|_| Error::from(AppError::Unauthenticated))
-            .extend()?;
-
         let db = ctx.data::<DatabaseConnection>()?;
 
         ResetPassword::reset_password(

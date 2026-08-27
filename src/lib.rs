@@ -32,6 +32,8 @@ pub mod workers;
 pub enum AppError {
     #[error("Unauthenticated")]
     Unauthenticated,
+    #[error("Unauthorized")]
+    Unauthorized,
     #[error("Validation")]
     Validation(Vec<ValidationError>),
     #[error("Forbidden")]
@@ -68,6 +70,7 @@ impl IntoResponse for AppError {
             AppError::Unauthenticated => {
                 (StatusCode::UNAUTHORIZED, "Unauthenticated").into_response()
             }
+            AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
             AppError::Forbidden => (StatusCode::FORBIDDEN, "Forbidden").into_response(),
             AppError::ForbiddenWithMessage(message) => {
                 (StatusCode::FORBIDDEN, message).into_response()
