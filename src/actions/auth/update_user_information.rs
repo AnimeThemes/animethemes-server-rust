@@ -39,6 +39,10 @@ impl UpdateUserInformation {
                 email_errors.push("The email is not valid.");
             }
 
+            if disposable::is_email(email) {
+                email_errors.push("Disposable email addresses are not allowed.");
+            }
+
             if !(1usize..=255).contains(&email.chars().count()) {
                 email_errors.push("The email must be between 1 and 255 characters.");
             }

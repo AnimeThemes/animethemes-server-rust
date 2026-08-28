@@ -80,6 +80,10 @@ impl Register {
             email_errors.push("The email is not valid.");
         }
 
+        if disposable::is_email(&params.email) {
+            email_errors.push("Disposable email addresses are not allowed.");
+        }
+
         if !(1usize..=255).contains(&params.email.chars().count()) {
             email_errors.push("The email must be between 1 and 255 characters.");
         }

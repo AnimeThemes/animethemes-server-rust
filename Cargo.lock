@@ -96,6 +96,7 @@ dependencies = [
  "bcrypt",
  "chrono",
  "convert_case",
+ "disposable",
  "dotenvy",
  "hash-ids",
  "hex",
@@ -1907,6 +1908,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.4",
+]
+
+[[package]]
+name = "disposable"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a29c4f063301272cd56485f446baf4aa2a6251ef81fc261841ce57681efd518"
+dependencies = [
+ "idna",
 ]
 
 [[package]]

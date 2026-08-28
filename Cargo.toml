@@ -53,6 +53,7 @@ reqwest = { version = "0.13", default-features = false, features = ["rustls", "m
 lettre = { version = "0.11.23", default-features = false, features = ["builder", "smtp-transport", "pool", "tokio1-rustls-tls"] }
 minijinja = "2.24.0"
 serde_yaml = "0.9.34"
+disposable = "0.1.0"
 
 [[bin]]
 name = "animethemes-server-rust"
