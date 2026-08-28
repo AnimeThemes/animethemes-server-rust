@@ -1,4 +1,4 @@
-use AnimeThemes::app::App;
+use animethemes_server_rust::app::App;
 use loco_rs::{task, testing::prelude::*};
 
 use loco_rs::boot::run_task;

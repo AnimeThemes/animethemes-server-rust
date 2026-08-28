@@ -39,7 +39,7 @@ pub async fn current_user_middleware(
         .await
     {
         Ok(users) => users,
-        Err(error) => {
+        Err(_) => {
             return next.run(request).await;
         }
     };
