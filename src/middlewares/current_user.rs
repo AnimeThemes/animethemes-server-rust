@@ -1,11 +1,14 @@
-use crate::entities::auth::{role, user};
+use crate::{
+    entities::auth::{role, sanction, user, user_sanctions},
+    scopes::auth::user_sanctions::current_sanctions,
+};
 use axum::{
     extract::{Request, State},
     middleware::Next,
     response::Response,
 };
 use loco_rs::app::AppContext;
-use sea_orm::EntityTrait;
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 
 use tower_sessions::Session;
 
@@ -13,6 +16,7 @@ use tower_sessions::Session;
 pub struct CurrentUser {
     pub user: user::Model,
     pub roles: Vec<role::Model>,
+    pub sanctions: Vec<(user_sanctions::Model, sanction::Model)>,
 }
 
 pub async fn current_user_middleware(
@@ -27,6 +31,8 @@ pub async fn current_user_middleware(
         return next.run(request).await;
     };
 
+    println!("user_id: {}", user_id.to_string().as_str());
+
     let users = match user::Entity::find_by_id(user_id)
         .find_with_related(role::Entity)
         .all(&db)
@@ -34,9 +40,19 @@ pub async fn current_user_middleware(
     {
         Ok(users) => users,
         Err(error) => {
-            println!("Failed to load current user {user_id}: {error}");
             return next.run(request).await;
         }
+    };
+
+    let sanctions = match user_sanctions::Entity::find()
+        .filter(user_sanctions::Column::UserId.eq(user_id))
+        .filter(current_sanctions())
+        .find_both_related(sanction::Entity)
+        .all(&db)
+        .await
+    {
+        Ok(sanctions) => sanctions,
+        Err(_) => Vec::new(),
     };
 
     let Some((user, roles)) = users.into_iter().next() else {
@@ -47,6 +63,7 @@ pub async fn current_user_middleware(
     request.extensions_mut().insert(CurrentUser {
         user: user,
         roles: roles,
+        sanctions: sanctions,
     });
 
     next.run(request).await

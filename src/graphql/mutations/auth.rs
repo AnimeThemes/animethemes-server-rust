@@ -102,18 +102,19 @@ impl AuthMutation {
     pub async fn login(&self, ctx: &Context<'_>, input: LoginInput) -> Result<Me> {
         let db = ctx.data::<DatabaseConnection>()?;
 
-        let session = ctx.data::<Session>()?;
-
         let user = LoginAction::login(
             db,
             LoginActionParameters {
                 email: input.email,
                 password: input.password,
-                session: &session,
             },
         )
         .await
         .extend()?;
+
+        let session = ctx.data::<Session>()?;
+
+        session.insert("user_id", user.id).await?;
 
         Ok(user.into())
     }

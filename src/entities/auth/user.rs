@@ -20,7 +20,7 @@ pub struct Model {
     #[sea_orm(column_type = "Timestamp")]
     pub updated_at: chrono::DateTime<Utc>,
 
-    #[sea_orm(has_many, via = "model_has_roles")]
+    #[sea_orm(has_many, via = "user_roles")]
     pub roles: HasMany<role::Entity>,
 
     #[sea_orm(has_many)]

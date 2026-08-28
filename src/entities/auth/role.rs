@@ -18,13 +18,15 @@ pub struct Model {
     pub color: Option<String>,
     pub default: bool,
     pub guard_name: String,
+    #[serde(default)]
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: Option<chrono::DateTime<Utc>>,
+    pub created_at: chrono::DateTime<Utc>,
+    #[serde(default)]
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: Option<chrono::DateTime<Utc>>,
+    pub updated_at: chrono::DateTime<Utc>,
 
     #[serde(skip)]
-    #[sea_orm(has_many, via = "model_has_roles")]
+    #[sea_orm(has_many, via = "user_roles")]
     pub users: HasMany<user::Entity>,
 }
 

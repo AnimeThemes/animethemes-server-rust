@@ -3,19 +3,19 @@ use std::path::Path;
 use loco_rs::{Error, Result, app::AppContext, environment::Environment};
 use sea_orm::{ActiveValue::NotSet, EntityTrait, IntoActiveModel};
 
-use crate::entities::auth::role;
+use crate::entities::auth::sanction;
 
-pub async fn seed_roles(ctx: &AppContext, base: &Path) -> Result<()> {
+pub async fn seed_sanctions(ctx: &AppContext, base: &Path) -> Result<()> {
     if ctx.environment != Environment::Development {
         return Ok(());
     }
 
-    let contents = tokio::fs::read(base.join("roles.yaml")).await?;
+    let contents = tokio::fs::read(base.join("sanctions.yaml")).await?;
 
-    let roles: Vec<role::Model> =
+    let sanctions: Vec<sanction::Model> =
         serde_yaml::from_slice(&contents).map_err(|e| Error::Message(e.to_string()))?;
 
-    let roles = roles
+    let sanctions = sanctions
         .into_iter()
         .map(|model| {
             let mut active = model.into_active_model();
@@ -27,7 +27,9 @@ pub async fn seed_roles(ctx: &AppContext, base: &Path) -> Result<()> {
         })
         .collect::<Vec<_>>();
 
-    role::Entity::insert_many(roles).exec(&ctx.db).await?;
+    sanction::Entity::insert_many(sanctions)
+        .exec(&ctx.db)
+        .await?;
 
     Ok(())
 }

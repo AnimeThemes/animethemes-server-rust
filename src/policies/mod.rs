@@ -1,6 +1,10 @@
 use crate::{
     AppError,
-    entities::auth::role::{self, Roles},
+    entities::auth::{
+        role::{self, Roles},
+        sanction::{self, Sanctions},
+        user_sanctions,
+    },
 };
 
 use crate::middlewares::current_user::CurrentUser;
@@ -18,7 +22,7 @@ pub enum PolicyAction {
 }
 
 pub trait Policy<T: Copy> {
-    fn before(user: Option<&CurrentUser>, _action: &PolicyAction) -> Option<PolicyResponse> {
+    fn global_before(user: Option<&CurrentUser>, _action: &PolicyAction) -> Option<PolicyResponse> {
         if let Some(user) = user
             && has_any_role(&user.roles, vec![Roles::Admin])
         {
@@ -26,6 +30,10 @@ pub trait Policy<T: Copy> {
         }
 
         None
+    }
+
+    fn before(user: Option<&CurrentUser>, action: &PolicyAction) -> Option<PolicyResponse> {
+        Self::global_before(user, action)
     }
 
     fn authorize(
@@ -88,4 +96,19 @@ pub fn has_any_role(user_roles: &[role::Model], roles: Vec<Roles>) -> bool {
             .parse::<Roles>()
             .is_ok_and(|role| roles.contains(&role))
     })
+}
+
+pub fn get_sanction<'a>(
+    user_sanctions: &'a [(user_sanctions::Model, sanction::Model)],
+    sanctions: Vec<Sanctions>,
+) -> Option<(&'a user_sanctions::Model, &'a sanction::Model)> {
+    user_sanctions
+        .iter()
+        .find(|(_, sanction)| {
+            sanction
+                .name
+                .parse::<Sanctions>()
+                .is_ok_and(|parsed| sanctions.contains(&parsed))
+        })
+        .map(|(user_sanction, sanction)| (user_sanction, sanction))
 }

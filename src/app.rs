@@ -145,6 +145,7 @@ impl Hooks for App {
 
     async fn seed(ctx: &AppContext, base: &Path) -> Result<()> {
         seeds::role_seeder::seed_roles(ctx, base).await?;
+        seeds::sanction_seeder::seed_sanctions(ctx, base).await?;
 
         Ok(())
     }

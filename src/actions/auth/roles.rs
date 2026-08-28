@@ -5,9 +5,8 @@ use sea_orm::{
 use crate::{
     AppError,
     entities::auth::{
-        model_has_roles,
         role::{self, Roles},
-        user,
+        user, user_roles,
     },
 };
 
@@ -28,10 +27,9 @@ impl RoleAction {
     ) -> Result<(), AppError> {
         let role_id = Self::find_role(db, role).await?.id;
 
-        let exists = model_has_roles::Entity::find()
-            .filter(model_has_roles::Column::ModelType.eq("user"))
-            .filter(model_has_roles::Column::ModelId.eq(user.id))
-            .filter(model_has_roles::Column::RoleId.eq(role_id))
+        let exists = user_roles::Entity::find()
+            .filter(user_roles::Column::UserId.eq(user.id))
+            .filter(user_roles::Column::RoleId.eq(role_id))
             .one(db)
             .await?
             .is_some();
@@ -40,9 +38,8 @@ impl RoleAction {
             return Ok(());
         }
 
-        model_has_roles::ActiveModel {
-            model_type: Set("user".to_string()),
-            model_id: Set(user.id),
+        user_roles::ActiveModel {
+            user_id: Set(user.id),
             role_id: Set(role_id),
             ..Default::default()
         }
@@ -59,10 +56,9 @@ impl RoleAction {
     ) -> Result<(), AppError> {
         let role_id = Self::find_role(db, role).await?.id;
 
-        model_has_roles::Entity::delete_many()
-            .filter(model_has_roles::Column::ModelType.eq("user"))
-            .filter(model_has_roles::Column::ModelId.eq(user.id))
-            .filter(model_has_roles::Column::RoleId.eq(role_id))
+        user_roles::Entity::delete_many()
+            .filter(user_roles::Column::UserId.eq(user.id))
+            .filter(user_roles::Column::RoleId.eq(role_id))
             .exec(db)
             .await?;
 

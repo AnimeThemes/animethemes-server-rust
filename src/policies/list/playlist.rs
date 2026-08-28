@@ -1,6 +1,10 @@
 use crate::{
-    entities::{auth::role::Roles, list::playlist},
+    entities::{
+        auth::{role::Roles, sanction::Sanctions},
+        list::playlist,
+    },
     enums::list::playlistvisibility::PlaylistVisibility,
+    policies::get_sanction,
 };
 
 use crate::{
@@ -11,6 +15,31 @@ use crate::{
 pub struct PlaylistPolicy;
 
 impl Policy<&playlist::Model> for PlaylistPolicy {
+    fn before(user: Option<&CurrentUser>, action: &PolicyAction) -> Option<PolicyResponse> {
+        if let Some(before) = <Self as Policy<&playlist::Model>>::global_before(user, action) {
+            return Some(before);
+        }
+
+        match user {
+            Some(user) => match action {
+                PolicyAction::Create | PolicyAction::Update | PolicyAction::Delete => {
+                    if let Some((user_sanction, _)) =
+                        get_sanction(&user.sanctions, vec![Sanctions::PlaylistManagement])
+                    {
+                        let message = Sanctions::PlaylistManagement
+                            .get_forbidden_message(user_sanction.get_forbidden_message());
+
+                        return Some(PolicyResponse::DenyWithMessage(message.to_string()));
+                    }
+                }
+                _ => {}
+            },
+            None => {}
+        }
+
+        None
+    }
+
     fn authorize(
         user: Option<&CurrentUser>,
         action: &PolicyAction,

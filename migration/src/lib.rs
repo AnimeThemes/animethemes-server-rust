@@ -32,6 +32,7 @@ mod m20260813_025156_create_page_roles_table;
 mod m20260824_174646_create_feature_flags_table;
 mod m20260824_224413_create_watch_history_table;
 mod m20260825_203853_create_password_reset_tokens_table;
+mod m20260828_130923_create_sanctions_table;
 
 pub struct Migrator;
 
@@ -71,6 +72,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260824_174646_create_feature_flags_table::Migration),
             Box::new(m20260824_224413_create_watch_history_table::Migration),
             Box::new(m20260825_203853_create_password_reset_tokens_table::Migration),
+            Box::new(m20260828_130923_create_sanctions_table::Migration),
         ]
     }
 }

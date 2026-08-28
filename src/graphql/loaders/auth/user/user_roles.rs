@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::entities::auth::{model_has_roles, role};
+use crate::entities::auth::{role, user_roles};
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
@@ -13,8 +13,8 @@ impl Loader<u64> for UserRolesLoader {
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
-        let roles = model_has_roles::Entity::find()
-            .filter(model_has_roles::Column::ModelId.is_in(keys))
+        let roles = user_roles::Entity::find()
+            .filter(user_roles::Column::UserId.is_in(keys))
             .find_also_related(role::Entity)
             .all(&self.db)
             .await?;
@@ -23,7 +23,7 @@ impl Loader<u64> for UserRolesLoader {
 
         for (pivot, role) in roles {
             if let Some(role) = role {
-                result.entry(pivot.model_id).or_default().push(role);
+                result.entry(pivot.user_id).or_default().push(role);
             }
         }
 
