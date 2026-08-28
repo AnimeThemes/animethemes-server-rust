@@ -1,14 +1,8 @@
 use crate::entities::auth::role;
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
-
-use crate::graphql::{
-    loaders::auth::role::role_permissions::RolePermissionsLoader,
-    types::auth::permission::Permission,
-};
+use async_graphql::SimpleObject;
 
 /// Represents an assignable label for users that provides a configured group of permissions.
 #[derive(SimpleObject)]
-#[graphql(complex)]
 pub struct Role {
     /// The primary key of the resource
     pub id: u64,
@@ -31,16 +25,5 @@ impl From<role::Model> for Role {
             default: model.default,
             priority: model.priority,
         }
-    }
-}
-
-#[ComplexObject]
-impl Role {
-    async fn permissions(&self, ctx: &Context<'_>) -> Result<Vec<Permission>> {
-        let loader = ctx.data_unchecked::<DataLoader<RolePermissionsLoader>>();
-
-        let models = loader.load_one(self.id).await?.unwrap_or_default();
-
-        Ok(models.into_iter().map(Permission::from).collect())
     }
 }

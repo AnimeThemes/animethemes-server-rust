@@ -1,10 +1,7 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::{
-    auth::{permission, role},
-    list::playlist,
-};
+use crate::entities::{auth::role, list::playlist};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
@@ -25,9 +22,6 @@ pub struct Model {
 
     #[sea_orm(has_many, via = "model_has_roles")]
     pub roles: HasMany<role::Entity>,
-
-    #[sea_orm(has_many, via = "model_has_permissions")]
-    pub permissions: HasMany<permission::Entity>,
 
     #[sea_orm(has_many)]
     pub playlists: HasMany<playlist::Entity>,

@@ -4,7 +4,7 @@ use chrono::Utc;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::entities::auth::{permission, user};
+use crate::entities::auth::user;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
@@ -22,10 +22,6 @@ pub struct Model {
     pub created_at: Option<chrono::DateTime<Utc>>,
     #[sea_orm(column_type = "Timestamp")]
     pub updated_at: Option<chrono::DateTime<Utc>>,
-
-    #[serde(skip)]
-    #[sea_orm(has_many, via = "role_has_permissions")]
-    pub permissions: HasMany<permission::Entity>,
 
     #[serde(skip)]
     #[sea_orm(has_many, via = "model_has_roles")]

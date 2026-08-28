@@ -8,13 +8,9 @@ use crate::graphql::{
             featuredtheme_user::FeaturedThemeUserLoader,
             featuredtheme_video::FeaturedThemeVideoLoader,
         },
-        auth::{
-            role::role_permissions::RolePermissionsLoader,
-            user::{
-                user_likes::UserLikesLoader, user_permissions::UserPermissionsLoader,
-                user_playlists::UserPlaylistsLoader, user_roles::UserRolesLoader,
-                user_watchhistory::UserWatchHistoryLoader,
-            },
+        auth::user::{
+            user_likes::UserLikesLoader, user_playlists::UserPlaylistsLoader,
+            user_roles::UserRolesLoader, user_watchhistory::UserWatchHistoryLoader,
         },
         content::{
             anime::{
@@ -88,10 +84,8 @@ impl<Query> RegisterLoaders for SchemaBuilder<Query, Mutation, EmptySubscription
         self.data(loader(FeaturedThemeEntryLoader { db: db.clone() }))
             .data(loader(FeaturedThemeUserLoader { db: db.clone() }))
             .data(loader(FeaturedThemeVideoLoader { db: db.clone() }))
-            .data(loader(RolePermissionsLoader { db: db.clone() }))
             .data(loader(UserPlaylistsLoader { db: db.clone() }))
             .data(loader(UserRolesLoader { db: db.clone() }))
-            .data(loader(UserPermissionsLoader { db: db.clone() }))
             .data(loader(UserWatchHistoryLoader { db: db.clone() }))
             .data(loader(UserLikesLoader { db: db.clone() }))
             .data(loader(WatchHistoryEntryLoader { db: db.clone() }))
