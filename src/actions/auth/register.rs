@@ -1,4 +1,5 @@
 use bcrypt::hash;
+use loco_rs::validator::ValidateEmail;
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DatabaseConnection, EntityTrait,
     QueryFilter, SelectExt,
@@ -29,8 +30,8 @@ impl Register {
     ) -> Vec<&'a str> {
         let mut errors = Vec::new();
 
-        if password.chars().count() < 8 {
-            errors.push("The password must be at least 8 characters.");
+        if !(8..=72).contains(&password.chars().count()) {
+            errors.push("The password must be between 8 and 72 characters.");
         }
 
         if !password.chars().any(|c| c.is_uppercase()) {
@@ -73,6 +74,10 @@ impl Register {
 
         if !(1usize..=35).contains(&params.name.chars().count()) {
             name_errors.push("The name must be between 1 and 35 characters.");
+        }
+
+        if !&params.email.validate_email() {
+            email_errors.push("The email is not valid.");
         }
 
         if !(1usize..=255).contains(&params.email.chars().count()) {

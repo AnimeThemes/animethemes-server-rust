@@ -1,3 +1,4 @@
+use loco_rs::validator::ValidateEmail;
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DatabaseConnection, EntityTrait,
     QueryFilter, SelectExt,
@@ -34,6 +35,10 @@ impl UpdateUserInformation {
         }
 
         if let Some(email) = params.email.as_deref() {
+            if !email.validate_email() {
+                email_errors.push("The email is not valid.");
+            }
+
             if !(1usize..=255).contains(&email.chars().count()) {
                 email_errors.push("The email must be between 1 and 255 characters.");
             }

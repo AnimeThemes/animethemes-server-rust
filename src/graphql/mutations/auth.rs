@@ -22,7 +22,6 @@ use crate::{graphql::types::auth::me::Me, middlewares::current_user::CurrentUser
 #[derive(InputObject)]
 pub struct RegisterInput {
     name: String,
-    #[graphql(validator(email))]
     email: String,
     #[graphql(secret)]
     password: String,
@@ -33,7 +32,6 @@ pub struct RegisterInput {
 
 #[derive(InputObject)]
 pub struct LoginInput {
-    #[graphql(validator(email, max_length = 255))]
     email: String,
     #[graphql(secret)]
     password: String,
@@ -42,7 +40,6 @@ pub struct LoginInput {
 #[derive(InputObject)]
 pub struct UpdateUserInformationInput {
     name: Option<String>,
-    #[graphql(validator(email))]
     email: Option<String>,
 }
 
@@ -58,7 +55,6 @@ pub struct UpdatePasswordInput {
 
 #[derive(InputObject)]
 pub struct ResetPasswordInput {
-    #[graphql(validator(email))]
     email: String,
     #[graphql(secret)]
     password: String,
