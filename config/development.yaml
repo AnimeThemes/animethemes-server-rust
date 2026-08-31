@@ -2,7 +2,7 @@
 
 database:
   uri: <%= get_env(name="DATABASE_URL", default="sqlite://myapp_development.sqlite?mode=rwc") %>
-  enable_logging: false
+  enable_logging: <%= get_env(name="DATABASE_LOGGING", default="false") %>
   connect_timeout: 500
   acquire_timeout: 30000
   idle_timeout: 600000

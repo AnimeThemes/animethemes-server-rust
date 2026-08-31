@@ -1,3 +1,5 @@
+use std::{env, time::Duration};
+
 use async_graphql::{EmptySubscription, SchemaBuilder, dataloader::DataLoader};
 use sea_orm::DatabaseConnection;
 
@@ -72,7 +74,12 @@ fn loader<L>(loader: L) -> DataLoader<L>
 where
     L: Send + Sync + 'static,
 {
+    let delay = env::var("DATALOADER_DELAY_MS").unwrap_or(1.to_string());
+    let max_batch_size = env::var("DATALOADER_MAX_BATCH_SIZE").unwrap_or(1000.to_string());
+
     DataLoader::new(loader, tokio::spawn)
+        .delay(Duration::from_millis(delay.parse().unwrap_or(1)))
+        .max_batch_size(max_batch_size.parse().unwrap_or(1000))
 }
 
 pub trait RegisterLoaders {

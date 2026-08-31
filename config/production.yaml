@@ -12,6 +12,7 @@
 
 database:
   uri: <%= get_env(name="DATABASE_URL") %>
+  enable_logging: <%= get_env(name="DATABASE_LOGGING", default="false") %>
   connect_timeout: 5000
   acquire_timeout: 30000
   idle_timeout: 60000
