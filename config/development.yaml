@@ -2,11 +2,12 @@
 
 database:
   uri: <%= get_env(name="DATABASE_URL", default="sqlite://myapp_development.sqlite?mode=rwc") %>
-  enable_logging: true
+  enable_logging: false
   connect_timeout: 500
-  idle_timeout: 500
+  acquire_timeout: 30000
+  idle_timeout: 600000
   min_connections: 1
-  max_connections: 10
+  max_connections: 20
   auto_migrate: false
   dangerously_truncate: false
   dangerously_recreate: false

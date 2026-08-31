@@ -39,7 +39,8 @@ Open the `/etc/hosts` file and paste the contents there:
 # Generate a new APP_KEY
 openssl rand -hex 32
 
-# Set the APP_KEY in the .env file
+# Open the .env file and set the APP_KEY
+nano .env
 
 # Build the containers
 docker compose up -d --build

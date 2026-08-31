@@ -31,7 +31,6 @@ impl MailBackend {
                 Ok(())
             }
             MailBackend::Mailgun => {
-                println!("mailgun");
                 let domain =
                     env::var("MAILGUN_DOMAIN").expect("MAILGUN_DOMAIN must be set in .env");
                 let secret =

@@ -12,10 +12,11 @@
 
 database:
   uri: <%= get_env(name="DATABASE_URL") %>
-  connect_timeout: 500
-  idle_timeout: 500
+  connect_timeout: 5000
+  acquire_timeout: 30000
+  idle_timeout: 60000
   min_connections: 1
-  max_connections: 10
+  max_connections: 20
   auto_migrate: false
   dangerously_truncate: false
   dangerously_recreate: false

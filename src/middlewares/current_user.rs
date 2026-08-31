@@ -31,8 +31,6 @@ pub async fn current_user_middleware(
         return next.run(request).await;
     };
 
-    println!("user_id: {}", user_id.to_string().as_str());
-
     let users = match user::Entity::find_by_id(user_id)
         .find_with_related(role::Entity)
         .all(&db)
@@ -56,7 +54,6 @@ pub async fn current_user_middleware(
     };
 
     let Some((user, roles)) = users.into_iter().next() else {
-        println!("User {user_id} from session was not found");
         return next.run(request).await;
     };
 

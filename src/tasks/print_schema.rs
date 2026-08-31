@@ -19,7 +19,10 @@ impl Task for PrintSchema {
             Schema::build(Query::default(), Mutation::default(), EmptySubscription).finish();
 
         // Print the schema in SDL format
-        println!("{}", &schema.sdl());
+        tracing::info!(
+            schema = %schema.sdl(),
+            "GraphQL schema"
+        );
 
         Ok(())
     }

@@ -23,7 +23,7 @@ impl Task for ClearResetPasswords {
             .await
             .map_err(|_| LocoError::InternalServerError)?;
 
-        println!("Task ClearResetPasswords executed");
+        tracing::info!("Task ClearResetPasswords executed");
 
         Ok(())
     }

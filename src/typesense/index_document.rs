@@ -88,7 +88,7 @@ where
 
         total_indexed += documents_count;
 
-        println!(
+        tracing::info!(
             "{total_indexed} indexed documents for entity {}",
             E::table_name(&E::default())
         );
