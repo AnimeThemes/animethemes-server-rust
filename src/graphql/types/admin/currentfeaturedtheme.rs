@@ -6,13 +6,12 @@ use crate::{
     entities::admin::featuredtheme,
     graphql::{
         loaders::admin::{
-            featuredtheme_entry::FeaturedThemeEntryLoader,
-            featuredtheme_user::FeaturedThemeUserLoader,
+            featuredtheme_entry::FeaturedEntryLoader, featuredtheme_user::FeaturedThemeUserLoader,
             featuredtheme_video::FeaturedThemeVideoLoader,
         },
         types::{
             auth::user::User,
-            content::{animethemeentry::AnimeThemeEntry, video::Video},
+            content::{entry::Entry, video::Video},
         },
         utils::format_option_datetime,
     },
@@ -48,8 +47,8 @@ impl CurrentFeaturedTheme {
         format_option_datetime(self.end_at.as_ref(), &format)
     }
 
-    async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<AnimeThemeEntry> {
-        let loader = ctx.data_unchecked::<DataLoader<FeaturedThemeEntryLoader>>();
+    async fn entry(&self, ctx: &Context<'_>) -> Result<Entry> {
+        let loader = ctx.data_unchecked::<DataLoader<FeaturedEntryLoader>>();
 
         let model = loader
             .load_one(self.entry_id)

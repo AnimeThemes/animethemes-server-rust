@@ -3,17 +3,17 @@ use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
 use crate::{
-    entities::content::{animethemeentry, video},
+    entities::content::{entry, video},
     typesense::{
         documents::{
             HasId,
-            animethemeentry_document::{AnimeThemeEntryDocument, build_animethemeentry_documents},
+            entry_document::{EntryDocument, build_entry_documents},
         },
         index_document::BuildDocumentsFuture,
     },
 };
 
-pub const QUERY_BY: &str = "filename,tags,entries.animetheme.song.title,entries.animetheme.song.title_native,entries.animetheme.anime.title,entries.animetheme.anime.title_english,entries.animetheme.anime.title_native,entries.animetheme.anime.synonyms,entries.type_sequence_version";
+pub const QUERY_BY: &str = "filename,tags,entries.theme.song.title,entries.theme.song.title_native,entries.theme.anime.title,entries.theme.anime.title_english,entries.theme.anime.title_native,entries.theme.anime.synonyms,entries.type_sequence_version";
 pub const QUERY_BY_WEIGHTS: &str = "10,8,6,7,5,5,5,4,4";
 
 #[derive(Debug, Clone, Serialize, Deserialize, Typesense)]
@@ -22,7 +22,7 @@ pub struct VideoDocument {
     pub id: String,
     pub filename: String,
     pub tags: String,
-    pub entries: Vec<AnimeThemeEntryDocument>,
+    pub entries: Vec<EntryDocument>,
     pub created_at: i64,
 }
 
@@ -32,7 +32,7 @@ impl HasId for VideoDocument {
     }
 }
 
-type VideoDocumentFrom = (video::Model, Vec<AnimeThemeEntryDocument>);
+type VideoDocumentFrom = (video::Model, Vec<EntryDocument>);
 
 impl From<VideoDocumentFrom> for VideoDocument {
     fn from((model, entry_documents): VideoDocumentFrom) -> Self {
@@ -51,14 +51,13 @@ pub fn build_video_documents<'a>(
     database: &'a DatabaseConnection,
 ) -> BuildDocumentsFuture<'a, VideoDocument> {
     Box::pin(async move {
-        let entry_models: Vec<Vec<animethemeentry::Model>> =
-            models.load_many(animethemeentry::Entity, database).await?;
+        let entry_models: Vec<Vec<entry::Model>> =
+            models.load_many(entry::Entity, database).await?;
 
-        let mut entry_documents: Vec<Vec<AnimeThemeEntryDocument>> =
-            Vec::with_capacity(entry_models.len());
+        let mut entry_documents: Vec<Vec<EntryDocument>> = Vec::with_capacity(entry_models.len());
 
         for entry_group in entry_models {
-            entry_documents.push(build_animethemeentry_documents(entry_group, database).await?);
+            entry_documents.push(build_entry_documents(entry_group, database).await?);
         }
 
         let documents = models

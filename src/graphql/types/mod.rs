@@ -2,8 +2,8 @@ use async_graphql::{OutputType, SimpleObject};
 
 use crate::graphql::types::{
     content::{
-        anime::Anime, animetheme::AnimeTheme, artist::Artist, series::Series, song::Song,
-        studio::Studio, video::Video,
+        anime::Anime, artist::Artist, series::Series, song::Song, studio::Studio, theme::Theme,
+        video::Video,
     },
     list::playlist::Playlist,
 };
@@ -18,7 +18,7 @@ pub mod user;
 #[derive(SimpleObject)]
 #[graphql(concrete(name = "AnimePagination", params(Anime)))]
 #[graphql(concrete(name = "ArtistPagination", params(Artist)))]
-#[graphql(concrete(name = "AnimeThemePagination", params(AnimeTheme)))]
+#[graphql(concrete(name = "ThemePagination", params(Theme)))]
 #[graphql(concrete(name = "PlaylistPagination", params(Playlist)))]
 #[graphql(concrete(name = "SeriesPagination", params(Series)))]
 #[graphql(concrete(name = "SongPagination", params(Song)))]

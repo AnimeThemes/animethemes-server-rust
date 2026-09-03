@@ -9,10 +9,10 @@ mod m20260813_001026_create_songs_table;
 mod m20260813_001122_create_artists_table;
 mod m20260813_001246_create_resources_table;
 mod m20260813_002050_create_groups_table;
-mod m20260813_002131_create_anime_themes_table;
-mod m20260813_002331_create_anime_theme_entries_table;
+mod m20260813_002131_create_themes_table;
+mod m20260813_002331_create_entries_table;
 mod m20260813_002652_create_anime_series_table;
-mod m20260813_003551_create_anime_theme_entry_video_table;
+mod m20260813_003551_create_entry_video_table;
 mod m20260813_003837_create_artist_member_table;
 mod m20260813_004225_create_images_table;
 mod m20260813_004321_create_studios_table;
@@ -50,10 +50,10 @@ impl MigratorTrait for Migrator {
             Box::new(m20260813_001122_create_artists_table::Migration),
             Box::new(m20260813_001246_create_resources_table::Migration),
             Box::new(m20260813_002050_create_groups_table::Migration),
-            Box::new(m20260813_002131_create_anime_themes_table::Migration),
-            Box::new(m20260813_002331_create_anime_theme_entries_table::Migration),
+            Box::new(m20260813_002131_create_themes_table::Migration),
+            Box::new(m20260813_002331_create_entries_table::Migration),
             Box::new(m20260813_002652_create_anime_series_table::Migration),
-            Box::new(m20260813_003551_create_anime_theme_entry_video_table::Migration),
+            Box::new(m20260813_003551_create_entry_video_table::Migration),
             Box::new(m20260813_003837_create_artist_member_table::Migration),
             Box::new(m20260813_004225_create_images_table::Migration),
             Box::new(m20260813_004321_create_studios_table::Migration),

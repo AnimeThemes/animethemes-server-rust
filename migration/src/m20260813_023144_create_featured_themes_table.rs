@@ -51,7 +51,7 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("featured_themes_entry_id_foreign")
                             .from("featured_themes", "entry_id")
-                            .to("anime_theme_entries", "entry_id")
+                            .to("entries", "entry_id")
                             .on_delete(ForeignKeyAction::SetNull),
                     )
                     .foreign_key(

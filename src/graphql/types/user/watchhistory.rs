@@ -5,7 +5,7 @@ use crate::graphql::{
     loaders::user::watchhistory::{
         watchhistory_entry::WatchHistoryEntryLoader, watchhistory_video::WatchHistoryVideoLoader,
     },
-    types::content::{animethemeentry::AnimeThemeEntry, video::Video},
+    types::content::{entry::Entry, video::Video},
 };
 
 /// Represents the watch history of the authenticated user.
@@ -16,7 +16,7 @@ pub struct WatchHistory {
 
 #[Object]
 impl WatchHistory {
-    async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<AnimeThemeEntry> {
+    async fn entry(&self, ctx: &Context<'_>) -> Result<Entry> {
         let loader = ctx.data_unchecked::<DataLoader<WatchHistoryEntryLoader>>();
 
         Ok(loader

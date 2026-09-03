@@ -2,13 +2,13 @@ use std::vec;
 
 use crate::{
     entities::{
-        content::{anime, animetheme, artist, series, song, studio, video},
+        content::{anime, artist, series, song, studio, theme, video},
         list::playlist,
     },
     graphql::{
         enums::search_sort::{
-            SearchAnimeSort, SearchAnimeThemeSort, SearchArtistSort, SearchPlaylistSort,
-            SearchSeriesSort, SearchSort, SearchStudioSort,
+            SearchAnimeSort, SearchArtistSort, SearchPlaylistSort, SearchSeriesSort, SearchSort,
+            SearchStudioSort, SearchThemeSort,
         },
         types::{OffsetPageInfo, OffsetPagination},
     },
@@ -16,8 +16,8 @@ use crate::{
     typesense::{
         client::TypesenseClient,
         search::{
-            search_anime, search_animethemes, search_artists, search_playlists, search_series,
-            search_songs, search_studios, search_videos,
+            search_anime, search_artists, search_playlists, search_series, search_songs,
+            search_studios, search_themes, search_videos,
         },
     },
 };
@@ -30,8 +30,8 @@ use sea_orm::{ActiveEnum, DatabaseConnection, EntityTrait, ModelTrait, QueryFilt
 
 use crate::graphql::types::{
     content::{
-        anime::Anime, animetheme::AnimeTheme, artist::Artist, series::Series, song::Song,
-        studio::Studio, video::Video,
+        anime::Anime, artist::Artist, series::Series, song::Song, studio::Studio, theme::Theme,
+        video::Video,
     },
     list::playlist::Playlist,
 };
@@ -126,12 +126,12 @@ impl SearchStudioFilterInput {
 }
 
 #[derive(InputObject, Default)]
-struct SearchAnimeThemeFilterInput {
+struct SearchThemeFilterInput {
     song_title_romaji_prefix: Option<String>,
     r#type: Option<ThemeType>,
 }
 
-impl SearchAnimeThemeFilterInput {
+impl SearchThemeFilterInput {
     pub fn to_typesense_filter(&self) -> Option<String> {
         let mut filters = Vec::new();
 
@@ -219,12 +219,12 @@ impl Search {
     }
 
     /// The theme results of the search
-    async fn animethemes(
+    async fn themes(
         &self,
         ctx: &Context<'_>,
-        filter: Option<SearchAnimeThemeFilterInput>,
-        sort: Option<Vec<SearchAnimeThemeSort>>,
-    ) -> Result<OffsetPagination<AnimeTheme>> {
+        filter: Option<SearchThemeFilterInput>,
+        sort: Option<Vec<SearchThemeSort>>,
+    ) -> Result<OffsetPagination<Theme>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let typesense = ctx.data::<TypesenseClient>()?;
@@ -237,10 +237,10 @@ impl Search {
             })
             .unwrap_or_default();
 
-        let result = search_animethemes(
+        let result = search_themes(
             db,
             typesense,
-            animetheme::Entity::find(),
+            theme::Entity::find(),
             self.term.clone(),
             self.first,
             self.page,

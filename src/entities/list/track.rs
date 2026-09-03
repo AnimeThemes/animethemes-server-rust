@@ -6,7 +6,7 @@ use async_trait::async_trait;
 use crate::{
     entities::{
         HasHashId,
-        content::{animethemeentry, video},
+        content::{entry, video},
         list::playlist,
     },
     traits::sortable::Sortable,
@@ -32,7 +32,7 @@ pub struct Model {
     pub playlist: BelongsTo<playlist::Entity>,
 
     #[sea_orm(belongs_to, from = "entry_id", to = "id")]
-    pub entry: BelongsTo<Option<animethemeentry::Entity>>,
+    pub entry: BelongsTo<Option<entry::Entity>>,
 
     #[sea_orm(belongs_to, from = "video_id", to = "id")]
     pub video: BelongsTo<Option<video::Entity>>,

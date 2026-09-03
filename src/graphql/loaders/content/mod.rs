@@ -1,11 +1,11 @@
 pub mod anime;
-pub mod animetheme;
-pub mod animethemeentry;
 pub mod artist;
+pub mod entry;
 pub mod imageable;
 pub mod performance;
 pub mod resourceable;
 pub mod series;
 pub mod song;
 pub mod studio;
+pub mod theme;
 pub mod video;

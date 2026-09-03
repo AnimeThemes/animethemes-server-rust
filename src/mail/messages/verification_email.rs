@@ -26,7 +26,7 @@ impl Messages {
             {}\n\n\
             If you did not create an account, no further action is required.\n\n\
             Regards,\n\
-            AnimeThemes",
+            Themes",
             name, verification_url,
         );
 

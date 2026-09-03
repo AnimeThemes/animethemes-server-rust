@@ -14,7 +14,7 @@ use crate::{
         loaders::content::{
             anime::{
                 anime_series::AnimeSeriesLoader, anime_studios::AnimeStudiosLoader,
-                anime_synonyms::AnimeSynonymsLoader, anime_themes::AnimeThemesLoader,
+                anime_synonyms::AnimeSynonymsLoader, anime_themes::ThemesLoader,
             },
             imageable::{ImageableKey, ImageableLoader},
             resourceable::{ResourceableKey, ResourceableLoader},
@@ -22,7 +22,6 @@ use crate::{
         types::content::{
             anime_series::{AnimeSeriesConnection, AnimeSeriesEdge, AnimeSeriesEdgeFields},
             anime_studios::{AnimeStudioConnection, AnimeStudioEdge, AnimeStudioEdgeFields},
-            animetheme::AnimeTheme,
             externalresource::ExternalResource,
             image::Image,
             imageable::{ImageableConnection, ImageableEdge, ImageableEdgeFields},
@@ -30,6 +29,7 @@ use crate::{
             series::Series,
             studio::Studio,
             synonym::Synonym,
+            theme::Theme,
         },
     },
 };
@@ -87,12 +87,12 @@ impl Anime {
         Ok(models.into_iter().map(Synonym::from).collect())
     }
 
-    async fn animethemes(&self, ctx: &Context<'_>) -> Result<Vec<AnimeTheme>> {
-        let loader = ctx.data_unchecked::<DataLoader<AnimeThemesLoader>>();
+    async fn themes(&self, ctx: &Context<'_>) -> Result<Vec<Theme>> {
+        let loader = ctx.data_unchecked::<DataLoader<ThemesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
-        Ok(models.into_iter().map(AnimeTheme::from).collect())
+        Ok(models.into_iter().map(Theme::from).collect())
     }
 
     async fn images(

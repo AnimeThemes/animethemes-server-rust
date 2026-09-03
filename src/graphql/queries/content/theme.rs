@@ -1,5 +1,5 @@
 use crate::{
-    entities::content::{anime, animetheme, animethemeentry},
+    entities::content::{anime, entry, theme},
     enums::content::{animeformat::AnimeFormat, themetype::ThemeType},
     scopes::without_trashed,
 };
@@ -14,13 +14,13 @@ use sea_orm::{
 
 use crate::graphql::{
     cursor::{CursorSort, PaginationCursor, cursor_paginate},
-    enums::sort::{GraphQLSort, content::animetheme_sort::AnimeThemeSort},
+    enums::sort::{GraphQLSort, content::theme_sort::ThemeSort},
     inputs::pagination_input::PaginationInput,
-    types::content::animetheme::AnimeTheme,
+    types::content::theme::Theme,
 };
 
 #[derive(InputObject, Default)]
-struct AnimeThemeShuffleInput {
+struct ThemeShuffleInput {
     r#type: Option<Vec<ThemeType>>,
     format: Option<AnimeFormat>,
     year_gte: Option<i16>,
@@ -29,35 +29,32 @@ struct AnimeThemeShuffleInput {
 }
 
 #[derive(InputObject, Default)]
-pub struct AnimeThemeFilterInput {
+pub struct ThemeFilterInput {
     id_in: Option<Vec<u64>>,
     r#type: Option<ThemeType>,
 }
 
 #[derive(Default)]
-pub struct AnimeThemeQuery;
+pub struct ThemeQuery;
 
 #[Object]
-impl AnimeThemeQuery {
-    async fn animetheme_shuffle(
+impl ThemeQuery {
+    async fn theme_shuffle(
         &self,
         ctx: &Context<'_>,
         #[graphql(default = 15)] first: u64,
-        input: Option<AnimeThemeShuffleInput>,
-    ) -> Result<Vec<AnimeTheme>> {
+        input: Option<ThemeShuffleInput>,
+    ) -> Result<Vec<Theme>> {
         let db = ctx.data::<DatabaseConnection>()?;
 
         let input = input.unwrap_or_default();
 
-        let mut query = animetheme::Entity::find()
-            .join(JoinType::InnerJoin, animetheme::Relation::Anime.def())
-            .join(
-                JoinType::InnerJoin,
-                animetheme::Relation::Animethemeentry.def(),
-            );
+        let mut query = theme::Entity::find()
+            .join(JoinType::InnerJoin, theme::Relation::Anime.def())
+            .join(JoinType::InnerJoin, theme::Relation::Entry.def());
 
         if let Some(r#type) = input.r#type {
-            query = query.filter(animetheme::Column::Type.is_in(r#type));
+            query = query.filter(theme::Column::Type.is_in(r#type));
         }
 
         if let Some(format) = input.format {
@@ -73,7 +70,7 @@ impl AnimeThemeQuery {
         }
 
         if let Some(spoiler) = input.spoiler {
-            query = query.filter(animethemeentry::Column::Spoiler.eq(spoiler));
+            query = query.filter(entry::Column::Spoiler.eq(spoiler));
         }
 
         let themes = query
@@ -86,25 +83,24 @@ impl AnimeThemeQuery {
         Ok(themes.into_iter().map(Into::into).collect())
     }
 
-    pub async fn animetheme_connection(
+    pub async fn theme_connection(
         &self,
         ctx: &Context<'_>,
         pagination: Option<PaginationInput>,
-        filter: Option<AnimeThemeFilterInput>,
-        sort: Option<Vec<AnimeThemeSort>>,
-    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, AnimeTheme, EmptyFields, EmptyFields>>
-    {
-        let mut query: sea_orm::prelude::Select<animetheme::Entity> =
-            animetheme::Entity::find().filter(without_trashed::<animetheme::Entity>());
+        filter: Option<ThemeFilterInput>,
+        sort: Option<Vec<ThemeSort>>,
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Theme, EmptyFields, EmptyFields>> {
+        let mut query: sea_orm::prelude::Select<theme::Entity> =
+            theme::Entity::find().filter(without_trashed::<theme::Entity>());
 
         let filter = filter.unwrap_or_default();
 
         if let Some(id_in) = filter.id_in {
-            query = query.filter(animetheme::Column::Id.is_in(id_in))
+            query = query.filter(theme::Column::Id.is_in(id_in))
         }
 
         if let Some(r#type) = filter.r#type {
-            query = query.filter(animetheme::Column::Type.eq(r#type))
+            query = query.filter(theme::Column::Type.eq(r#type))
         }
 
         if let Some(sorts) = sort.clone() {
@@ -117,11 +113,11 @@ impl AnimeThemeQuery {
             .clone()
             .unwrap_or(vec![])
             .iter()
-            .filter_map(AnimeThemeSort::cursor_sort)
+            .filter_map(ThemeSort::cursor_sort)
             .collect::<Vec<_>>();
 
         cursor_sorts.push(CursorSort {
-            column: animetheme::Column::Id,
+            column: theme::Column::Id,
             order: Order::Asc,
         });
 

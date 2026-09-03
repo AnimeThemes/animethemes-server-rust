@@ -10,7 +10,7 @@ use crate::{
 };
 use async_graphql::{Context, Error, Object, Result, dataloader::DataLoader};
 
-use crate::graphql::types::content::animethemeentry::AnimeThemeEntry;
+use crate::graphql::types::content::entry::Entry;
 
 /// Represents a favorite of a user.
 pub struct Favorite {
@@ -21,7 +21,7 @@ pub struct Favorite {
 
 #[Object]
 impl Favorite {
-    async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<Option<AnimeThemeEntry>> {
+    async fn entry(&self, ctx: &Context<'_>) -> Result<Option<Entry>> {
         if self.favoriteable_type != "entry" {
             return Ok(None);
         }

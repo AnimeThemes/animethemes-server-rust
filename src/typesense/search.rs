@@ -8,7 +8,7 @@ use typesense::{models::SearchParameters, prelude::Document};
 
 use crate::{
     entities::{
-        content::{anime, animetheme, artist, series, song, studio, video},
+        content::{anime, artist, series, song, studio, theme, video},
         list::playlist,
     },
     scopes::list::playlist::public_playlists,
@@ -17,12 +17,12 @@ use crate::{
         documents::{
             HasId,
             anime_document::{self, AnimeDocument},
-            animetheme_document::{self, AnimeThemeDocument},
             artist_document::{self, ArtistDocument},
             playlist_document::{self, PlaylistDocument},
             series_document::{self, SeriesDocument},
             song_document::{self, SongDocument},
             studio_document::{self, StudioDocument},
+            theme_document::{self, ThemeDocument},
             video_document::{self, VideoDocument},
         },
     },
@@ -80,28 +80,28 @@ pub async fn search_artists(
     .await
 }
 
-pub async fn search_animethemes(
+pub async fn search_themes(
     db: &DatabaseConnection,
     typesense: &TypesenseClient,
-    builder: Select<animetheme::Entity>,
+    builder: Select<theme::Entity>,
     term: String,
     first: i32,
     page: i32,
     filter_by: Option<String>,
     sort_by: Vec<String>,
-) -> Result<OffsetPagination<animetheme::Model>> {
-    search::<animetheme::Entity, AnimeThemeDocument>(
+) -> Result<OffsetPagination<theme::Model>> {
+    search::<theme::Entity, ThemeDocument>(
         db,
         typesense,
         builder,
-        animetheme::Column::Id,
+        theme::Column::Id,
         term,
         first as u64,
         page as u64,
         filter_by,
         sort_by,
-        animetheme_document::QUERY_BY,
-        animetheme_document::QUERY_BY_WEIGHTS,
+        theme_document::QUERY_BY,
+        theme_document::QUERY_BY_WEIGHTS,
     )
     .await
 }

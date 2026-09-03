@@ -6,7 +6,7 @@ use chrono::{DateTime, Utc};
 
 use crate::graphql::utils::format_datetime;
 
-pub struct AnimeThemeEntryVideoEdgeFields {
+pub struct EntryVideoEdgeFields {
     /// The date that the resource was created
     pub created_at: DateTime<Utc>,
     /// The date that the resource was updated
@@ -14,7 +14,7 @@ pub struct AnimeThemeEntryVideoEdgeFields {
 }
 
 #[Object]
-impl AnimeThemeEntryVideoEdgeFields {
+impl EntryVideoEdgeFields {
     async fn created_at(&self, #[graphql(default = "%+")] format: String) -> String {
         format_datetime(&self.created_at, &format)
     }
@@ -24,23 +24,23 @@ impl AnimeThemeEntryVideoEdgeFields {
     }
 }
 
-pub struct AnimeThemeEntryVideoEdge;
+pub struct EntryVideoEdge;
 
-impl EdgeNameType for AnimeThemeEntryVideoEdge {
+impl EdgeNameType for EntryVideoEdge {
     fn type_name<T: OutputType>() -> String {
-        "AnimeThemeEntryVideoEdge".to_string()
+        "EntryVideoEdge".to_string()
     }
 }
 
-pub struct AnimeThemeEntryVideoConnection;
+pub struct EntryVideoConnection;
 
-impl ConnectionNameType for AnimeThemeEntryVideoConnection {
+impl ConnectionNameType for EntryVideoConnection {
     fn type_name<T: OutputType>() -> String {
-        "AnimeThemeEntryVideoConnection".to_string()
+        "EntryVideoConnection".to_string()
     }
 }
 
-pub struct VideoAnimeThemeEntryEdgeFields {
+pub struct VideoEntryEdgeFields {
     /// The date that the resource was created
     pub created_at: DateTime<Utc>,
     /// The date that the resource was updated
@@ -48,7 +48,7 @@ pub struct VideoAnimeThemeEntryEdgeFields {
 }
 
 #[Object]
-impl VideoAnimeThemeEntryEdgeFields {
+impl VideoEntryEdgeFields {
     async fn created_at(&self, #[graphql(default = "%+")] format: String) -> String {
         format_datetime(&self.created_at, &format)
     }
@@ -58,18 +58,18 @@ impl VideoAnimeThemeEntryEdgeFields {
     }
 }
 
-pub struct VideoAnimeThemeEntryEdge;
+pub struct VideoEntryEdge;
 
-impl EdgeNameType for VideoAnimeThemeEntryEdge {
+impl EdgeNameType for VideoEntryEdge {
     fn type_name<T: OutputType>() -> String {
-        "VideoAnimeThemeEntryEdge".to_string()
+        "VideoEntryEdge".to_string()
     }
 }
 
-pub struct VideoAnimeThemeEntryConnection;
+pub struct VideoEntryConnection;
 
-impl ConnectionNameType for VideoAnimeThemeEntryConnection {
+impl ConnectionNameType for VideoEntryConnection {
     fn type_name<T: OutputType>() -> String {
-        "VideoAnimeThemeEntryConnection".to_string()
+        "VideoEntryConnection".to_string()
     }
 }

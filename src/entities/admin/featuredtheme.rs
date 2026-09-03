@@ -3,7 +3,7 @@ use sea_orm::entity::prelude::*;
 
 use crate::entities::{
     auth::user,
-    content::{animethemeentry, video},
+    content::{entry, video},
 };
 
 #[sea_orm::model]
@@ -25,7 +25,7 @@ pub struct Model {
     pub updated_at: chrono::DateTime<Utc>,
 
     #[sea_orm(belongs_to, from = "entry_id", to = "id")]
-    pub animethemeentry: BelongsTo<Option<animethemeentry::Entity>>,
+    pub entry: BelongsTo<Option<entry::Entity>>,
 
     #[sea_orm(belongs_to, from = "video_id", to = "id")]
     pub video: BelongsTo<Option<video::Entity>>,

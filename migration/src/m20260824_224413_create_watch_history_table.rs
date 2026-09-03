@@ -42,7 +42,7 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("watch_history_entry_id_foreign")
                             .from("watch_history", "entry_id")
-                            .to("anime_theme_entries", "entry_id")
+                            .to("entries", "entry_id")
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .foreign_key(

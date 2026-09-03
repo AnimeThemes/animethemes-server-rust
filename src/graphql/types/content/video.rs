@@ -12,17 +12,14 @@ use crate::{
     entities::content::video::{self},
     graphql::{
         loaders::content::video::{
-            video_animethemeentries::VideoAnimeThemeEntriesLoader, video_audio::VideoAudioLoader,
+            video_audio::VideoAudioLoader, video_entries::VideoThemeEntriesLoader,
             video_script::VideoScriptLoader, video_tracks::VideoTracksLoader,
         },
         types::{
             content::{
-                animethemeentry::AnimeThemeEntry,
-                animethemeentry_video::{
-                    VideoAnimeThemeEntryConnection, VideoAnimeThemeEntryEdge,
-                    VideoAnimeThemeEntryEdgeFields,
-                },
                 audio::Audio,
+                entry::Entry,
+                entry_video::{VideoEntryConnection, VideoEntryEdge, VideoEntryEdgeFields},
                 videoscript::VideoScript,
             },
             list::track::PlaylistTrack,
@@ -30,7 +27,7 @@ use crate::{
     },
 };
 
-/// Represents a WebM of an anime theme.
+/// Represents a WebM of a theme.
 ///
 /// For example, the video Bakemonogatari-OP1.webm represents the WebM of the Bakemonogatari OP1 theme.
 #[derive(SimpleObject)]
@@ -76,20 +73,20 @@ pub struct Video {
 
 #[ComplexObject]
 impl Video {
-    async fn animethemeentries(
+    async fn entries(
         &self,
         ctx: &Context<'_>,
     ) -> Result<
         Connection<
             u64,
-            AnimeThemeEntry,
+            Entry,
             EmptyFields,
-            VideoAnimeThemeEntryEdgeFields,
-            VideoAnimeThemeEntryConnection,
-            VideoAnimeThemeEntryEdge,
+            VideoEntryEdgeFields,
+            VideoEntryConnection,
+            VideoEntryEdge,
         >,
     > {
-        let loader = ctx.data_unchecked::<DataLoader<VideoAnimeThemeEntriesLoader>>();
+        let loader = ctx.data_unchecked::<DataLoader<VideoThemeEntriesLoader>>();
 
         let rows = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -99,7 +96,7 @@ impl Video {
             connection.edges.push(Edge::with_additional_fields(
                 model.id,
                 model.into(),
-                VideoAnimeThemeEntryEdgeFields {
+                VideoEntryEdgeFields {
                     created_at: pivot.created_at,
                     updated_at: pivot.updated_at,
                 },

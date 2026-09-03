@@ -51,7 +51,7 @@ impl MigrationTrait for Migration {
                 ForeignKey::create()
                     .name("playlist_tracks_entry_id_foreign")
                     .from("playlist_tracks", "entry_id")
-                    .to("anime_theme_entries", "entry_id")
+                    .to("entries", "entry_id")
                     .on_delete(ForeignKeyAction::SetNull),
             )
             .foreign_key(

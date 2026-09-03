@@ -3,12 +3,12 @@ use sea_orm::entity::prelude::*;
 
 use crate::entities::{
     SoftDeleteEntity,
-    content::{animetheme, video},
+    content::{theme, video},
 };
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
-#[sea_orm(table_name = "anime_theme_entries")]
+#[sea_orm(table_name = "entries")]
 pub struct Model {
     #[sea_orm(primary_key, column_name = "entry_id")]
     pub id: u64,
@@ -28,9 +28,9 @@ pub struct Model {
     pub deleted_at: Option<chrono::DateTime<Utc>>,
 
     #[sea_orm(belongs_to, from = "theme_id", to = "id")]
-    pub theme: BelongsTo<animetheme::Entity>,
+    pub theme: BelongsTo<theme::Entity>,
 
-    #[sea_orm(has_many, via = "animethemeentry_videos")]
+    #[sea_orm(has_many, via = "entry_videos")]
     pub videos: HasMany<video::Entity>,
 }
 

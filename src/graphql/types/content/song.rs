@@ -4,9 +4,9 @@ use crate::{
     entities::content::song,
     graphql::{
         loaders::content::song::{
-            song_animethemes::SongAnimeThemesLoader, song_performances::SongPerformancesLoader,
+            song_performances::SongPerformancesLoader, song_themes::SongThemesLoader,
         },
-        types::content::{animetheme::AnimeTheme, performance::Performance},
+        types::content::{performance::Performance, theme::Theme},
     },
 };
 
@@ -27,9 +27,9 @@ impl From<&song::Model> for SongTitle {
     }
 }
 
-/// Represents the composition that accompanies an AnimeTheme.
+/// Represents the composition that accompanies an Theme.
 ///
-/// For example, Staple Stable is the song for the Bakemonogatari OP1 AnimeTheme.
+/// For example, Staple Stable is the song for the Bakemonogatari OP1 Theme.
 #[derive(SimpleObject)]
 #[graphql(complex)]
 pub struct Song {
@@ -41,12 +41,12 @@ pub struct Song {
 
 #[ComplexObject]
 impl Song {
-    async fn animethemes(&self, ctx: &Context<'_>) -> Result<Vec<AnimeTheme>> {
-        let loader = ctx.data_unchecked::<DataLoader<SongAnimeThemesLoader>>();
+    async fn themes(&self, ctx: &Context<'_>) -> Result<Vec<Theme>> {
+        let loader = ctx.data_unchecked::<DataLoader<SongThemesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
-        Ok(models.into_iter().map(AnimeTheme::from).collect())
+        Ok(models.into_iter().map(Theme::from).collect())
     }
 
     async fn performances(&self, ctx: &Context<'_>) -> Result<Vec<Performance>> {

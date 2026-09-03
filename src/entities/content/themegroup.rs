@@ -1,7 +1,7 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::{SoftDeleteEntity, content::animetheme};
+use crate::entities::{SoftDeleteEntity, content::theme};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
@@ -19,7 +19,7 @@ pub struct Model {
     pub deleted_at: Option<chrono::DateTime<Utc>>,
 
     #[sea_orm(has_many)]
-    pub animethemes: HasMany<animetheme::Entity>,
+    pub themes: HasMany<theme::Entity>,
 }
 
 impl SoftDeleteEntity for Entity {

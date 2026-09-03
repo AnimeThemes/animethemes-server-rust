@@ -28,7 +28,7 @@ pub struct UserFavoritesFilterInput {
     pub entry_id: Option<u64>,
 }
 
-/// Represents an AnimeThemes account.
+/// Represents an Themes account.
 #[derive(SimpleObject)]
 #[graphql(complex)]
 pub struct Me {

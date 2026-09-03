@@ -98,7 +98,7 @@ impl SearchSort for SearchStudioSort {
 }
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq)]
-pub enum SearchAnimeThemeSort {
+pub enum SearchThemeSort {
     SongTitleRomaji,
     SongTitleRomajiDesc,
     AnimeYear,
@@ -108,16 +108,16 @@ pub enum SearchAnimeThemeSort {
     CreatedAtDesc,
 }
 
-impl SearchSort for SearchAnimeThemeSort {
+impl SearchSort for SearchThemeSort {
     fn sort_key(&self) -> &str {
         match self {
-            SearchAnimeThemeSort::SongTitleRomaji => "song_title:asc",
-            SearchAnimeThemeSort::SongTitleRomajiDesc => "song_title:desc",
-            SearchAnimeThemeSort::AnimeYear => "anime.year:asc",
-            SearchAnimeThemeSort::AnimeYearDesc => "anime.year:desc",
-            SearchAnimeThemeSort::AnimeSeason => "anime.season:asc",
-            SearchAnimeThemeSort::AnimeSeasonDesc => "anime.season:desc",
-            SearchAnimeThemeSort::CreatedAtDesc => "created_at:desc",
+            SearchThemeSort::SongTitleRomaji => "song_title:asc",
+            SearchThemeSort::SongTitleRomajiDesc => "song_title:desc",
+            SearchThemeSort::AnimeYear => "anime.year:asc",
+            SearchThemeSort::AnimeYearDesc => "anime.year:desc",
+            SearchThemeSort::AnimeSeason => "anime.season:asc",
+            SearchThemeSort::AnimeSeasonDesc => "anime.season:desc",
+            SearchThemeSort::CreatedAtDesc => "created_at:desc",
         }
     }
 }

@@ -4,14 +4,14 @@ use sea_orm::entity::prelude::*;
 use crate::{
     entities::{
         SoftDeleteEntity,
-        content::{anime, animethemeentry, song, themegroup},
+        content::{anime, entry, song, themegroup},
     },
     enums::content::themetype::ThemeType,
 };
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
-#[sea_orm(table_name = "anime_themes")]
+#[sea_orm(table_name = "themes")]
 pub struct Model {
     #[sea_orm(primary_key, column_name = "theme_id")]
     pub id: u64,
@@ -38,7 +38,7 @@ pub struct Model {
     pub theme_group: BelongsTo<Option<themegroup::Entity>>,
 
     #[sea_orm(has_many)]
-    pub animethemeentries: HasMany<animethemeentry::Entity>,
+    pub entries: HasMany<entry::Entity>,
 }
 
 impl SoftDeleteEntity for Entity {

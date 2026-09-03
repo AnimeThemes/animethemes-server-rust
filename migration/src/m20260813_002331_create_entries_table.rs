@@ -4,7 +4,7 @@ pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m20260813_003551_create_anime_theme_entry_video_table"
+        "m20260813_002331_create_entries_table"
     }
 }
 
@@ -14,17 +14,33 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table("anime_theme_entry_video")
+                    .table("entries")
                     .if_not_exists()
                     .col(
-                        ColumnDef::new("id")
+                        ColumnDef::new("entry_id")
                             .big_unsigned()
                             .not_null()
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new("entry_id").big_unsigned().not_null())
-                    .col(ColumnDef::new("video_id").big_unsigned().not_null())
+                    .col(ColumnDef::new("theme_id").big_unsigned().not_null())
+                    .col(ColumnDef::new("version").integer().not_null())
+                    .col(ColumnDef::new("episodes").string().null())
+                    .col(ColumnDef::new("nsfw").boolean().default(false))
+                    .col(ColumnDef::new("spoiler").boolean().default(false))
+                    .col(ColumnDef::new("notes").text().null())
+                    .col(
+                        ColumnDef::new("favorites_count")
+                            .integer()
+                            .default(0)
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new("tracks_count")
+                            .integer()
+                            .default(0)
+                            .not_null(),
+                    )
                     .col(
                         ColumnDef::new("created_at")
                             .timestamp()
@@ -37,26 +53,13 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(Expr::current_timestamp()),
                     )
+                    .col(ColumnDef::new("deleted_at").timestamp().null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("anime_theme_entry_video_entry_id_foreign")
-                            .from("anime_theme_entry_video", "entry_id")
-                            .to("anime_theme_entries", "entry_id")
+                            .name("entries_theme_id_foreign")
+                            .from("entries", "theme_id")
+                            .to("themes", "theme_id")
                             .on_delete(ForeignKeyAction::Cascade),
-                    )
-                    .foreign_key(
-                        ForeignKey::create()
-                            .name("anime_theme_entry_video_video_id_foreign")
-                            .from("anime_theme_entry_video", "video_id")
-                            .to("videos", "video_id")
-                            .on_delete(ForeignKeyAction::Cascade),
-                    )
-                    .index(
-                        Index::create()
-                            .name("entry_video_unique_index")
-                            .col("entry_id")
-                            .col("video_id")
-                            .unique(),
                     )
                     .to_owned(),
             )

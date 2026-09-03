@@ -9,7 +9,7 @@ use crate::{
             track_video::TrackVideoLoader,
         },
         types::{
-            content::{animethemeentry::AnimeThemeEntry, video::Video},
+            content::{entry::Entry, video::Video},
             list::playlist::Playlist,
         },
     },
@@ -48,7 +48,7 @@ impl PlaylistTrack {
             .into())
     }
 
-    async fn animethemeentry(&self, ctx: &Context<'_>) -> Result<AnimeThemeEntry> {
+    async fn entry(&self, ctx: &Context<'_>) -> Result<Entry> {
         let loader = ctx.data_unchecked::<DataLoader<TrackEntryLoader>>();
 
         Ok(loader

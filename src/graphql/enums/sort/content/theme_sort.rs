@@ -1,11 +1,11 @@
-use crate::entities::content::animetheme;
+use crate::entities::content::theme;
 use async_graphql::Enum;
 use sea_orm::{EntityTrait, Order, QueryOrder, Select, sea_query::Expr};
 
 use crate::graphql::{cursor::CursorSort, enums::sort::GraphQLSort};
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq)]
-pub enum AnimeThemeSort {
+pub enum ThemeSort {
     Id,
     IdDesc,
     Sequence,
@@ -17,22 +17,22 @@ pub enum AnimeThemeSort {
     Random,
 }
 
-impl GraphQLSort for AnimeThemeSort {
-    type Entity = animetheme::Entity;
+impl GraphQLSort for ThemeSort {
+    type Entity = theme::Entity;
 
     fn cursor_sort(&self) -> Option<CursorSort<<Self::Entity as EntityTrait>::Column>> {
         let (column, direction) = match self {
-            Self::Id => (animetheme::Column::Id, Order::Asc),
-            Self::IdDesc => (animetheme::Column::Id, Order::Desc),
+            Self::Id => (theme::Column::Id, Order::Asc),
+            Self::IdDesc => (theme::Column::Id, Order::Desc),
 
-            Self::Sequence => (animetheme::Column::Sequence, Order::Asc),
-            Self::SequenceDesc => (animetheme::Column::Sequence, Order::Desc),
+            Self::Sequence => (theme::Column::Sequence, Order::Asc),
+            Self::SequenceDesc => (theme::Column::Sequence, Order::Desc),
 
-            Self::CreatedAt => (animetheme::Column::CreatedAt, Order::Asc),
-            Self::CreatedAtDesc => (animetheme::Column::CreatedAt, Order::Desc),
+            Self::CreatedAt => (theme::Column::CreatedAt, Order::Asc),
+            Self::CreatedAtDesc => (theme::Column::CreatedAt, Order::Desc),
 
-            Self::UpdatedAt => (animetheme::Column::UpdatedAt, Order::Asc),
-            Self::UpdatedAtDesc => (animetheme::Column::UpdatedAt, Order::Desc),
+            Self::UpdatedAt => (theme::Column::UpdatedAt, Order::Asc),
+            Self::UpdatedAtDesc => (theme::Column::UpdatedAt, Order::Desc),
 
             Self::Random => return None,
         };

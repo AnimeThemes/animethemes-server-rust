@@ -35,7 +35,7 @@ impl Messages {
             Reset your password:\n\
             {}\n\n\
             Regards,\n\
-            AnimeThemes",
+            Themes",
             name, reset_url,
         );
 

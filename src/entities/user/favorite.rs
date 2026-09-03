@@ -1,7 +1,7 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::{auth::user, content::animethemeentry};
+use crate::entities::{auth::user, content::entry};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
@@ -16,7 +16,7 @@ pub struct Model {
     pub created_at: chrono::DateTime<Utc>,
 
     #[sea_orm(belongs_to, from = "favoriteable_id", to = "id")]
-    pub favoriteable: BelongsTo<animethemeentry::Entity>,
+    pub favoriteable: BelongsTo<entry::Entity>,
     #[sea_orm(belongs_to, from = "user_id", to = "id")]
     pub user: BelongsTo<user::Entity>,
 }

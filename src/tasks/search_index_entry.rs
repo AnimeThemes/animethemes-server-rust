@@ -4,23 +4,23 @@ use std::error::Error as StdError;
 use typesense::prelude::Document;
 
 use crate::{
-    entities::content::animetheme,
+    entities::content::entry,
     scopes::without_trashed,
     typesense::{
         client::TypesenseClient,
-        documents::animetheme_document::{AnimeThemeDocument, build_animetheme_documents},
+        documents::entry_document::{EntryDocument, build_entry_documents},
         index_document,
     },
 };
 
-pub struct SearchIndexAnimeTheme;
+pub struct SearchIndexEntry;
 
 #[async_trait]
-impl Task for SearchIndexAnimeTheme {
+impl Task for SearchIndexEntry {
     fn task(&self) -> TaskInfo {
         TaskInfo {
-            name: "search:index-animetheme".to_string(),
-            detail: "Import animethemes from the database into the search index".to_string(),
+            name: "search:index-entry".to_string(),
+            detail: "Import entries from the database into the search index".to_string(),
         }
     }
 
@@ -30,7 +30,7 @@ impl Task for SearchIndexAnimeTheme {
             .get::<TypesenseClient>()
             .expect("Typesense not initialized");
 
-        let collection = typesense.collection::<AnimeThemeDocument>();
+        let collection = typesense.collection::<EntryDocument>();
 
         match collection.retrieve().await {
             Ok(_) => {
@@ -43,19 +43,19 @@ impl Task for SearchIndexAnimeTheme {
 
         typesense
             .collections()
-            .create(AnimeThemeDocument::collection_schema())
+            .create(EntryDocument::collection_schema())
             .await
             .map_err(
                 |err| loco_rs::Error::from(Box::new(err) as Box<dyn StdError + Send + Sync>),
             )?;
 
-        let builder = animetheme::Entity::find().filter(without_trashed::<animetheme::Entity>());
+        let builder = entry::Entity::find().filter(without_trashed::<entry::Entity>());
 
-        index_document::<animetheme::Entity, AnimeThemeDocument, _>(
+        index_document::<entry::Entity, EntryDocument, _>(
             &app_context.db,
             &typesense,
             builder,
-            build_animetheme_documents,
+            build_entry_documents,
         )
         .await
         .unwrap();

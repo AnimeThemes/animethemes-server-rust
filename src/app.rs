@@ -127,8 +127,8 @@ impl Hooks for App {
     fn register_tasks(tasks: &mut Tasks) {
         tasks.register(tasks::print_schema::PrintSchema);
         tasks.register(tasks::search_index_anime::SearchIndexAnime);
-        tasks.register(tasks::search_index_animetheme::SearchIndexAnimeTheme);
-        tasks.register(tasks::search_index_animethemeentry::SearchIndexAnimeThemeEntry);
+        tasks.register(tasks::search_index_theme::SearchIndexTheme);
+        tasks.register(tasks::search_index_entry::SearchIndexEntry);
         tasks.register(tasks::search_index_artist::SearchIndexArtist);
         tasks.register(tasks::search_index_playlist::SearchIndexPlaylist);
         tasks.register(tasks::search_index_series::SearchIndexSeries);

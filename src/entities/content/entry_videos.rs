@@ -3,11 +3,11 @@ use sea_orm::{
     sqlx::types::chrono::{self, Utc},
 };
 
-use crate::entities::content::{animethemeentry, video};
+use crate::entities::content::{entry, video};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
-#[sea_orm(table_name = "anime_theme_entry_video")]
+#[sea_orm(table_name = "entry_video")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub entry_id: u64,
@@ -19,7 +19,7 @@ pub struct Model {
     pub updated_at: chrono::DateTime<Utc>,
 
     #[sea_orm(belongs_to, from = "entry_id", to = "id")]
-    pub animethemeentry: BelongsTo<animethemeentry::Entity>,
+    pub entry: BelongsTo<entry::Entity>,
 
     #[sea_orm(belongs_to, from = "video_id", to = "id")]
     pub video: BelongsTo<video::Entity>,

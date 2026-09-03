@@ -9,7 +9,7 @@ use crate::{
     },
 };
 
-/// Represents an AnimeThemes account.
+/// Represents an Themes account.
 #[derive(SimpleObject)]
 #[graphql(complex)]
 pub struct User {

@@ -4,7 +4,7 @@ use sea_orm::entity::prelude::*;
 use crate::{
     entities::{
         SoftDeleteEntity,
-        content::{animetheme, series, studio, synonym},
+        content::{series, studio, synonym, theme},
     },
     enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason},
 };
@@ -38,7 +38,7 @@ pub struct Model {
     pub synonyms: HasMany<synonym::Entity>,
 
     #[sea_orm(has_many)]
-    pub animethemes: HasMany<animetheme::Entity>,
+    pub themes: HasMany<theme::Entity>,
 
     #[sea_orm(has_many, via = "anime_series")]
     pub series: HasMany<series::Entity>,

@@ -5,31 +5,25 @@ use async_graphql::{
 };
 
 use crate::{
-    entities::content::animethemeentry,
+    entities::content::entry,
     graphql::{
-        loaders::content::animethemeentry::{
-            animethemeentry_theme::AnimeThemeEntryThemeLoader,
-            animethemeentry_videos::AnimeThemeEntryVideosLoader,
-        },
+        loaders::content::entry::{entry_theme::EntryThemeLoader, entry_videos::EntryVideosLoader},
         types::content::{
             video::Video,
             {
-                animetheme::AnimeTheme,
-                animethemeentry_video::{
-                    AnimeThemeEntryVideoConnection, AnimeThemeEntryVideoEdge,
-                    AnimeThemeEntryVideoEdgeFields,
-                },
+                entry_video::{EntryVideoConnection, EntryVideoEdge, EntryVideoEdgeFields},
+                theme::Theme,
             },
         },
     },
 };
 
-/// Represents a version of an anime theme.
+/// Represents a version of a theme.
 ///
-/// For example, the ED theme of the Bakemonogatari anime has three anime theme entries to represent three versions.
+/// For example, the ED theme of the Bakemonogatari anime has three theme entries to represent three versions.
 #[derive(SimpleObject)]
 #[graphql(complex)]
-pub struct AnimeThemeEntry {
+pub struct Entry {
     /// The primary key of the resource
     pub id: u64,
     #[graphql(skip)]
@@ -51,9 +45,9 @@ pub struct AnimeThemeEntry {
 }
 
 #[ComplexObject]
-impl AnimeThemeEntry {
-    async fn animetheme(&self, ctx: &Context<'_>) -> Result<AnimeTheme> {
-        let loader = ctx.data_unchecked::<DataLoader<AnimeThemeEntryThemeLoader>>();
+impl Entry {
+    async fn theme(&self, ctx: &Context<'_>) -> Result<Theme> {
+        let loader = ctx.data_unchecked::<DataLoader<EntryThemeLoader>>();
 
         let theme = loader
             .load_one(self.theme_id)
@@ -71,12 +65,12 @@ impl AnimeThemeEntry {
             u64,
             Video,
             EmptyFields,
-            AnimeThemeEntryVideoEdgeFields,
-            AnimeThemeEntryVideoConnection,
-            AnimeThemeEntryVideoEdge,
+            EntryVideoEdgeFields,
+            EntryVideoConnection,
+            EntryVideoEdge,
         >,
     > {
-        let loader = ctx.data_unchecked::<DataLoader<AnimeThemeEntryVideosLoader>>();
+        let loader = ctx.data_unchecked::<DataLoader<EntryVideosLoader>>();
 
         let rows = loader.load_one(self.id).await?.unwrap_or_default();
 
@@ -86,7 +80,7 @@ impl AnimeThemeEntry {
             connection.edges.push(Edge::with_additional_fields(
                 video.id,
                 video.into(),
-                AnimeThemeEntryVideoEdgeFields {
+                EntryVideoEdgeFields {
                     created_at: pivot.created_at,
                     updated_at: pivot.updated_at,
                 },
@@ -97,8 +91,8 @@ impl AnimeThemeEntry {
     }
 }
 
-impl From<animethemeentry::Model> for AnimeThemeEntry {
-    fn from(model: animethemeentry::Model) -> Self {
+impl From<entry::Model> for Entry {
+    fn from(model: entry::Model) -> Self {
         Self {
             id: model.id,
             theme_id: model.theme_id,

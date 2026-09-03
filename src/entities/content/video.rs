@@ -6,7 +6,7 @@ use sea_orm::entity::prelude::*;
 use crate::{
     entities::{
         SoftDeleteEntity,
-        content::{animethemeentry, audio, videoscript},
+        content::{audio, entry, videoscript},
     },
     enums::{
         LocalizedEnum,
@@ -46,8 +46,8 @@ pub struct Model {
     #[sea_orm(has_one)]
     pub video_script: HasOne<videoscript::Entity>,
 
-    #[sea_orm(has_many, via = "animethemeentry_videos")]
-    pub animethemeentries: HasMany<animethemeentry::Entity>,
+    #[sea_orm(has_many, via = "entry_videos")]
+    pub entries: HasMany<entry::Entity>,
 }
 
 impl Model {

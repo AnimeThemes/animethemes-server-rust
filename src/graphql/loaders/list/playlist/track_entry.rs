@@ -3,19 +3,19 @@ use std::collections::HashMap;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
-use crate::entities::content::animethemeentry;
+use crate::entities::content::entry;
 
 pub struct TrackEntryLoader {
     pub db: DatabaseConnection,
 }
 
 impl Loader<u64> for TrackEntryLoader {
-    type Value = animethemeentry::Model;
+    type Value = entry::Model;
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
-        let models = animethemeentry::Entity::find()
-            .filter(animethemeentry::Column::Id.is_in(keys.iter().copied()))
+        let models = entry::Entity::find()
+            .filter(entry::Column::Id.is_in(keys.iter().copied()))
             .all(&self.db)
             .await?;
 

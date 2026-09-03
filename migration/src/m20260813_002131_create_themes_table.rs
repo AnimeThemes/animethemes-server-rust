@@ -4,7 +4,7 @@ pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m20260813_002131_create_anime_themes_table"
+        "m20260813_002131_create_themes_table"
     }
 }
 
@@ -14,7 +14,7 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table("anime_themes")
+                    .table("themes")
                     .if_not_exists()
                     .col(
                         ColumnDef::new("theme_id")
@@ -44,22 +44,22 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new("deleted_at").timestamp().null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("anime_themes_anime_id_foreign")
-                            .from("anime_themes", "anime_id")
+                            .name("themes_anime_id_foreign")
+                            .from("themes", "anime_id")
                             .to("anime", "anime_id")
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("anime_themes_song_id_foreign")
-                            .from("anime_themes", "song_id")
+                            .name("themes_song_id_foreign")
+                            .from("themes", "song_id")
                             .to("songs", "song_id")
                             .on_delete(ForeignKeyAction::SetNull),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("anime_themes_group_id_foreign")
-                            .from("anime_themes", "group_id")
+                            .name("themes_group_id_foreign")
+                            .from("themes", "group_id")
                             .to("groups", "group_id")
                             .on_delete(ForeignKeyAction::SetNull),
                     )

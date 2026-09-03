@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
 use crate::{
-    entities::content::{anime, animetheme, song},
+    entities::content::{anime, song, theme},
     enums::LocalizedEnum,
     typesense::{
         documents::{
@@ -15,12 +15,12 @@ use crate::{
     },
 };
 
-pub const QUERY_BY: &str = "song.title,song.title_native,anime.title,type_sequence, anime.title_english,anime.title_native,anime.synonyms";
+pub const QUERY_BY: &str = "song.title,song.title_native,anime.title,type_sequence,anime.title_english,anime.title_native,anime.synonyms";
 pub const QUERY_BY_WEIGHTS: &str = "10,8,6,6,5,5,4";
 
 #[derive(Debug, Clone, Serialize, Deserialize, Typesense)]
-#[typesense(collection_name = "animethemes", enable_nested_fields = true)]
-pub struct AnimeThemeDocument {
+#[typesense(collection_name = "themes", enable_nested_fields = true)]
+pub struct ThemeDocument {
     pub id: String,
     pub r#type: i32,
     pub sequence: Option<i32>,
@@ -33,16 +33,16 @@ pub struct AnimeThemeDocument {
     pub created_at: i64,
 }
 
-impl HasId for AnimeThemeDocument {
+impl HasId for ThemeDocument {
     fn id(&self) -> &str {
         &self.id
     }
 }
 
-type AnimeThemeDocumentFrom = (animetheme::Model, AnimeDocument, Option<song::Model>);
+type ThemeDocumentFrom = (theme::Model, AnimeDocument, Option<song::Model>);
 
-impl From<AnimeThemeDocumentFrom> for AnimeThemeDocument {
-    fn from((model, anime_document, song): AnimeThemeDocumentFrom) -> Self {
+impl From<ThemeDocumentFrom> for ThemeDocument {
+    fn from((model, anime_document, song): ThemeDocumentFrom) -> Self {
         Self {
             id: model.id.to_string(),
             r#type: model.r#type.to_value(),
@@ -56,16 +56,16 @@ impl From<AnimeThemeDocumentFrom> for AnimeThemeDocument {
     }
 }
 
-pub fn build_animetheme_documents<'a>(
-    models: Vec<animetheme::Model>,
+pub fn build_theme_documents<'a>(
+    models: Vec<theme::Model>,
     database: &'a DatabaseConnection,
-) -> BuildDocumentsFuture<'a, AnimeThemeDocument> {
+) -> BuildDocumentsFuture<'a, ThemeDocument> {
     Box::pin(async move {
         let anime_models: Vec<anime::Model> = models
             .load_one(anime::Entity, database)
             .await?
             .into_iter()
-            .map(|anime| anime.expect("Anime not found for animetheme"))
+            .map(|anime| anime.expect("Anime not found for theme"))
             .collect();
 
         let anime_documents = build_anime_documents(anime_models, database).await?;
@@ -77,7 +77,7 @@ pub fn build_animetheme_documents<'a>(
             .zip(anime_documents)
             .zip(song_models)
             .map(|((model, anime_document), song)| {
-                AnimeThemeDocument::from((model, anime_document, song))
+                ThemeDocument::from((model, anime_document, song))
             })
             .collect();
 

@@ -4,25 +4,23 @@ use std::error::Error as StdError;
 use typesense::prelude::Document;
 
 use crate::{
-    entities::content::animethemeentry,
+    entities::content::theme,
     scopes::without_trashed,
     typesense::{
         client::TypesenseClient,
-        documents::animethemeentry_document::{
-            AnimeThemeEntryDocument, build_animethemeentry_documents,
-        },
+        documents::theme_document::{ThemeDocument, build_theme_documents},
         index_document,
     },
 };
 
-pub struct SearchIndexAnimeThemeEntry;
+pub struct SearchIndexTheme;
 
 #[async_trait]
-impl Task for SearchIndexAnimeThemeEntry {
+impl Task for SearchIndexTheme {
     fn task(&self) -> TaskInfo {
         TaskInfo {
-            name: "search:index-animethemeentry".to_string(),
-            detail: "Import animethemeentries from the database into the search index".to_string(),
+            name: "search:index-theme".to_string(),
+            detail: "Import themes from the database into the search index".to_string(),
         }
     }
 
@@ -32,7 +30,7 @@ impl Task for SearchIndexAnimeThemeEntry {
             .get::<TypesenseClient>()
             .expect("Typesense not initialized");
 
-        let collection = typesense.collection::<AnimeThemeEntryDocument>();
+        let collection = typesense.collection::<ThemeDocument>();
 
         match collection.retrieve().await {
             Ok(_) => {
@@ -45,20 +43,19 @@ impl Task for SearchIndexAnimeThemeEntry {
 
         typesense
             .collections()
-            .create(AnimeThemeEntryDocument::collection_schema())
+            .create(ThemeDocument::collection_schema())
             .await
             .map_err(
                 |err| loco_rs::Error::from(Box::new(err) as Box<dyn StdError + Send + Sync>),
             )?;
 
-        let builder =
-            animethemeentry::Entity::find().filter(without_trashed::<animethemeentry::Entity>());
+        let builder = theme::Entity::find().filter(without_trashed::<theme::Entity>());
 
-        index_document::<animethemeentry::Entity, AnimeThemeEntryDocument, _>(
+        index_document::<theme::Entity, ThemeDocument, _>(
             &app_context.db,
             &typesense,
             builder,
-            build_animethemeentry_documents,
+            build_theme_documents,
         )
         .await
         .unwrap();
