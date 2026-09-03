@@ -1,2 +1,2 @@
-pub mod like;
+pub mod favorite;
 pub mod watch;

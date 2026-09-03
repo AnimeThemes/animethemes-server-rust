@@ -5,11 +5,11 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::entities::auth::user;
 
-pub struct LikeUserLoader {
+pub struct FavoriteUserLoader {
     pub db: DatabaseConnection,
 }
 
-impl Loader<u64> for LikeUserLoader {
+impl Loader<u64> for FavoriteUserLoader {
     type Value = user::Model;
     type Error = sea_orm::DbErr;
 

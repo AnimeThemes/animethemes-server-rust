@@ -1,4 +1,6 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::{
+    ComplexObject, Context, InputObject, Result, SimpleObject, dataloader::DataLoader,
+};
 use chrono::{DateTime, Utc};
 
 use crate::{
@@ -6,7 +8,9 @@ use crate::{
     graphql::{
         enums::sort::list::playlist_sort::PlaylistSort,
         loaders::auth::user::{
-            user_likes::UserLikesLoader,
+            user_favorites::{
+                UserFavoritesLoader, UserFavoritesLoaderKey, UserFavoritesLoaderQuery,
+            },
             user_playlists::{UserPlaylistsLoader, UserPlaylistsLoaderKey},
             user_roles::UserRolesLoader,
             user_watchhistory::UserWatchHistoryLoader,
@@ -14,10 +18,15 @@ use crate::{
         types::{
             auth::role::Role,
             list::playlist::Playlist,
-            user::{like::Like, watchhistory::WatchHistory},
+            user::{favorite::Favorite, watchhistory::WatchHistory},
         },
     },
 };
+
+#[derive(InputObject, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct UserFavoritesFilterInput {
+    pub entry_id: Option<u64>,
+}
 
 /// Represents an AnimeThemes account.
 #[derive(SimpleObject)]
@@ -83,11 +92,21 @@ impl Me {
         Ok(models.into_iter().map(WatchHistory::from).collect())
     }
 
-    async fn likes(&self, ctx: &Context<'_>) -> Result<Vec<Like>> {
-        let loader = ctx.data_unchecked::<DataLoader<UserLikesLoader>>();
+    async fn favorites(
+        &self,
+        ctx: &Context<'_>,
+        filter: Option<UserFavoritesFilterInput>,
+    ) -> Result<Vec<Favorite>> {
+        let loader = ctx.data_unchecked::<DataLoader<UserFavoritesLoader>>();
 
-        let models = loader.load_one(self.id).await?.unwrap_or_default();
+        let models = loader
+            .load_one(UserFavoritesLoaderKey {
+                key: self.id,
+                query: UserFavoritesLoaderQuery { filter },
+            })
+            .await?
+            .unwrap_or_default();
 
-        Ok(models.into_iter().map(Like::from).collect())
+        Ok(models.into_iter().map(Favorite::from).collect())
     }
 }

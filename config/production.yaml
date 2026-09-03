@@ -76,6 +76,10 @@ scheduler:
     clear_reset_passwords:
       run: "clear:reset-passwords"
       schedule: "run every minute"
+    sync_entry_favorites_count:
+      run: "entry:sync-favorites-count"
+      # Every day at 23:56
+      schedule: "0 56 23 * * * *"
 
 # Initializers Configuration
 # initializers:

@@ -58,19 +58,6 @@ pub struct PlaylistTracksLoaderKey {
     pub query: PlaylistTracksLoaderQuery,
 }
 
-impl PlaylistTracksLoaderKey {
-    pub fn new(
-        key: u64,
-        filter: Option<PlaylistTracksFilterInput>,
-        sort: Option<Vec<PlaylistTrackSort>>,
-    ) -> Self {
-        Self {
-            key,
-            query: PlaylistTracksLoaderQuery { filter, sort },
-        }
-    }
-}
-
 impl Loader<PlaylistTracksLoaderKey> for PlaylistTracksLoader {
     type Value = Vec<track::Model>;
     type Error = sea_orm::DbErr;

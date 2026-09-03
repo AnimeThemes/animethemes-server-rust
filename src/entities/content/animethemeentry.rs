@@ -14,7 +14,7 @@ pub struct Model {
     pub id: u64,
     pub theme_id: u64,
     pub episodes: Option<String>,
-    pub likes_count: i32,
+    pub favorites_count: i32,
     pub notes: Option<String>,
     pub nsfw: bool,
     pub spoiler: bool,

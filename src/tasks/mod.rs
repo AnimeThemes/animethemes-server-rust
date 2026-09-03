@@ -10,3 +10,5 @@ pub mod search_index_studio;
 pub mod search_index_video;
 
 pub mod clear_reset_passwords;
+
+pub mod sync_entry_favorites_count;

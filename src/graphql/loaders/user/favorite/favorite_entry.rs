@@ -5,11 +5,11 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::entities::content::animethemeentry;
 
-pub struct LikeEntryLoader {
+pub struct FavoriteEntryLoader {
     pub db: DatabaseConnection,
 }
 
-impl Loader<u64> for LikeEntryLoader {
+impl Loader<u64> for FavoriteEntryLoader {
     type Value = animethemeentry::Model;
     type Error = sea_orm::DbErr;
 

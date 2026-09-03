@@ -136,6 +136,7 @@ impl Hooks for App {
         tasks.register(tasks::search_index_studio::SearchIndexStudio);
         tasks.register(tasks::search_index_video::SearchIndexVideo);
         tasks.register(tasks::clear_reset_passwords::ClearResetPasswords);
+        tasks.register(tasks::sync_entry_favorites_count::SyncEntryFavoritesCount);
         // tasks-inject (do not remove)
     }
 

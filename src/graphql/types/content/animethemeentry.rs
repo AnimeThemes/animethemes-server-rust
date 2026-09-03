@@ -36,8 +36,8 @@ pub struct AnimeThemeEntry {
     pub theme_id: u64,
     /// The episodes that the theme is used for
     pub episodes: Option<String>,
-    /// The number of likes recorded for the resource
-    pub likes_count: i32,
+    /// The number of favorites recorded for the resource
+    pub favorites_count: i32,
     /// Any additional information for this sequence
     pub notes: Option<String>,
     /// Is not safe for work content included?
@@ -103,7 +103,7 @@ impl From<animethemeentry::Model> for AnimeThemeEntry {
             id: model.id,
             theme_id: model.theme_id,
             episodes: model.episodes,
-            likes_count: model.likes_count,
+            favorites_count: model.favorites_count,
             notes: model.notes,
             nsfw: model.nsfw,
             spoiler: model.spoiler,

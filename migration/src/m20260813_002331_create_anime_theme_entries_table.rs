@@ -30,7 +30,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new("spoiler").boolean().default(false))
                     .col(ColumnDef::new("notes").text().null())
                     .col(
-                        ColumnDef::new("likes_count")
+                        ColumnDef::new("favorites_count")
                             .integer()
                             .default(0)
                             .not_null(),

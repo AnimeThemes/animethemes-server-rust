@@ -1,6 +1,7 @@
 use crate::{
     AppError,
     enums::{LocalizedEnum, list::playlistvisibility::PlaylistVisibility},
+    graphql::loaders::list::playlist::playlist_tracks::PlaylistTracksLoaderQuery,
     middlewares::current_user::CurrentUser,
     policies::{
         Policy, PolicyAction,
@@ -93,7 +94,10 @@ impl Playlist {
         let loader = ctx.data_unchecked::<DataLoader<PlaylistTracksLoader>>();
 
         let models = loader
-            .load_one(PlaylistTracksLoaderKey::new(self.id, filter, sort))
+            .load_one(PlaylistTracksLoaderKey {
+                key: self.id,
+                query: PlaylistTracksLoaderQuery { filter, sort },
+            })
             .await?
             .unwrap_or_default();
 
