@@ -8,18 +8,24 @@ use crate::{
         types::auth::user::User,
     },
 };
-use async_graphql::{Context, Error, Object, Result, dataloader::DataLoader};
+use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject, dataloader::DataLoader};
 
 use crate::graphql::types::content::entry::Entry;
 
 /// Represents a favorite of a user.
+#[derive(SimpleObject)]
+#[graphql(complex)]
 pub struct Favorite {
+    pub id: u64,
+    #[graphql(skip)]
     pub favoriteable_type: String,
+    #[graphql(skip)]
     pub favoriteable_id: u64,
+    #[graphql(skip)]
     pub user_id: u64,
 }
 
-#[Object]
+#[ComplexObject]
 impl Favorite {
     async fn entry(&self, ctx: &Context<'_>) -> Result<Option<Entry>> {
         if self.favoriteable_type != "entry" {
@@ -45,6 +51,7 @@ impl Favorite {
 impl From<favorite::Model> for Favorite {
     fn from(model: favorite::Model) -> Self {
         Self {
+            id: model.id,
             favoriteable_type: model.favoriteable_type,
             favoriteable_id: model.favoriteable_id,
             user_id: model.user_id,
