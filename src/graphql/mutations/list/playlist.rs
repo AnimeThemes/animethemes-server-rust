@@ -67,6 +67,7 @@ impl PlaylistMutation {
                 visibility: input.visibility,
                 user_id: user.user.clone().id,
             },
+            user,
         )
         .await
         .extend()?;

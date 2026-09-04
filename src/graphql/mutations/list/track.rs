@@ -75,6 +75,7 @@ impl PlaylistTrackMutation {
                 video_id: input.video_id,
                 position: input.position,
             },
+            user,
         )
         .await
         .extend()?;

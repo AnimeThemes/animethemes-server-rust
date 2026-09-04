@@ -1,10 +1,16 @@
+use std::env;
+
 use anyhow::Context;
-use sea_orm::{ActiveModelTrait, DatabaseConnection};
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
+};
 
 use crate::{
     AppError,
-    entities::list::playlist,
+    entities::{auth::role::Roles, list::playlist},
     enums::list::playlistvisibility::PlaylistVisibility,
+    middlewares::current_user::CurrentUser,
+    policies::has_any_role,
     rules::validation_error::ValidationError,
     typesense::{
         client::typesense,
@@ -57,8 +63,25 @@ impl CreatePlaylistAction {
     pub async fn create(
         db: &DatabaseConnection,
         params: CreatePlaylistActionParameters,
+        user: &CurrentUser,
     ) -> Result<playlist::Model, AppError> {
         Self::validate(&params)?;
+
+        let count = playlist::Entity::find()
+            .filter(playlist::Column::UserId.eq(params.user_id))
+            .count(db)
+            .await?;
+
+        let max_playlists: u64 = env::var("USER_MAX_PLAYLISTS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(1000);
+
+        if count >= max_playlists && !has_any_role(&user.roles, vec![Roles::Admin, Roles::Patron]) {
+            return Err(AppError::ForbiddenWithMessage(
+                "You have reached the maximum number of playlists".to_string(),
+            ));
+        }
 
         let playlist = playlist::ActiveModel {
             name: Set(params.name),

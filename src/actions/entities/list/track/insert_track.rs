@@ -1,11 +1,18 @@
+use std::env;
+
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, QueryOrder,
-    QuerySelect, TransactionTrait,
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, PaginatorTrait,
+    QueryFilter, QueryOrder, QuerySelect, TransactionTrait,
 };
 
 use crate::{
     AppError,
-    entities::list::{playlist, track},
+    entities::{
+        auth::role::Roles,
+        list::{playlist, track},
+    },
+    middlewares::current_user::CurrentUser,
+    policies::has_any_role,
     rules::validation_error::ValidationError,
     traits::sortable::Sortable,
 };
@@ -46,8 +53,25 @@ impl InsertTrackAction {
         db: &DatabaseConnection,
         playlist: playlist::Model,
         params: InsertTrackActionParameters,
+        user: &CurrentUser,
     ) -> Result<track::Model, AppError> {
         Self::validate(&params)?;
+
+        let count = track::Entity::find()
+            .filter(track::Column::PlaylistId.eq(playlist.id))
+            .count(db)
+            .await?;
+
+        let max_tracks: u64 = env::var("PLAYLIST_MAX_TRACKS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(1000);
+
+        if count >= max_tracks && !has_any_role(&user.roles, vec![Roles::Admin, Roles::Patron]) {
+            return Err(AppError::ForbiddenWithMessage(
+                "This playlist has reached the maximum number of tracks".to_string(),
+            ));
+        }
 
         let txn = db.begin().await?;
 
