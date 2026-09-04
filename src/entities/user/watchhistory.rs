@@ -17,8 +17,6 @@ pub struct Model {
     pub user_id: u64,
     #[sea_orm(column_type = "Timestamp")]
     pub created_at: chrono::DateTime<Utc>,
-    #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: chrono::DateTime<Utc>,
 
     #[sea_orm(belongs_to, from = "entry_id", to = "id")]
     pub entry: BelongsTo<entry::Entity>,

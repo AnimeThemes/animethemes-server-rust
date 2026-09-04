@@ -1,7 +1,9 @@
 use crate::AppError;
 use crate::entities::user::watchhistory;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, TransactionTrait,
+};
 
 pub struct MarkAsWatchedActionParameters {
     pub entry_id: u64,
@@ -16,6 +18,15 @@ impl MarkAsWatchedAction {
         db: &DatabaseConnection,
         params: MarkAsWatchedActionParameters,
     ) -> Result<watchhistory::Model, AppError> {
+        let txn = db.begin().await?;
+
+        watchhistory::Entity::delete_many()
+            .filter(watchhistory::Column::EntryId.eq(params.entry_id))
+            .filter(watchhistory::Column::VideoId.eq(params.video_id))
+            .filter(watchhistory::Column::UserId.eq(params.user_id))
+            .exec(&txn)
+            .await?;
+
         let model = watchhistory::ActiveModel {
             entry_id: Set(params.entry_id),
             video_id: Set(params.video_id),
@@ -23,7 +34,9 @@ impl MarkAsWatchedAction {
             ..Default::default()
         };
 
-        let model = model.insert(db).await?;
+        let model = model.insert(&txn).await?;
+
+        txn.commit().await?;
 
         Ok(model)
     }

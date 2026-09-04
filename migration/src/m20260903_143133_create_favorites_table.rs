@@ -52,6 +52,14 @@ impl MigrationTrait for Migration {
                             .col("favoriteable_id")
                             .col("user_id"),
                     )
+                    .index(
+                        Index::create()
+                            .name("unique_favorite")
+                            .col("favoriteable_type")
+                            .col("favoriteable_id")
+                            .col("user_id")
+                            .unique(),
+                    )
                     .to_owned(),
             )
             .await?;

@@ -32,12 +32,6 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(Expr::current_timestamp()),
                     )
-                    .col(
-                        ColumnDef::new("updated_at")
-                            .timestamp()
-                            .not_null()
-                            .default(Expr::current_timestamp()),
-                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("watch_history_entry_id_foreign")
@@ -58,6 +52,14 @@ impl MigrationTrait for Migration {
                             .from("watch_history", "user_id")
                             .to("users", "id")
                             .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .index(
+                        Index::create()
+                            .name("unique_history")
+                            .col("entry_id")
+                            .col("video_id")
+                            .col("user_id")
+                            .unique(),
                     )
                     .to_owned(),
             )
