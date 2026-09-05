@@ -6,19 +6,20 @@ use chrono::{DateTime, Utc};
 use crate::{
     entities::auth::user,
     graphql::{
-        enums::sort::list::playlist_sort::PlaylistSort,
+        enums::sort::{list::playlist_sort::PlaylistSort, user::rating_sort::RatingSort},
         loaders::auth::user::{
             user_favorites::{
                 UserFavoritesLoader, UserFavoritesLoaderKey, UserFavoritesLoaderQuery,
             },
             user_playlists::{UserPlaylistsLoader, UserPlaylistsLoaderKey},
+            user_ratings::{UserRatingsLoader, UserRatingsLoaderKey, UserRatingsLoaderQuery},
             user_roles::UserRolesLoader,
             user_watchhistory::UserWatchHistoryLoader,
         },
         types::{
             auth::role::Role,
             list::playlist::Playlist,
-            user::{favorite::Favorite, watchhistory::WatchHistory},
+            user::{favorite::Favorite, rating::Rating, watchhistory::WatchHistory},
         },
     },
 };
@@ -61,6 +62,7 @@ impl From<user::Model> for Me {
 
 #[ComplexObject]
 impl Me {
+    /// The playlists of the authenticated user.
     async fn playlists(
         &self,
         ctx: &Context<'_>,
@@ -76,6 +78,7 @@ impl Me {
         Ok(models.into_iter().map(Playlist::from).collect())
     }
 
+    /// The roles of the authenticated user.
     async fn roles(&self, ctx: &Context<'_>) -> Result<Vec<Role>> {
         let loader = ctx.data_unchecked::<DataLoader<UserRolesLoader>>();
 
@@ -84,6 +87,7 @@ impl Me {
         Ok(models.into_iter().map(Role::from).collect())
     }
 
+    /// The watch history of the authenticated user.
     async fn watch_history(&self, ctx: &Context<'_>) -> Result<Vec<WatchHistory>> {
         let loader = ctx.data_unchecked::<DataLoader<UserWatchHistoryLoader>>();
 
@@ -92,6 +96,7 @@ impl Me {
         Ok(models.into_iter().map(WatchHistory::from).collect())
     }
 
+    /// The favorites of the authenticated user.
     async fn favorites(
         &self,
         ctx: &Context<'_>,
@@ -108,5 +113,24 @@ impl Me {
             .unwrap_or_default();
 
         Ok(models.into_iter().map(Favorite::from).collect())
+    }
+
+    /// The ratings of the authenticated user.
+    async fn ratings(
+        &self,
+        ctx: &Context<'_>,
+        sort: Option<Vec<RatingSort>>,
+    ) -> Result<Vec<Rating>> {
+        let loader = ctx.data_unchecked::<DataLoader<UserRatingsLoader>>();
+
+        let models = loader
+            .load_one(UserRatingsLoaderKey {
+                key: self.id,
+                query: UserRatingsLoaderQuery { sort },
+            })
+            .await?
+            .unwrap_or_default();
+
+        Ok(models.into_iter().map(Rating::from).collect())
     }
 }

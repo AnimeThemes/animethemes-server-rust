@@ -5,6 +5,7 @@ use crate::graphql::cursor::CursorSort;
 pub mod content;
 pub mod document;
 pub mod list;
+pub mod user;
 
 pub trait GraphQLSort {
     type Entity: EntityTrait;
