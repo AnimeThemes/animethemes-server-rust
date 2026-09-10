@@ -1,4 +1,4 @@
-FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.95.0-trixie AS chef
 
 WORKDIR /app
 
@@ -8,24 +8,7 @@ RUN apt-get update \
         pkg-config \
         libssl-dev \
         git \
-        curl \
     && rm -rf /var/lib/apt/lists/*
-
-
-# --------------------------------------------------
-# DEVELOPMENT
-# --------------------------------------------------
-
-FROM chef AS development
-
-WORKDIR /app
-
-CMD ["sleep", "infinity"]
-
-
-# --------------------------------------------------
-# PLANNER
-# --------------------------------------------------
 
 FROM chef AS planner
 
@@ -33,30 +16,19 @@ COPY . .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
-
-# --------------------------------------------------
-# BUILDER
-# --------------------------------------------------
-
 FROM chef AS builder
 
 COPY --from=planner /app/recipe.json recipe.json
 
-RUN cargo chef cook \
-    --release \
-    --recipe-path recipe.json
+# Build dependencies - this is the caching Docker layer!
+RUN cargo chef cook --release --recipe-path recipe.json
 
+# Build application
 COPY . .
 
-RUN cargo build \
-    --release \
-    --bin animethemes-server-rust
+RUN cargo build --release --locked --bin animethemes-server-rust
 
-
-# --------------------------------------------------
-# PRODUCTION
-# --------------------------------------------------
-
+# We do not need the Rust toolchain to run the binary!
 FROM debian:trixie-slim AS runtime
 
 WORKDIR /app
@@ -64,6 +36,7 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
+        libssl3t64 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder \
@@ -74,4 +47,6 @@ COPY --from=builder \
     /app/config \
     /app/config
 
-CMD ["animethemes-server-rust", "start"]
+ENTRYPOINT ["animethemes-server-rust"]
+
+CMD ["start"]

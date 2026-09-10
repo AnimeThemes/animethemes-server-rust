@@ -1,34 +1,9 @@
 services:
-    rust:
-        build:
-            context: .
-            target: development
-        container_name: animethemes-server-rust-rust
-        working_dir: /app
-        volumes:
-            - .:/app
-            - cargo-target:/app/target
-            - cargo-registry:/usr/local/cargo/registry
-            - cargo-git:/usr/local/cargo/git
-        env_file:
-            - .env
-        depends_on:
-            mysql:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-            typesense:
-                condition: service_healthy
-            mailpit:
-                condition: service_started
     server:
-        build:
-            context: .
-            target: runtime
-        image: animethemes-server-rust
-        pull_policy: build
+        image: '${APP_IMAGE:-animethemes-server-rust:local}'
         container_name: animethemes-server-rust
-        command: ["animethemes-server-rust", "start"]
+        command: ["start"]
+        restart: unless-stopped
         ports:
             - '${APP_PORT:-80}:80'
         env_file:
@@ -39,9 +14,8 @@ services:
             - mailpit
             - typesense
     scheduler:
-        image: animethemes-server-rust
-        pull_policy: never
-        command: ["animethemes-server-rust", "scheduler"]
+        image: '${APP_IMAGE:-animethemes-server-rust:local}'
+        command: ["scheduler"]
         restart: unless-stopped
         env_file:
             - .env
@@ -51,9 +25,8 @@ services:
             redis:
                 condition: service_healthy
     worker:
-        image: animethemes-server-rust
-        pull_policy: never
-        command: ["animethemes-server-rust", "start", "--worker"]
+        image: '${APP_IMAGE:-animethemes-server-rust:local}'
+        command: ["start", "--worker"]
         restart: unless-stopped
         env_file:
             - .env
@@ -124,9 +97,6 @@ services:
             timeout: 7s
 
 volumes:
-    cargo-target:
-    cargo-registry:
-    cargo-git:
     mysql_data:
     redis-data:
     typesense-data:

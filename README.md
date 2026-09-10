@@ -42,17 +42,19 @@ openssl rand -hex 32
 # Open the .env file and set the APP_KEY
 nano .env
 
+docker build -t animethemes-server-rust:local .
+
 # Build the containers
-docker compose up -d --build
+docker compose up -d
 
 # Import dumps if you have one
 docker exec -i animethemes-server-rust-mysql mysql -u root animethemes < content.sql
 
 # Run the migrations
-docker compose exec -w /app/migration rust cargo run -- up
+docker compose run --rm server db migrate
 
 # Seed the database
-docker compose exec rust cargo loco db seed
+docker compose run --rm server db seed
 ```
 
 ### Running
@@ -71,15 +73,15 @@ TODO: Waiting feature implementation
 Import models into our indices using:
 
 ```sh
-docker compose exec server animethemes-server-rust task search:index-anime
-docker compose exec server animethemes-server-rust task search:index-animetheme
-docker compose exec server animethemes-server-rust task search:index-animethemeentry
-docker compose exec server animethemes-server-rust task search:index-artist
-docker compose exec server animethemes-server-rust task search:index-playlist
-docker compose exec server animethemes-server-rust task search:index-series
-docker compose exec server animethemes-server-rust task search:index-song
-docker compose exec server animethemes-server-rust task search:index-studio
-docker compose exec server animethemes-server-rust task search:index-video
+docker compose run --rm server task search:index-anime
+docker compose run --rm server task search:index-artist
+docker compose run --rm server task search:index-entry
+docker compose run --rm server task search:index-playlist
+docker compose run --rm server task search:index-series
+docker compose run --rm server task search:index-song
+docker compose run --rm server task search:index-studio
+docker compose run --rm server task search:index-theme
+docker compose run --rm server task search:index-video
 ```
 
 ### MySQL Terminal

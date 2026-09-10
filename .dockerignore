@@ -1,6 +1,13 @@
 target
+Dockerfile*
+docker-compose*.yml
+.dockerignore
 .git
+.gitignore
+.github
 .env
-.idea
-.vscode
+.env.*
 *.sql
+*.sqlite
+README.md
+.rustfmt.toml
