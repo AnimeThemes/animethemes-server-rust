@@ -42,7 +42,7 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("ratings_entry_id_foreign")
                             .from("ratings", "entry_id")
-                            .to("entries", "id")
+                            .to("entries", "entry_id")
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .foreign_key(
