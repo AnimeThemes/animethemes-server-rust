@@ -41,7 +41,7 @@ impl MigrationTrait for Migration {
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("resourceables_resource_id_foreign")
+                            .name("imageables_image_id_foreign")
                             .from("imageables", "image_id")
                             .to("images", "image_id")
                             .on_delete(ForeignKeyAction::Cascade),

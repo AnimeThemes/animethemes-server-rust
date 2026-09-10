@@ -19,3 +19,4 @@ target/
 *.sqlite-*
 *.sql
 .env
+.env.production
