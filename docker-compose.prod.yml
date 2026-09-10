@@ -11,7 +11,6 @@ services:
         depends_on:
             - mysql
             - redis
-            - mailpit
             - typesense
     scheduler:
         image: '${APP_IMAGE:-animethemes-server-rust:local}'
