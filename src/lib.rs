@@ -2,6 +2,7 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use loco_rs::Error as LocoError;
 
 use crate::rules::validation_error::ValidationError;
 
@@ -61,6 +62,27 @@ impl AppError {
         );
 
         Self::Internal(error)
+    }
+}
+
+impl Into<LocoError> for AppError {
+    fn into(self) -> LocoError {
+        match self {
+            AppError::Unauthenticated => LocoError::Unauthorized("Unauthenticated".to_string()),
+            AppError::Unauthorized => LocoError::Unauthorized("Unauthorized".to_string()),
+            AppError::Forbidden => LocoError::Message("Forbidden".to_string()),
+            AppError::ForbiddenWithMessage(message) => LocoError::Message(message),
+            AppError::NotFound => LocoError::NotFound,
+            AppError::Validation(errors) => LocoError::BadRequest(
+                errors
+                    .into_iter()
+                    .map(|e| format!("{}: {}", e.field, e.messages.join(", ")))
+                    .collect::<Vec<_>>()
+                    .join(" "),
+            ),
+            AppError::Database(error) => LocoError::DB(error),
+            AppError::Internal(_) => LocoError::InternalServerError,
+        }
     }
 }
 

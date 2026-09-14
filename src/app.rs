@@ -125,6 +125,9 @@ impl Hooks for App {
 
     #[allow(unused_variables)]
     fn register_tasks(tasks: &mut Tasks) {
+        tasks.register(tasks::assign_role::AssignRole);
+        tasks.register(tasks::clear_reset_passwords::ClearResetPasswords);
+        tasks.register(tasks::create_user::CreateUser);
         tasks.register(tasks::print_schema::PrintSchema);
         tasks.register(tasks::search_index_anime::SearchIndexAnime);
         tasks.register(tasks::search_index_theme::SearchIndexTheme);
@@ -135,7 +138,6 @@ impl Hooks for App {
         tasks.register(tasks::search_index_song::SearchIndexSong);
         tasks.register(tasks::search_index_studio::SearchIndexStudio);
         tasks.register(tasks::search_index_video::SearchIndexVideo);
-        tasks.register(tasks::clear_reset_passwords::ClearResetPasswords);
         tasks.register(tasks::sync_entry_favorites_count::SyncEntryFavoritesCount);
         // tasks-inject (do not remove)
     }

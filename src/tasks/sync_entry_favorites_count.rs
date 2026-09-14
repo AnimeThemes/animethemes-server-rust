@@ -18,7 +18,7 @@ impl Task for SyncEntryFavoritesCount {
             .execute_raw(Statement::from_sql_and_values(
                 DatabaseBackend::MySql,
                 r#"
-                    UPDATE anime_theme_entries AS entries
+                    UPDATE entries
                     LEFT JOIN (
                         SELECT
                             favoriteable_id,

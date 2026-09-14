@@ -3,7 +3,7 @@ use crate::{
     actions::auth::{
         forgot_password::ForgotPassword,
         login::{LoginAction, LoginActionParameters},
-        register::{CreateUserParameters, Register},
+        register::{Register, RegisterParameters},
         reset_password::{ResetPassword, ResetPasswordParams},
         update_user_information::{UpdateUserInformation, UpdateUserInformationParameters},
         update_user_password::{UpdateUserPassword, UpdateUserPasswordParameters},
@@ -81,7 +81,7 @@ impl AuthMutation {
 
         let user = Register::register(
             db,
-            CreateUserParameters {
+            RegisterParameters {
                 name: input.name,
                 email: input.email,
                 password: input.password,

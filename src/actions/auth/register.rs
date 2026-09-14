@@ -13,7 +13,7 @@ use crate::{
 };
 
 #[derive(Clone)]
-pub struct CreateUserParameters {
+pub struct RegisterParameters {
     pub name: String,
     pub email: String,
     pub password: String,
@@ -63,7 +63,7 @@ impl Register {
 
     async fn validate(
         db: &DatabaseConnection,
-        params: &CreateUserParameters,
+        params: &RegisterParameters,
     ) -> Result<(), AppError> {
         let mut errors = Vec::new();
 
@@ -130,7 +130,7 @@ impl Register {
 
     pub async fn register(
         db: &DatabaseConnection,
-        params: CreateUserParameters,
+        params: RegisterParameters,
     ) -> Result<user::Model, AppError> {
         Self::validate(db, &params).await?;
 

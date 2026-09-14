@@ -9,7 +9,7 @@ pub struct PrintSchema;
 impl Task for PrintSchema {
     fn task(&self) -> TaskInfo {
         TaskInfo {
-            name: "print_schema".to_string(),
+            name: "print:schema".to_string(),
             detail: "Print the schema in SDL format".to_string(),
         }
     }

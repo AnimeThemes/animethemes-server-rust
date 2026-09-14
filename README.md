@@ -42,9 +42,10 @@ openssl rand -hex 32
 # Open the .env file and set the APP_KEY
 nano .env
 
+# Build the Docker image
 docker build -t animethemes-server-rust:local .
 
-# Build the containers
+# Start the containers
 docker compose up -d
 
 # Import dumps if you have one
@@ -66,7 +67,13 @@ docker compose run --rm server db seed
 
 ### Users
 
-TODO: Waiting feature implementation
+```sh
+# Create a new user
+docker compose run --rm server task create:user name:"Name" email:"example@example.com" password:"Password1."
+
+# Assign a role to the user
+docker compose run --rm server task assign:role id:1 role:"Admin"
+```
 
 ### Search
 

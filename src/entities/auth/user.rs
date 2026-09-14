@@ -1,5 +1,6 @@
+use async_trait::async_trait;
 use chrono::Utc;
-use sea_orm::entity::prelude::*;
+use sea_orm::{ActiveValue::Set, entity::prelude::*};
 
 use crate::entities::{auth::role, list::playlist};
 
@@ -27,4 +28,16 @@ pub struct Model {
     pub playlists: HasMany<playlist::Entity>,
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait]
+impl ActiveModelBehavior for ActiveModel {
+    async fn before_save<C>(self, _db: &C, _insert: bool) -> Result<Self, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        let mut model = self;
+
+        model.updated_at = Set(Utc::now());
+
+        Ok(model)
+    }
+}
