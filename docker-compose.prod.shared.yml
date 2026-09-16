@@ -1,0 +1,30 @@
+# Shared services for the two backends
+services:
+    mysql:
+        image: mysql:8.0.36
+        container_name: shared-mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        volumes:
+            - './data/mysql:/var/lib/mysql'
+        networks:
+            - shared-network
+    typesense:
+        image: typesense/typesense:30.2
+        container_name: shared-typesense
+        restart: unless-stopped
+        environment:
+            TYPESENSE_DATA_DIR: '${TYPESENSE_DATA_DIR:-/data}'
+            TYPESENSE_API_KEY: '${TYPESENSE_API_KEY:-xyz}'
+            TYPESENSE_ENABLE_CORS: '${TYPESENSE_ENABLE_CORS:-true}'
+        volumes:
+            - './data/typesense:/data'
+        networks:
+            - shared-network
+networks:
+    shared-network:
+        external: true
