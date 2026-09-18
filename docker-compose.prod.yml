@@ -38,7 +38,7 @@ services:
         image: 'redis:alpine'
         container_name: animethemes-server-rust-redis
         volumes:
-            - 'redis-data:/data'
+            - './docker-data/redis:/data'
         networks:
             - shared-network
         healthcheck:
