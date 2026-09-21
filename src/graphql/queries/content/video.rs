@@ -47,8 +47,8 @@ impl VideoQuery {
         }
 
         let mut cursor_sorts = sort
-            .clone()
-            .unwrap_or(vec![])
+            .as_deref()
+            .unwrap_or_default()
             .iter()
             .filter_map(VideoSort::cursor_sort)
             .collect::<Vec<_>>();

@@ -47,8 +47,8 @@ impl ImageQuery {
         }
 
         let mut cursor_sorts = sort
-            .clone()
-            .unwrap_or(vec![])
+            .as_deref()
+            .unwrap_or_default()
             .iter()
             .filter_map(ImageSort::cursor_sort)
             .collect::<Vec<_>>();

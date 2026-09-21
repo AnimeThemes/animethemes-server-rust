@@ -1,20 +1,25 @@
 use async_graphql::{
-    ComplexObject, Context, InputObject, Result, SimpleObject, dataloader::DataLoader,
+    ComplexObject, Context, InputObject, Result, SimpleObject,
+    connection::{Connection, EmptyFields, OpaqueCursor},
+    dataloader::DataLoader,
 };
 use chrono::{DateTime, Utc};
+use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter};
 
 use crate::{
-    entities::auth::user,
+    entities::{auth::user, list::playlist, user::watchhistory},
     graphql::{
-        enums::sort::{list::playlist_sort::PlaylistSort, user::rating_sort::RatingSort},
+        cursor::{CursorSort, PaginationCursor, cursor_paginate},
+        enums::sort::{
+            GraphQLSort, list::playlist_sort::PlaylistSort, user::rating_sort::RatingSort,
+        },
+        inputs::pagination_input::PaginationInput,
         loaders::auth::user::{
             user_favorites::{
                 UserFavoritesLoader, UserFavoritesLoaderKey, UserFavoritesLoaderQuery,
             },
-            user_playlists::{UserPlaylistsLoader, UserPlaylistsLoaderKey},
             user_ratings::{UserRatingsLoader, UserRatingsLoaderKey, UserRatingsLoaderQuery},
             user_roles::UserRolesLoader,
-            user_watchhistory::UserWatchHistoryLoader,
         },
         types::{
             auth::role::Role,
@@ -66,16 +71,31 @@ impl Me {
     async fn playlists(
         &self,
         ctx: &Context<'_>,
+        pagination: Option<PaginationInput>,
         sort: Option<Vec<PlaylistSort>>,
-    ) -> Result<Vec<Playlist>> {
-        let loader = ctx.data_unchecked::<DataLoader<UserPlaylistsLoader>>();
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Playlist, EmptyFields, EmptyFields>>
+    {
+        let mut query = playlist::Entity::find().filter(playlist::Column::UserId.eq(self.id));
 
-        let models = loader
-            .load_one(UserPlaylistsLoaderKey::new(self.id, sort))
-            .await?
-            .unwrap_or_default();
+        if let Some(sorts) = sort.clone() {
+            for sort in sorts {
+                query = sort.apply_sort(query);
+            }
+        }
 
-        Ok(models.into_iter().map(Playlist::from).collect())
+        let mut cursor_sorts = sort
+            .as_deref()
+            .unwrap_or_default()
+            .iter()
+            .filter_map(PlaylistSort::cursor_sort)
+            .collect::<Vec<_>>();
+
+        cursor_sorts.push(CursorSort {
+            column: playlist::Column::Id,
+            order: Order::Asc,
+        });
+
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 
     /// The roles of the authenticated user.
@@ -88,12 +108,20 @@ impl Me {
     }
 
     /// The watch history of the authenticated user.
-    async fn watch_history(&self, ctx: &Context<'_>) -> Result<Vec<WatchHistory>> {
-        let loader = ctx.data_unchecked::<DataLoader<UserWatchHistoryLoader>>();
+    async fn watch_history(
+        &self,
+        ctx: &Context<'_>,
+        pagination: Option<PaginationInput>,
+    ) -> Result<Connection<OpaqueCursor<PaginationCursor>, WatchHistory, EmptyFields, EmptyFields>>
+    {
+        let query = watchhistory::Entity::find().filter(watchhistory::Column::UserId.eq(self.id));
 
-        let models = loader.load_one(self.id).await?.unwrap_or_default();
+        let cursor_sorts = vec![CursorSort {
+            column: watchhistory::Column::Id,
+            order: Order::Asc,
+        }];
 
-        Ok(models.into_iter().map(WatchHistory::from).collect())
+        cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
 
     /// The favorites of the authenticated user.
