@@ -129,6 +129,7 @@ impl Hooks for App {
         tasks.register(tasks::clear_reset_passwords::ClearResetPasswords);
         tasks.register(tasks::create_user::CreateUser);
         tasks.register(tasks::print_schema::PrintSchema);
+        tasks.register(tasks::prune_watch_history::PruneWatchHistory);
         tasks.register(tasks::search_index_anime::SearchIndexAnime);
         tasks.register(tasks::search_index_theme::SearchIndexTheme);
         tasks.register(tasks::search_index_entry::SearchIndexEntry);

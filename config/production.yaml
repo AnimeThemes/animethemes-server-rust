@@ -80,6 +80,10 @@ scheduler:
       run: "entry:sync-favorites-count"
       # Every day at 23:56
       schedule: "0 56 23 * * * *"
+    prune_watch_history:
+      run: "prune:watch-history"
+      # Every day at 00:00
+      schedule: "0 0 * * * *"
 
 # Initializers Configuration
 # initializers:

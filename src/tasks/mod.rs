@@ -2,6 +2,7 @@ pub mod assign_role;
 pub mod clear_reset_passwords;
 pub mod create_user;
 pub mod print_schema;
+pub mod prune_watch_history;
 pub mod search_index_anime;
 pub mod search_index_artist;
 pub mod search_index_entry;
