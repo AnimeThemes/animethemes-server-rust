@@ -8,15 +8,16 @@ use crate::entities::{
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
-#[sea_orm(table_name = "performances")]
+#[sea_orm(table_name = "song_staff")]
 pub struct Model {
-    #[sea_orm(primary_key, column_name = "performance_id")]
+    #[sea_orm(primary_key, column_name = "id")]
     pub id: u64,
     pub alias: Option<String>,
     pub r#as: Option<String>,
     pub member_alias: Option<String>,
     pub member_as: Option<String>,
     pub relevance: i32,
+    pub role: String,
     pub artist_id: u64,
     pub member_id: Option<u64>,
     pub song_id: u64,

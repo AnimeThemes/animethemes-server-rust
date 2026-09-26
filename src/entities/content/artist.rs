@@ -3,7 +3,7 @@ use sea_orm::entity::prelude::*;
 
 use crate::entities::{
     SoftDeleteEntity,
-    content::{performance, synonym},
+    content::{song_staff, synonym},
 };
 
 #[sea_orm::model]
@@ -30,11 +30,11 @@ pub struct Model {
     )]
     pub synonyms: HasMany<synonym::Entity>,
 
-    #[sea_orm(has_many, relation_enum = "Performances", via_rel = "Artist")]
-    pub performances: HasMany<performance::Entity>,
+    #[sea_orm(has_many, relation_enum = "SongStaff", via_rel = "Artist")]
+    pub song_staff: HasMany<song_staff::Entity>,
 
-    #[sea_orm(has_many, relation_enum = "MemberPerformances", via_rel = "Member")]
-    pub member_performances: HasMany<performance::Entity>,
+    #[sea_orm(has_many, relation_enum = "MemberSongStaff", via_rel = "Member")]
+    pub member_song_staff: HasMany<song_staff::Entity>,
 
     #[sea_orm(self_ref, via = "artist_members", from = "Artist", to = "Member")]
     pub members: HasMany<Entity>,

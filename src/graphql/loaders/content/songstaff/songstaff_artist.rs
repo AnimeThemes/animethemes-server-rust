@@ -5,11 +5,11 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::entities::content::artist;
 
-pub struct PerformanceMemberLoader {
+pub struct SongStaffArtistLoader {
     pub db: DatabaseConnection,
 }
 
-impl Loader<u64> for PerformanceMemberLoader {
+impl Loader<u64> for SongStaffArtistLoader {
     type Value = artist::Model;
     type Error = sea_orm::DbErr;
 

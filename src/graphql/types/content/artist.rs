@@ -11,8 +11,10 @@ use crate::{
             artist::{
                 artist_groups::ArtistGroupsLoader,
                 artist_memberperformances::ArtistMemberPerformancesLoader,
-                artist_members::ArtistMembersLoader, artist_performances::ArtistPerformancesLoader,
-                artist_synonyms::ArtistSynonymsLoader,
+                artist_members::ArtistMembersLoader,
+                artist_membersongstaffs::ArtistMemberSongStaffsLoader,
+                artist_performances::ArtistPerformancesLoader,
+                artist_songstaffs::ArtistSongStaffsLoader, artist_synonyms::ArtistSynonymsLoader,
             },
             imageable::{ImageableKey, ImageableLoader},
             resourceable::{ResourceableKey, ResourceableLoader},
@@ -22,8 +24,8 @@ use crate::{
             externalresource::ExternalResource,
             image::Image,
             imageable::{ImageableConnection, ImageableEdge, ImageableEdgeFields},
-            performance::Performance,
             resourceable::{ResourceableConnection, ResourceableEdge, ResourceableEdgeFields},
+            song_staff::SongStaff,
             synonym::Synonym,
         },
     },
@@ -146,20 +148,38 @@ impl Artist {
         Ok(connection)
     }
 
-    async fn performances(&self, ctx: &Context<'_>) -> Result<Vec<Performance>> {
+    #[graphql(deprecation = "Use `songStaff` instead")]
+    async fn performances(&self, ctx: &Context<'_>) -> Result<Vec<SongStaff>> {
         let loader = ctx.data_unchecked::<DataLoader<ArtistPerformancesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
-        Ok(models.into_iter().map(Performance::from).collect())
+        Ok(models.into_iter().map(SongStaff::from).collect())
     }
 
-    async fn member_performances(&self, ctx: &Context<'_>) -> Result<Vec<Performance>> {
+    #[graphql(deprecation = "Use `memberSongStaff` instead")]
+    async fn member_performances(&self, ctx: &Context<'_>) -> Result<Vec<SongStaff>> {
         let loader = ctx.data_unchecked::<DataLoader<ArtistMemberPerformancesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
-        Ok(models.into_iter().map(Performance::from).collect())
+        Ok(models.into_iter().map(SongStaff::from).collect())
+    }
+
+    async fn song_staff(&self, ctx: &Context<'_>) -> Result<Vec<SongStaff>> {
+        let loader = ctx.data_unchecked::<DataLoader<ArtistSongStaffsLoader>>();
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(SongStaff::from).collect())
+    }
+
+    async fn member_song_staff(&self, ctx: &Context<'_>) -> Result<Vec<SongStaff>> {
+        let loader = ctx.data_unchecked::<DataLoader<ArtistMemberSongStaffsLoader>>();
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(SongStaff::from).collect())
     }
 
     async fn images(

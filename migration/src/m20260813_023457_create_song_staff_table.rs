@@ -4,7 +4,7 @@ pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m20260813_023457_create_performances_table"
+        "m20260813_023457_create_song_staff_table"
     }
 }
 
@@ -14,10 +14,10 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table("performances")
+                    .table("song_staff")
                     .if_not_exists()
                     .col(
-                        ColumnDef::new("performance_id")
+                        ColumnDef::new("id")
                             .big_unsigned()
                             .not_null()
                             .auto_increment()
@@ -26,6 +26,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new("song_id").big_unsigned().not_null())
                     .col(ColumnDef::new("artist_id").big_unsigned().not_null())
                     .col(ColumnDef::new("member_id").big_unsigned().null())
+                    .col(ColumnDef::new("role").string())
                     .col(ColumnDef::new("alias").string().null())
                     .col(ColumnDef::new("as").string().null())
                     .col(ColumnDef::new("member_alias").string().null())
@@ -63,7 +64,7 @@ impl MigrationTrait for Migration {
                             .name("performances_member_id_foreign")
                             .from("performances", "member_id")
                             .to("artists", "artist_id")
-                            .on_delete(ForeignKeyAction::SetNull),
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .index(
                         Index::create()
@@ -71,6 +72,7 @@ impl MigrationTrait for Migration {
                             .col("song_id")
                             .col("artist_id")
                             .col("member_id")
+                            .col("role")
                             .col("deleted_at")
                             .unique(),
                     )

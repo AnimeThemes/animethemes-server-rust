@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
 use crate::{
-    entities::content::{artist, performance, synonym},
+    entities::content::{artist, song_staff, synonym},
     typesense::{documents::HasId, index_document::BuildDocumentsFuture},
 };
 
@@ -35,20 +35,16 @@ impl HasId for ArtistDocument {
 type ArtistDocumentFrom = (
     artist::Model,
     Vec<synonym::Model>,
-    Vec<performance::Model>,
-    Vec<performance::Model>,
+    Vec<song_staff::Model>,
+    Vec<song_staff::Model>,
 );
 
 impl From<ArtistDocumentFrom> for ArtistDocument {
-    fn from((model, synonyms, performances, member_performances): ArtistDocumentFrom) -> Self {
-        let r#as = performances
+    fn from((model, synonyms, staffs, member_staffs): ArtistDocumentFrom) -> Self {
+        let r#as = staffs
             .iter()
             .filter_map(|p| p.r#as.clone())
-            .chain(
-                member_performances
-                    .iter()
-                    .filter_map(|p| p.member_as.clone()),
-            )
+            .chain(member_staffs.iter().filter_map(|p| p.member_as.clone()))
             .collect::<Vec<String>>();
 
         let name_native = if model.name_native.as_ref() == Some(&model.name) {
@@ -92,33 +88,30 @@ pub fn build_artist_documents<'a>(
 
         let artist_ids: Vec<u64> = models.iter().map(|model| model.id).collect();
 
-        let performances = performance::Entity::find()
-            .filter(performance::Column::ArtistId.is_in(artist_ids.clone()))
+        let staffs = song_staff::Entity::find()
+            .filter(song_staff::Column::ArtistId.is_in(artist_ids.clone()))
             .all(database)
             .await?;
 
-        let member_performances = performance::Entity::find()
-            .filter(performance::Column::MemberId.is_in(artist_ids))
+        let member_staffs = song_staff::Entity::find()
+            .filter(song_staff::Column::MemberId.is_in(artist_ids))
             .all(database)
             .await?;
 
-        let mut performances_by_artist: HashMap<u64, Vec<performance::Model>> = HashMap::new();
+        let mut staffs_by_artist: HashMap<u64, Vec<song_staff::Model>> = HashMap::new();
 
-        for performance in performances {
-            performances_by_artist
-                .entry(performance.artist_id)
+        for staff in staffs {
+            staffs_by_artist
+                .entry(staff.artist_id)
                 .or_default()
-                .push(performance);
+                .push(staff);
         }
 
-        let mut performances_by_member: HashMap<u64, Vec<performance::Model>> = HashMap::new();
+        let mut staffs_by_member: HashMap<u64, Vec<song_staff::Model>> = HashMap::new();
 
-        for performance in member_performances {
-            if let Some(member_id) = performance.member_id {
-                performances_by_member
-                    .entry(member_id)
-                    .or_default()
-                    .push(performance);
+        for staff in member_staffs {
+            if let Some(member_id) = staff.member_id {
+                staffs_by_member.entry(member_id).or_default().push(staff);
             }
         }
 
@@ -126,12 +119,11 @@ pub fn build_artist_documents<'a>(
             .into_iter()
             .zip(synonyms)
             .map(|(model, synonyms)| {
-                let performances = performances_by_artist.remove(&model.id).unwrap_or_default();
+                let staffs = staffs_by_artist.remove(&model.id).unwrap_or_default();
 
-                let member_performances =
-                    performances_by_member.remove(&model.id).unwrap_or_default();
+                let member_staffs = staffs_by_member.remove(&model.id).unwrap_or_default();
 
-                ArtistDocument::from((model, synonyms, performances, member_performances))
+                ArtistDocument::from((model, synonyms, staffs, member_staffs))
             })
             .collect();
 

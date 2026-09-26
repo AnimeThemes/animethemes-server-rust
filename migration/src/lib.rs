@@ -23,7 +23,7 @@ mod m20260813_013404_create_video_scripts_table;
 mod m20260813_021040_create_playlists_table;
 mod m20260813_022143_create_playlist_tracks_table;
 mod m20260813_023144_create_featured_themes_table;
-mod m20260813_023457_create_performances_table;
+mod m20260813_023457_create_song_staff_table;
 mod m20260813_023839_create_resourceables_table;
 mod m20260813_024141_create_imageables_table;
 mod m20260813_024405_create_synonyms_table;
@@ -65,7 +65,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260813_021040_create_playlists_table::Migration),
             Box::new(m20260813_022143_create_playlist_tracks_table::Migration),
             Box::new(m20260813_023144_create_featured_themes_table::Migration),
-            Box::new(m20260813_023457_create_performances_table::Migration),
+            Box::new(m20260813_023457_create_song_staff_table::Migration),
             Box::new(m20260813_023839_create_resourceables_table::Migration),
             Box::new(m20260813_024141_create_imageables_table::Migration),
             Box::new(m20260813_024405_create_synonyms_table::Migration),

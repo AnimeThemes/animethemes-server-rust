@@ -4,9 +4,10 @@ use crate::{
     entities::content::song,
     graphql::{
         loaders::content::song::{
-            song_performances::SongPerformancesLoader, song_themes::SongThemesLoader,
+            song_performances::SongPerformancesLoader, song_staffs::SongStaffsLoader,
+            song_themes::SongThemesLoader,
         },
-        types::content::{performance::Performance, theme::Theme},
+        types::content::{song_staff::SongStaff, theme::Theme},
     },
 };
 
@@ -49,12 +50,21 @@ impl Song {
         Ok(models.into_iter().map(Theme::from).collect())
     }
 
-    async fn performances(&self, ctx: &Context<'_>) -> Result<Vec<Performance>> {
+    #[graphql(deprecation = "Use `performances` instead")]
+    async fn performances(&self, ctx: &Context<'_>) -> Result<Vec<SongStaff>> {
         let loader = ctx.data_unchecked::<DataLoader<SongPerformancesLoader>>();
 
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
-        Ok(models.into_iter().map(Performance::from).collect())
+        Ok(models.into_iter().map(SongStaff::from).collect())
+    }
+
+    async fn staff(&self, ctx: &Context<'_>) -> Result<Vec<SongStaff>> {
+        let loader = ctx.data_unchecked::<DataLoader<SongStaffsLoader>>();
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(SongStaff::from).collect())
     }
 }
 

@@ -5,25 +5,24 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::entities::content::song_staff;
 
-pub struct ArtistPerformancesLoader {
+pub struct SongStaffsLoader {
     pub db: DatabaseConnection,
 }
 
-impl Loader<u64> for ArtistPerformancesLoader {
+impl Loader<u64> for SongStaffsLoader {
     type Value = Vec<song_staff::Model>;
     type Error = sea_orm::DbErr;
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
         let models = song_staff::Entity::find()
-            .filter(song_staff::Column::ArtistId.is_in(keys))
-            .filter(song_staff::Column::Role.eq("Performance"))
+            .filter(song_staff::Column::SongId.is_in(keys))
             .all(&self.db)
             .await?;
 
         let mut result: HashMap<u64, Self::Value> = HashMap::new();
 
         for model in models {
-            result.entry(model.artist_id).or_default().push(model);
+            result.entry(model.song_id).or_default().push(model);
         }
 
         Ok(result)
