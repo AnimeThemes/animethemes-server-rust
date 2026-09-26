@@ -17,6 +17,7 @@ pub mod studio;
 pub mod studio_anime;
 pub mod synonym;
 pub mod theme;
+pub mod theme_staff;
 pub mod themegroup;
 pub mod video;
 pub mod videoscript;

@@ -4,7 +4,7 @@ pub struct Migration;
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m20260813_023457_create_song_staff_table"
+        "m20260926_230104_create_theme_staff_table"
     }
 }
 
@@ -14,7 +14,7 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table("song_staff")
+                    .table("theme_staff")
                     .if_not_exists()
                     .col(
                         ColumnDef::new("id")
@@ -23,14 +23,10 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new("song_id").big_unsigned().not_null())
+                    .col(ColumnDef::new("theme_id").big_unsigned().not_null())
                     .col(ColumnDef::new("artist_id").big_unsigned().not_null())
-                    .col(ColumnDef::new("member_id").big_unsigned().null())
                     .col(ColumnDef::new("role").string().not_null())
                     .col(ColumnDef::new("alias").string().null())
-                    .col(ColumnDef::new("as").string().null())
-                    .col(ColumnDef::new("member_alias").string().null())
-                    .col(ColumnDef::new("member_as").string().null())
                     .col(ColumnDef::new("relevance").integer().not_null().default(1))
                     .col(
                         ColumnDef::new("created_at")
@@ -47,31 +43,23 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new("deleted_at").timestamp().null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("song_staff_song_id_foreign")
-                            .from("song_staff", "song_id")
-                            .to("songs", "song_id")
+                            .name("theme_staff_theme_id_foreign")
+                            .from("theme_staff", "theme_id")
+                            .to("themes", "theme_id")
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .foreign_key(
                         ForeignKey::create()
-                            .name("song_staff_artist_id_foreign")
-                            .from("song_staff", "artist_id")
-                            .to("artists", "artist_id")
-                            .on_delete(ForeignKeyAction::Cascade),
-                    )
-                    .foreign_key(
-                        ForeignKey::create()
-                            .name("song_staff_member_id_foreign")
-                            .from("song_staff", "member_id")
+                            .name("theme_staff_artist_id_foreign")
+                            .from("theme_staff", "artist_id")
                             .to("artists", "artist_id")
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .index(
                         Index::create()
-                            .name("unique_song_staff")
-                            .col("song_id")
+                            .name("unique_theme_staff")
+                            .col("theme_id")
                             .col("artist_id")
-                            .col("member_id")
                             .col("role")
                             .col("deleted_at")
                             .unique(),

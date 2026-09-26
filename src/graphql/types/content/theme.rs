@@ -1,4 +1,10 @@
-use crate::enums::{LocalizedEnum, content::themetype::ThemeType};
+use crate::{
+    enums::{LocalizedEnum, content::themetype::ThemeType},
+    graphql::{
+        loaders::content::theme::theme_staffs::ThemeStaffsLoader,
+        types::content::theme_staff::ThemeStaff,
+    },
+};
 use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
 
 use crate::{
@@ -78,6 +84,14 @@ impl Theme {
         let loader = ctx.data_unchecked::<DataLoader<ThemeGroupLoader>>();
 
         Ok(loader.load_one(group_id).await?.map(Into::into))
+    }
+
+    async fn staff(&self, ctx: &Context<'_>) -> Result<Vec<ThemeStaff>> {
+        let loader = ctx.data_unchecked::<DataLoader<ThemeStaffsLoader>>();
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(ThemeStaff::from).collect())
     }
 }
 

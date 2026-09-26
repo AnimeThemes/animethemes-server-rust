@@ -27,6 +27,7 @@ use crate::graphql::{
                 artist_membersongstaffs::ArtistMemberSongStaffsLoader,
                 artist_performances::ArtistPerformancesLoader,
                 artist_songstaffs::ArtistSongStaffsLoader, artist_synonyms::ArtistSynonymsLoader,
+                artist_themestaffs::ArtistThemeStaffsLoader,
             },
             entry::{entry_theme::EntryThemeLoader, entry_videos::EntryVideosLoader},
             imageable::ImageableLoader,
@@ -43,7 +44,10 @@ use crate::graphql::{
             studio::studio_anime::StudioAnimeLoader,
             theme::{
                 theme_anime::ThemeAnimeLoader, theme_group::ThemeGroupLoader,
-                theme_song::ThemeSongLoader,
+                theme_song::ThemeSongLoader, theme_staffs::ThemeStaffsLoader,
+            },
+            themestaff::{
+                themestaff_artist::ThemeStaffArtistLoader, themestaff_theme::ThemeStaffThemeLoader,
             },
             video::{
                 video_audio::VideoAudioLoader, video_entries::VideoThemeEntriesLoader,
@@ -117,6 +121,7 @@ impl<Query> RegisterLoaders for SchemaBuilder<Query, Mutation, EmptySubscription
             .data(loader(ArtistMemberPerformancesLoader { db: db.clone() }))
             .data(loader(ArtistSongStaffsLoader { db: db.clone() }))
             .data(loader(ArtistMemberSongStaffsLoader { db: db.clone() }))
+            .data(loader(ArtistThemeStaffsLoader { db: db.clone() }))
             .data(loader(SeriesAnimeLoader { db: db.clone() }))
             .data(loader(SongThemesLoader { db: db.clone() }))
             .data(loader(SongStaffsLoader { db: db.clone() }))
@@ -125,6 +130,9 @@ impl<Query> RegisterLoaders for SchemaBuilder<Query, Mutation, EmptySubscription
             .data(loader(SongStaffArtistLoader { db: db.clone() }))
             .data(loader(SongStaffMemberLoader { db: db.clone() }))
             .data(loader(SongStaffSongLoader { db: db.clone() }))
+            .data(loader(ThemeStaffsLoader { db: db.clone() }))
+            .data(loader(ThemeStaffArtistLoader { db: db.clone() }))
+            .data(loader(ThemeStaffThemeLoader { db: db.clone() }))
             .data(loader(VideoThemeEntriesLoader { db: db.clone() }))
             .data(loader(VideoAudioLoader { db: db.clone() }))
             .data(loader(VideoScriptLoader { db: db.clone() }))

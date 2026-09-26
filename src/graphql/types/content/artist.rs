@@ -15,6 +15,7 @@ use crate::{
                 artist_membersongstaffs::ArtistMemberSongStaffsLoader,
                 artist_performances::ArtistPerformancesLoader,
                 artist_songstaffs::ArtistSongStaffsLoader, artist_synonyms::ArtistSynonymsLoader,
+                artist_themestaffs::ArtistThemeStaffsLoader,
             },
             imageable::{ImageableKey, ImageableLoader},
             resourceable::{ResourceableKey, ResourceableLoader},
@@ -27,6 +28,7 @@ use crate::{
             resourceable::{ResourceableConnection, ResourceableEdge, ResourceableEdgeFields},
             song_staff::SongStaff,
             synonym::Synonym,
+            theme_staff::ThemeStaff,
         },
     },
 };
@@ -180,6 +182,14 @@ impl Artist {
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
         Ok(models.into_iter().map(SongStaff::from).collect())
+    }
+
+    async fn theme_staff(&self, ctx: &Context<'_>) -> Result<Vec<ThemeStaff>> {
+        let loader = ctx.data_unchecked::<DataLoader<ArtistThemeStaffsLoader>>();
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(ThemeStaff::from).collect())
     }
 
     async fn images(

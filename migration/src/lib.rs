@@ -35,6 +35,7 @@ mod m20260825_203853_create_password_reset_tokens_table;
 mod m20260828_130923_create_sanctions_table;
 mod m20260903_143133_create_favorites_table;
 mod m20260904_225415_create_ratings_table;
+mod m20260926_230104_create_theme_staff_table;
 
 pub struct Migrator;
 
@@ -77,6 +78,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260828_130923_create_sanctions_table::Migration),
             Box::new(m20260903_143133_create_favorites_table::Migration),
             Box::new(m20260904_225415_create_ratings_table::Migration),
+            Box::new(m20260926_230104_create_theme_staff_table::Migration),
         ]
     }
 }

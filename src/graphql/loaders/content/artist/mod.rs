@@ -5,3 +5,4 @@ pub mod artist_membersongstaffs;
 pub mod artist_performances;
 pub mod artist_songstaffs;
 pub mod artist_synonyms;
+pub mod artist_themestaffs;

@@ -8,4 +8,5 @@ pub mod song;
 pub mod songstaff;
 pub mod studio;
 pub mod theme;
+pub mod themestaff;
 pub mod video;

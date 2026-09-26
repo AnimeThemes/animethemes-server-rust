@@ -16,6 +16,7 @@ pub mod song_staff;
 pub mod studio;
 pub mod synonym;
 pub mod theme;
+pub mod theme_staff;
 pub mod themegroup;
 pub mod video;
 pub mod videoscript;
