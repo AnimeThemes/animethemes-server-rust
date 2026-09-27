@@ -39,6 +39,11 @@ pub struct Studio {
 
 #[ComplexObject]
 impl Studio {
+    /// The URL for the studio page on the website
+    async fn site_url(&self, _ctx: &Context<'_>) -> String {
+        format!("https://animethemes.moe/studio/{}", self.slug)
+    }
+
     async fn anime(
         &self,
         ctx: &Context<'_>,

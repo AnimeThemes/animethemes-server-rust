@@ -37,6 +37,7 @@ services:
     redis:
         image: 'redis:alpine'
         container_name: animethemes-server-rust-redis
+        restart: unless-stopped
         volumes:
             - './docker-data/redis:/data'
         networks:

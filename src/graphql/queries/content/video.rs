@@ -3,7 +3,7 @@ use async_graphql::{
     Context, InputObject, Object, Result,
     connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
 use crate::{
     graphql::{
@@ -25,6 +25,18 @@ pub struct VideoQuery;
 
 #[Object]
 impl VideoQuery {
+    async fn video(&self, ctx: &Context<'_>, id: i32) -> Result<Option<Video>> {
+        let db = ctx.data::<DatabaseConnection>()?;
+
+        let model = video::Entity::find()
+            .filter(without_trashed::<video::Entity>())
+            .filter(video::Column::Id.eq(id))
+            .one(db)
+            .await?;
+
+        Ok(model.map(Into::into))
+    }
+
     async fn video_connection(
         &self,
         ctx: &Context<'_>,

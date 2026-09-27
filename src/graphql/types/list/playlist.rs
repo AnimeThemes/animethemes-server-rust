@@ -59,6 +59,11 @@ pub struct Playlist {
 
 #[ComplexObject]
 impl Playlist {
+    /// The URL for the playlist page on the website
+    async fn site_url(&self, _ctx: &Context<'_>) -> String {
+        format!("https://animethemes.moe/playlist/{}", self.hashid)
+    }
+
     async fn tracks_count(&self, ctx: &Context<'_>) -> Result<i32> {
         let loader = ctx.data_unchecked::<DataLoader<PlaylistTracksCountLoader>>();
 

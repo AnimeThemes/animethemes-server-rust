@@ -79,6 +79,11 @@ pub struct Anime {
 
 #[ComplexObject]
 impl Anime {
+    /// The URL for the anime page on the website
+    async fn site_url(&self, _ctx: &Context<'_>) -> String {
+        format!("https://animethemes.moe/anime/{}", self.slug)
+    }
+
     async fn synonyms(&self, ctx: &Context<'_>) -> Result<Vec<Synonym>> {
         let loader = ctx.data_unchecked::<DataLoader<AnimeSynonymsLoader>>();
 

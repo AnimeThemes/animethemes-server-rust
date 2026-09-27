@@ -68,6 +68,11 @@ pub struct Artist {
 
 #[ComplexObject]
 impl Artist {
+    /// The URL for the artist page on the website
+    async fn site_url(&self, _ctx: &Context<'_>) -> String {
+        format!("https://animethemes.moe/artist/{}", self.slug)
+    }
+
     async fn synonyms(&self, ctx: &Context<'_>) -> Result<Vec<Synonym>> {
         let loader = ctx.data_unchecked::<DataLoader<ArtistSynonymsLoader>>();
 

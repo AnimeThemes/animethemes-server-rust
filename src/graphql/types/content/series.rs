@@ -44,6 +44,11 @@ pub struct Series {
 
 #[ComplexObject]
 impl Series {
+    /// The URL for the series page on the website
+    async fn site_url(&self, _ctx: &Context<'_>) -> String {
+        format!("https://animethemes.moe/series/{}", self.slug)
+    }
+
     async fn anime(
         &self,
         ctx: &Context<'_>,
