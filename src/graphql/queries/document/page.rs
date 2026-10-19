@@ -5,7 +5,10 @@ use async_graphql::{
 use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
 use crate::{
-    entities::{auth::role, document::page},
+    entities::{
+        auth::role,
+        document::{page, page_roles},
+    },
     graphql::{
         cursor::{CursorSort, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, document::page_sort::PageSort},
@@ -32,23 +35,26 @@ impl PageQuery {
 
         let user = ctx.data_opt::<CurrentUser>();
 
-        let pages = page::Entity::find()
-            .find_with_related(role::Entity)
+        let Some(page) = page::Entity::find()
             .filter(without_trashed::<page::Entity>())
             .filter(page::Column::Slug.eq(slug))
+            .one(db)
+            .await?
+        else {
+            return Ok(None);
+        };
+
+        let page_roles = page_roles::Entity::find()
+            .filter(page_roles::Column::PageId.eq(page.id))
+            .find_both_related(role::Entity)
             .all(db)
             .await?;
 
-        if let Some((page, page_roles)) = pages.into_iter().next() {
-            if !PagePolicy::check(user, PolicyAction::View, Some((&page, &page_roles))).is_allowed()
-            {
-                return Ok(None);
-            }
-
-            return Ok(Some(page.into()));
+        if !PagePolicy::check(user, PolicyAction::View, Some((&page, &page_roles))).is_allowed() {
+            return Ok(None);
         }
 
-        Ok(None)
+        Ok(Some(page.into()))
     }
 
     async fn page_connection(

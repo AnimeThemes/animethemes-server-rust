@@ -1,8 +1,11 @@
 use std::str::FromStr;
 
-use crate::entities::{
-    auth::role::{self, Roles},
-    document::page,
+use crate::{
+    entities::{
+        auth::role::{self, Roles},
+        document::{page, page_roles},
+    },
+    enums::document::pageroletype::PageRoleType,
 };
 
 use crate::{
@@ -12,11 +15,11 @@ use crate::{
 
 pub struct PagePolicy;
 
-impl Policy<(&page::Model, &Vec<role::Model>)> for PagePolicy {
+impl Policy<(&page::Model, &Vec<(page_roles::Model, role::Model)>)> for PagePolicy {
     fn authorize(
         user: Option<&CurrentUser>,
         action: &PolicyAction,
-        model: Option<(&page::Model, &Vec<role::Model>)>,
+        model: Option<(&page::Model, &Vec<(page_roles::Model, role::Model)>)>,
     ) -> PolicyResponse {
         match action {
             PolicyAction::ViewAny => Self::view_any(),
@@ -33,11 +36,14 @@ impl PagePolicy {
 
     fn view(
         user: Option<&CurrentUser>,
-        models: (&page::Model, &Vec<role::Model>),
+        models: (&page::Model, &Vec<(page_roles::Model, role::Model)>),
     ) -> PolicyResponse {
         let (_, page_roles) = models;
 
-        if page_roles.is_empty() {
+        if !page_roles
+            .iter()
+            .any(|(pivot, _)| pivot.r#type == PageRoleType::Viewer)
+        {
             return PolicyResponse::Allow;
         }
 
@@ -45,9 +51,8 @@ impl PagePolicy {
             && has_any_role(
                 &user.roles,
                 page_roles
-                    .clone()
                     .iter()
-                    .filter_map(|role| Roles::from_str(&role.name).ok())
+                    .filter_map(|(_, role)| Roles::from_str(&role.name).ok())
                     .collect::<Vec<_>>(),
             )
         {
