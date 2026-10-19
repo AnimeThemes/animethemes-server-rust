@@ -11,6 +11,7 @@ use tower_sessions_redis_store::{
 };
 
 pub async fn create_session_layer(ctx: &AppContext) -> SessionManagerLayer<RedisStore<Pool>> {
+    let domain = env::var("SESSION_DOMAIN").expect("SESSION_DOMAIN is required in .env");
     let redis_url = env::var("REDIS_URL").expect("REDIS_URL must be set");
 
     let config = Config::from_url(&redis_url).expect("Invalid REDIS_URL");
@@ -29,6 +30,7 @@ pub async fn create_session_layer(ctx: &AppContext) -> SessionManagerLayer<Redis
 
     SessionManagerLayer::new(store)
         .with_secure(is_production)
+        .with_domain(domain)
         .with_same_site(SameSite::Lax)
         .with_expiry(Expiry::OnInactivity(Duration::days(30)))
 }
