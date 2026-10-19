@@ -89,7 +89,8 @@ impl Hooks for App {
     }
 
     async fn after_routes(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
-        let parsed_url = Url::parse(&ctx.config.server.host).expect("invalid server.host");
+        let client_url = env::var("CLIENT_URL").expect("CLIENT_URL is required in .env");
+        let parsed_url = Url::parse(&client_url).expect("Invalid CLIENT_URL");
 
         let cors = CorsLayer::new()
             .allow_origin(AllowOrigin::predicate(
