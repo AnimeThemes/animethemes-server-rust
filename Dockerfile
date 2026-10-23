@@ -47,6 +47,10 @@ COPY --from=builder \
     /app/config \
     /app/config
 
+COPY --from=builder \
+    /app/src/fixtures \
+    /app/src/fixtures
+
 ENTRYPOINT ["animethemes-server-rust"]
 
 CMD ["start"]
