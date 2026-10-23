@@ -1,68 +1,51 @@
 services:
-    server:
+    server-rs:
         image: '${APP_IMAGE:-animethemes-server-rust:local}'
-        container_name: animethemes-server-rust
+        container_name: animethemes-server-rs
         command: ["start"]
         restart: unless-stopped
         ports:
             - '${APP_PORT:-80}:80'
-        env_file:
-            - .env
+        env_file: .env
+        networks:
+            - rs-network
+            - shared-network
         depends_on:
-            - mysql
-            - redis
-            - mailpit
-            - typesense
-    scheduler:
+            redis-rs:
+                condition: service_healthy
+    scheduler-rs:
         image: '${APP_IMAGE:-animethemes-server-rust:local}'
+        container_name: animethemes-server-rs-scheduler
         command: ["scheduler"]
         restart: unless-stopped
-        env_file:
-            - .env
+        env_file: .env
+        networks:
+            - rs-network
+            - shared-network
         depends_on:
-            mysql:
+            redis-rs:
                 condition: service_healthy
-            redis:
-                condition: service_healthy
-    worker:
+    worker-rs:
         image: '${APP_IMAGE:-animethemes-server-rust:local}'
+        container_name: animethemes-server-rs-worker
         command: ["start", "--worker"]
         restart: unless-stopped
-        env_file:
-            - .env
+        env_file: .env
+        networks:
+            - rs-network
+            - shared-network
         depends_on:
-            mysql:
+            redis-rs:
                 condition: service_healthy
-            redis:
-                condition: service_healthy
-    mysql:
-        image: mysql:8.4
-        container_name: animethemes-server-rust-mysql
-        ports:
-            - '${DB_PORT:-3306}:3306'
-        environment:
-            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ROOT_HOST: '%'
-            MYSQL_DATABASE: '${DB_DATABASE}'
-            MYSQL_ALLOW_EMPTY_PASSWORD: 1
-            MYSQL_EXTRA_OPTIONS: '${MYSQL_EXTRA_OPTIONS:-}'
-        volumes:
-            - mysql_data:/var/lib/mysql
-        healthcheck:
-            test:
-                - CMD
-                - mysqladmin
-                - ping
-                - '-p${DB_PASSWORD}'
-            retries: 3
-            timeout: 5s
-    redis:
+    redis-rs:
         image: 'redis:alpine'
-        container_name: animethemes-server-rust-redis
+        container_name: animethemes-server-rs-redis
         ports:
             - '${FORWARD_REDIS_PORT:-6379}:6379'
         volumes:
             - 'redis-data:/data'
+        networks:
+            - rs-network
         healthcheck:
             test:
                 - CMD
@@ -70,33 +53,16 @@ services:
                 - ping
             retries: 3
             timeout: 5s
-    mailpit:
+    mailpit-rs:
         image: 'axllent/mailpit:latest'
-        container_name: animethemes-server-rust-mailpit
+        container_name: animethemes-server-rs-mailpit
         ports:
             - '${FORWARD_MAILPIT_PORT:-1025}:1025'
             - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
-    typesense:
-        image: 'typesense/typesense:30.2'
-        container_name: animethemes-server-rust-typesense
-        ports:
-            - '${FORWARD_TYPESENSE_PORT:-8108}:8108'
-        environment:
-            TYPESENSE_DATA_DIR: '${TYPESENSE_DATA_DIR:-/data}'
-            TYPESENSE_API_KEY: '${TYPESENSE_API_KEY:-xyz}'
-            TYPESENSE_ENABLE_CORS: '${TYPESENSE_ENABLE_CORS:-true}'
-        volumes:
-            - 'typesense-data:/data'
-        healthcheck:
-            test:
-                - CMD
-                - bash
-                - '-c'
-                - 'exec 3<>/dev/tcp/localhost/8108 && printf ''GET /health HTTP/1.1\r\nConnection: close\r\n\r\n'' >&3 && head -n1 <&3 | grep ''200'' && exec 3>&-'
-            retries: 5
-            timeout: 7s
-
 volumes:
-    mysql_data:
     redis-data:
-    typesense-data:
+networks:
+    rs-network:
+        driver: bridge
+    shared-network:
+        external: true

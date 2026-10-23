@@ -1,0 +1,36 @@
+services:
+    mysql:
+        image: mysql:8.0.36
+        container_name: animethemes-shared-mysql
+        ports:
+            - '${DB_PORT:-3306}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+            MYSQL_EXTRA_OPTIONS: '${MYSQL_EXTRA_OPTIONS:-}'
+        volumes:
+            - mysql-data:/var/lib/mysql
+        networks:
+            - shared-network
+    typesense:
+        image: 'typesense/typesense:30.2'
+        container_name: animethemes-shared-typesense
+        restart: unless-stopped
+        ports:
+            - '${FORWARD_TYPESENSE_PORT:-8108}:8108'
+        environment:
+            TYPESENSE_DATA_DIR: '${TYPESENSE_DATA_DIR:-/data}'
+            TYPESENSE_API_KEY: '${TYPESENSE_API_KEY:-xyz}'
+            TYPESENSE_ENABLE_CORS: '${TYPESENSE_ENABLE_CORS:-true}'
+        volumes:
+            - 'typesense-data:/data'
+        networks:
+            - shared-network
+volumes:
+    mysql-data:
+    typesense-data:
+networks:
+    shared-network:
+        external: true

@@ -42,14 +42,16 @@ openssl rand -hex 32
 # Open the .env file and set the APP_KEY
 nano .env
 
-# Build the Docker image
-docker build -t animethemes-server-rust:local .
+# Build the shared services used by php and rust servers
+docker compose -p animethemes-shared -f docker-compose.shared.yml pull
+docker compose -p animethemes-shared -f docker-compose.shared.yml up -d
 
-# Start the containers
+# Build the main Docker image and start the containers
+docker build -t animethemes-server-rust:local .
 docker compose up -d
 
 # Import dumps if you have one
-docker exec -i animethemes-server-rust-mysql mysql -u root animethemes < content.sql
+docker exec -i animethemes-shared-mysql mysql -u root animethemes < content.sql
 
 # Run the migrations
 docker compose run --rm server db migrate
@@ -96,7 +98,7 @@ docker compose run --rm server task search:index-video
 To open the MySQL Terminal:
 
 ```bash
-docker exec -it animethemes-server-rust-mysql mysql -u root animethemes
+docker exec -it animethemes-shared-mysql mysql -u root animethemes
 ```
 
 # Resources
