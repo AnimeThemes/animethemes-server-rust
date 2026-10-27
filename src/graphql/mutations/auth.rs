@@ -12,6 +12,7 @@ use crate::{
     entities::auth::user,
     enums::features::Feature,
     features::functions::FeatureManager,
+    graphql::is_development,
 };
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
 use sea_orm::{DatabaseConnection, EntityTrait};
@@ -69,6 +70,7 @@ pub struct AuthMutation;
 
 #[Object]
 impl AuthMutation {
+    #[graphql(visible = "is_development")]
     pub async fn register(&self, ctx: &Context<'_>, input: RegisterInput) -> Result<Me> {
         let feature_manager = ctx.data_unchecked::<FeatureManager>();
 
@@ -99,6 +101,7 @@ impl AuthMutation {
         Ok(Me::from(user))
     }
 
+    #[graphql(visible = "is_development")]
     pub async fn login(&self, ctx: &Context<'_>, input: LoginInput) -> Result<Me> {
         let db = ctx.data::<DatabaseConnection>()?;
 
@@ -119,6 +122,7 @@ impl AuthMutation {
         Ok(user.into())
     }
 
+    #[graphql(visible = "is_development")]
     pub async fn update_user_information(
         &self,
         ctx: &Context<'_>,
@@ -147,6 +151,7 @@ impl AuthMutation {
         Ok(result)
     }
 
+    #[graphql(visible = "is_development")]
     pub async fn update_password(
         &self,
         ctx: &Context<'_>,
@@ -176,6 +181,7 @@ impl AuthMutation {
         Ok(true)
     }
 
+    #[graphql(visible = "is_development")]
     pub async fn forgot_password(&self, ctx: &Context<'_>, email: String) -> Result<bool> {
         let db = ctx.data::<DatabaseConnection>()?;
 
@@ -186,6 +192,7 @@ impl AuthMutation {
         Ok(true)
     }
 
+    #[graphql(visible = "is_development")]
     pub async fn reset_password(
         &self,
         ctx: &Context<'_>,
@@ -208,6 +215,7 @@ impl AuthMutation {
         Ok(true)
     }
 
+    #[graphql(visible = "is_development")]
     pub async fn resend_email_verification(&self, ctx: &Context<'_>) -> Result<bool> {
         let user = ctx
             .data::<CurrentUser>()
@@ -226,6 +234,7 @@ impl AuthMutation {
         Ok(true)
     }
 
+    #[graphql(visible = "is_development")]
     pub async fn logout(&self, ctx: &Context<'_>) -> Result<bool> {
         let session = ctx.data::<Session>()?;
 
