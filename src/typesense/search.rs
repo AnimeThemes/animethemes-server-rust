@@ -266,7 +266,7 @@ where
     E: EntityTrait,
     D: Document + HasId,
 {
-    let offset = page as u64 * first;
+    let offset = (page - 1) * first;
 
     let documents = typesense
         .collection::<D>()
