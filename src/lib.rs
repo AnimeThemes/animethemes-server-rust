@@ -43,6 +43,8 @@ pub enum AppError {
     NotFound,
     #[error("{0}")]
     ForbiddenWithMessage(String),
+    #[error("Too Many Requests")]
+    RateLimitingExceeded,
     #[error("Internal server error")]
     Database(#[from] sea_orm::DbErr),
     #[error("Internal server error")]
@@ -80,6 +82,7 @@ impl Into<LocoError> for AppError {
                     .collect::<Vec<_>>()
                     .join(" "),
             ),
+            AppError::RateLimitingExceeded => LocoError::Message("Too Many Requests".to_string()),
             AppError::Database(error) => LocoError::DB(error),
             AppError::Internal(_) => LocoError::InternalServerError,
         }
@@ -100,6 +103,9 @@ impl IntoResponse for AppError {
             AppError::NotFound => (StatusCode::NOT_FOUND, "Not Found").into_response(),
             AppError::Validation(_) => {
                 (StatusCode::UNPROCESSABLE_ENTITY, "Validation error").into_response()
+            }
+            AppError::RateLimitingExceeded => {
+                (StatusCode::TOO_MANY_REQUESTS, "Too Many Requests").into_response()
             }
             AppError::Database(error) => {
                 tracing::error!(error = ?error, "database error");

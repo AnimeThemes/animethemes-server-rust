@@ -41,6 +41,11 @@ impl ErrorExtensions for AppError {
             AppError::NotFound => Error::new(self.to_string()).extend_with(|_, extensions| {
                 extensions.set("code", 404);
             }),
+            AppError::RateLimitingExceeded => {
+                Error::new(self.to_string()).extend_with(|_, extensions| {
+                    extensions.set("code", 429);
+                })
+            }
             AppError::Database(source) => {
                 if matches!(get_environment(), Environment::Development) {
                     Error::new(format!("DEV INTERNAL => {}", source.to_string())).extend_with(

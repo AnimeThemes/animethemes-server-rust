@@ -29,7 +29,11 @@ use url::Url;
 #[allow(unused_imports)]
 use crate::{controllers, tasks, workers::downloader::DownloadWorker};
 use crate::{
-    middlewares::{current_user::current_user_middleware, features::features_middleware},
+    middlewares::{
+        current_user::current_user_middleware,
+        features::features_middleware,
+        rate_limiting::{GraphqlRateLimitState, rate_limiting_middleware},
+    },
     schema::{self, graphiql, graphql_handler},
     seeds,
     session::create_session_layer,
@@ -79,13 +83,17 @@ impl Hooks for App {
     }
 
     fn routes(_ctx: &AppContext) -> AppRoutes {
+        let rate_limit_state = GraphqlRateLimitState::from_env();
+
         AppRoutes::with_default_routes() // controller routes below
             .add_route(controllers::verify_email::routes())
-            .add_route(
-                Routes::new()
-                    .add("/", get(graphiql))
-                    .add("/graphql", post(graphql_handler)),
-            )
+            .add_route(Routes::new().add("/", get(graphiql)).add(
+                "/graphql",
+                post(graphql_handler).route_layer(from_fn_with_state(
+                    rate_limit_state,
+                    rate_limiting_middleware,
+                )),
+            ))
     }
 
     async fn after_routes(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {

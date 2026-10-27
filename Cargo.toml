@@ -54,6 +54,7 @@ lettre = { version = "0.11.23", default-features = false, features = ["builder",
 minijinja = "2.24.0"
 serde_yaml = "0.9.34"
 disposable = "0.1.0"
+redis = { version = "1.8.0", features = ["connection-manager"] }
 
 [[bin]]
 name = "animethemes-server-rust"

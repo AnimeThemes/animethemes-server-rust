@@ -106,6 +106,7 @@ dependencies = [
  "loco-rs",
  "migration",
  "minijinja",
+ "redis",
  "regex",
  "reqwest 0.13.4",
  "rstest",
@@ -4766,15 +4767,18 @@ dependencies = [
 
 [[package]]
 name = "redis"
-version = "1.6.0"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e37a4ca5c6ca42aa3e6df2fd32b987a65d32a4c2159a6f3fe0fd1df306a2658f"
+checksum = "7acd809e80afa754c63f586955699d8990efe1c4b6613183ee5f027a11fbc8b5"
 dependencies = [
+ "arc-swap",
  "arcstr",
  "async-lock",
+ "backon",
  "bytes",
  "cfg-if",
  "combine",
+ "futures-channel",
  "futures-util",
  "itoa",
  "num-bigint 0.5.1",
