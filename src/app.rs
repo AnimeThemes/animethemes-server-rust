@@ -33,6 +33,7 @@ use crate::{
         current_user::current_user_middleware,
         features::features_middleware,
         rate_limiting::{GraphqlRateLimitState, rate_limiting_middleware},
+        require_user_agent::require_user_agent_middleware,
     },
     schema::{self, graphiql, graphql_handler},
     seeds,
@@ -123,6 +124,10 @@ impl Hooks for App {
         Ok(router
             .layer(from_fn_with_state(ctx.clone(), features_middleware))
             .layer(from_fn_with_state(ctx.clone(), current_user_middleware))
+            .layer(from_fn_with_state(
+                ctx.clone(),
+                require_user_agent_middleware,
+            ))
             .layer(session_layer)
             .layer(cors))
     }

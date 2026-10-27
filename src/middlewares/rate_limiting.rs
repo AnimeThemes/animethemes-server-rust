@@ -17,7 +17,10 @@ use redis::{
     aio::{ConnectionManager, ConnectionManagerConfig},
 };
 
-use crate::{AppError, middlewares::current_user::CurrentUser};
+use crate::{
+    AppError, entities::auth::role::Roles, middlewares::current_user::CurrentUser,
+    policies::has_any_role,
+};
 
 // Atomically:
 // - verify if the request can pass
@@ -148,7 +151,7 @@ pub async fn rate_limiting_middleware(
 
     // Bypass for admins
     if let Some(current_user) = current_user {
-        if current_user.roles.iter().any(|role| role.name == "Admin") {
+        if has_any_role(&current_user.roles, vec![Roles::Admin]) {
             return Ok(next.run(request).await);
         }
     }
@@ -164,17 +167,9 @@ pub async fn rate_limiting_middleware(
 
     // Only accept forwarded IP if the connection came from a trusted local IP
     let ip = if state.local_ips.contains(&peer_ip) {
-        let mut values = request.headers().get_all("x-forwarded-ip").iter();
+        let forwarded_ip = request.headers().get("x-forwarded-ip");
 
-        let first = values.next();
-
-        if values.next().is_some() {
-            return Err(AppError::Internal(anyhow::Error::msg(
-                "Invalid forwarded IP",
-            )));
-        }
-
-        match first {
+        match forwarded_ip {
             // Without forwarded IP, use peer IP
             None => {
                 return Ok(next.run(request).await);
