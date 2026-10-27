@@ -1,7 +1,9 @@
 use crate::AppError;
+use crate::entities::content::entry;
 use crate::entities::user::rating;
+use crate::rules::validation_error::ValidationError;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt};
 use sea_query::OnConflict;
 
 pub struct RateEntryActionParameters {
@@ -13,10 +15,37 @@ pub struct RateEntryActionParameters {
 pub struct RatingAction;
 
 impl RatingAction {
+    async fn validate(
+        db: &DatabaseConnection,
+        params: &RateEntryActionParameters,
+    ) -> Result<(), AppError> {
+        let mut errors = Vec::new();
+
+        let entry_exists = entry::Entity::find()
+            .filter(entry::Column::Id.eq(params.entry_id))
+            .exists(db)
+            .await?;
+
+        if !entry_exists {
+            errors.push(ValidationError::new(
+                "entry_id",
+                vec!["The entry does not exist."],
+            ));
+        }
+
+        if !errors.is_empty() {
+            return Err(AppError::Validation(errors));
+        }
+
+        Ok(())
+    }
+
     pub async fn rate_entry(
         db: &DatabaseConnection,
         params: RateEntryActionParameters,
     ) -> Result<Option<rating::Model>, AppError> {
+        Self::validate(db, &params).await?;
+
         match params.score {
             Some(score) => {
                 let model = rating::ActiveModel {

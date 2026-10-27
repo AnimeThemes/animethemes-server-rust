@@ -2,13 +2,14 @@ use std::env;
 
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, PaginatorTrait,
-    QueryFilter, QueryOrder, QuerySelect, TransactionTrait,
+    QueryFilter, QueryOrder, QuerySelect, SelectExt, TransactionTrait,
 };
 
 use crate::{
     AppError,
     entities::{
         auth::role::Roles,
+        content::entry_videos,
         list::{playlist, track},
     },
     middlewares::current_user::CurrentUser,
@@ -27,15 +28,39 @@ pub struct InsertTrackActionParameters {
 pub struct InsertTrackAction {}
 
 impl InsertTrackAction {
-    fn validate(params: &InsertTrackActionParameters) -> Result<(), AppError> {
+    async fn validate(
+        db: &DatabaseConnection,
+        params: &InsertTrackActionParameters,
+    ) -> Result<(), AppError> {
         let mut errors = Vec::new();
 
+        let mut entry_id_errors = Vec::new();
+        let mut video_id_errors = Vec::new();
         let mut position_errors = Vec::new();
+
+        let entry_video_exists = entry_videos::Entity::find()
+            .filter(entry_videos::Column::EntryId.eq(params.entry_id))
+            .filter(entry_videos::Column::VideoId.eq(params.video_id))
+            .exists(db)
+            .await?;
+
+        if !entry_video_exists {
+            entry_id_errors.push("The entry video pair does not exist.");
+            video_id_errors.push("The entry video pair does not exist.");
+        }
 
         if let Some(position) = params.position {
             if position < 1 {
                 position_errors.push("The position must be greater than 0.");
             }
+        }
+
+        if !entry_id_errors.is_empty() {
+            errors.push(ValidationError::new("entry_id", entry_id_errors));
+        }
+
+        if !video_id_errors.is_empty() {
+            errors.push(ValidationError::new("video_id", video_id_errors));
         }
 
         if !position_errors.is_empty() {
@@ -55,7 +80,7 @@ impl InsertTrackAction {
         params: InsertTrackActionParameters,
         user: &CurrentUser,
     ) -> Result<track::Model, AppError> {
-        Self::validate(&params)?;
+        Self::validate(db, &params).await?;
 
         let count = track::Entity::find()
             .filter(track::Column::PlaylistId.eq(playlist.id))
