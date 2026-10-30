@@ -56,7 +56,8 @@ impl Loader<UserFavoritesLoaderKey> for UserFavoritesLoader {
 
             let builder = favorite::Entity::find()
                 .filter(favorite::Column::UserId.is_in(ids))
-                .filter(query.condition());
+                .filter(query.condition())
+                .order_by_id_desc();
 
             let models = builder.all(&self.db).await?;
 
