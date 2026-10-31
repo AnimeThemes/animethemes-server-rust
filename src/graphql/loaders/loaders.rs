@@ -21,11 +21,8 @@ use crate::graphql::{
                 theme_entries::ThemeEntriesLoader,
             },
             artist::{
-                artist_groups::ArtistGroupsLoader,
-                artist_memberperformances::ArtistMemberPerformancesLoader,
-                artist_members::ArtistMembersLoader,
+                artist_groups::ArtistGroupsLoader, artist_members::ArtistMembersLoader,
                 artist_membersongstaffs::ArtistMemberSongStaffsLoader,
-                artist_performances::ArtistPerformancesLoader,
                 artist_songstaffs::ArtistSongStaffsLoader, artist_synonyms::ArtistSynonymsLoader,
                 artist_themestaffs::ArtistThemeStaffsLoader,
             },
@@ -33,10 +30,7 @@ use crate::graphql::{
             imageable::ImageableLoader,
             resourceable::ResourceableLoader,
             series::series_anime::SeriesAnimeLoader,
-            song::{
-                song_performances::SongPerformancesLoader, song_staffs::SongStaffsLoader,
-                song_themes::SongThemesLoader,
-            },
+            song::{song_staffs::SongStaffsLoader, song_themes::SongThemesLoader},
             songstaff::{
                 songstaff_artist::SongStaffArtistLoader, songstaff_member::SongStaffMemberLoader,
                 songstaff_song::SongStaffSongLoader,
@@ -117,8 +111,6 @@ impl<Query> RegisterLoaders for SchemaBuilder<Query, Mutation, EmptySubscription
             .data(loader(ArtistSynonymsLoader { db: db.clone() }))
             .data(loader(ArtistGroupsLoader { db: db.clone() }))
             .data(loader(ArtistMembersLoader { db: db.clone() }))
-            .data(loader(ArtistPerformancesLoader { db: db.clone() }))
-            .data(loader(ArtistMemberPerformancesLoader { db: db.clone() }))
             .data(loader(ArtistSongStaffsLoader { db: db.clone() }))
             .data(loader(ArtistMemberSongStaffsLoader { db: db.clone() }))
             .data(loader(ArtistThemeStaffsLoader { db: db.clone() }))
@@ -126,7 +118,6 @@ impl<Query> RegisterLoaders for SchemaBuilder<Query, Mutation, EmptySubscription
             .data(loader(SongThemesLoader { db: db.clone() }))
             .data(loader(SongStaffsLoader { db: db.clone() }))
             .data(loader(StudioAnimeLoader { db: db.clone() }))
-            .data(loader(SongPerformancesLoader { db: db.clone() }))
             .data(loader(SongStaffArtistLoader { db: db.clone() }))
             .data(loader(SongStaffMemberLoader { db: db.clone() }))
             .data(loader(SongStaffSongLoader { db: db.clone() }))

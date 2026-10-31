@@ -9,11 +9,8 @@ use crate::{
     graphql::{
         loaders::content::{
             artist::{
-                artist_groups::ArtistGroupsLoader,
-                artist_memberperformances::ArtistMemberPerformancesLoader,
-                artist_members::ArtistMembersLoader,
+                artist_groups::ArtistGroupsLoader, artist_members::ArtistMembersLoader,
                 artist_membersongstaffs::ArtistMemberSongStaffsLoader,
-                artist_performances::ArtistPerformancesLoader,
                 artist_songstaffs::ArtistSongStaffsLoader, artist_synonyms::ArtistSynonymsLoader,
                 artist_themestaffs::ArtistThemeStaffsLoader,
             },
@@ -153,24 +150,6 @@ impl Artist {
         }
 
         Ok(connection)
-    }
-
-    #[graphql(deprecation = "Use `songStaff` instead")]
-    async fn performances(&self, ctx: &Context<'_>) -> Result<Vec<SongStaff>> {
-        let loader = ctx.data_unchecked::<DataLoader<ArtistPerformancesLoader>>();
-
-        let models = loader.load_one(self.id).await?.unwrap_or_default();
-
-        Ok(models.into_iter().map(SongStaff::from).collect())
-    }
-
-    #[graphql(deprecation = "Use `memberSongStaff` instead")]
-    async fn member_performances(&self, ctx: &Context<'_>) -> Result<Vec<SongStaff>> {
-        let loader = ctx.data_unchecked::<DataLoader<ArtistMemberPerformancesLoader>>();
-
-        let models = loader.load_one(self.id).await?.unwrap_or_default();
-
-        Ok(models.into_iter().map(SongStaff::from).collect())
     }
 
     async fn song_staff(&self, ctx: &Context<'_>) -> Result<Vec<SongStaff>> {
