@@ -62,6 +62,12 @@ impl MigrationTrait for Migration {
                     .table("user_roles")
                     .if_not_exists()
                     .col(ColumnDef::new("role_id").big_unsigned().not_null())
+                    .col(
+                        ColumnDef::new("model_type")
+                            .string()
+                            .not_null()
+                            .default("App\\Models\\Auth\\User"),
+                    ) // PHP Backwards Compatibility
                     .col(ColumnDef::new("user_id").big_unsigned().not_null())
                     .col(
                         ColumnDef::new("created_at")
@@ -75,7 +81,12 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(Expr::current_timestamp()),
                     )
-                    .primary_key(Index::create().col("role_id").col("user_id"))
+                    .primary_key(
+                        Index::create()
+                            .col("role_id")
+                            .col("model_type")
+                            .col("user_id"),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("user_roles_role_id_foreign")
