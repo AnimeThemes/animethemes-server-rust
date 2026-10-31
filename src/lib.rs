@@ -8,6 +8,7 @@ use crate::rules::validation_error::ValidationError;
 
 pub mod actions;
 pub mod app;
+pub mod caches;
 pub mod controllers;
 pub mod data;
 pub mod entities;

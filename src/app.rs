@@ -26,9 +26,8 @@ use loco_rs::{
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use url::Url;
 
-#[allow(unused_imports)]
-use crate::{controllers, tasks, workers::downloader::DownloadWorker};
 use crate::{
+    caches::hostname_cache::HostnameCache,
     middlewares::{
         current_user::current_user_middleware,
         features::features_middleware,
@@ -40,6 +39,8 @@ use crate::{
     session::create_session_layer,
     typesense::client::{create_typesense_client, init_typesense},
 };
+#[allow(unused_imports)]
+use crate::{controllers, tasks, workers::downloader::DownloadWorker};
 
 pub struct App;
 #[async_trait]
@@ -121,6 +122,8 @@ impl Hooks for App {
 
         let session_layer = create_session_layer(&ctx).await;
 
+        let hostname_cache = HostnameCache::new().await;
+
         Ok(router
             .layer(from_fn_with_state(ctx.clone(), features_middleware))
             .layer(from_fn_with_state(ctx.clone(), current_user_middleware))
@@ -129,6 +132,7 @@ impl Hooks for App {
                 require_user_agent_middleware,
             ))
             .layer(session_layer)
+            .layer(axum::Extension(hostname_cache))
             .layer(cors))
     }
 

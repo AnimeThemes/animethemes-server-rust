@@ -18,8 +18,8 @@ use redis::{
 };
 
 use crate::{
-    AppError, entities::auth::role::Roles, middlewares::current_user::CurrentUser,
-    policies::has_any_role,
+    AppError, caches::hostname_cache::HostnameCache, entities::auth::role::Roles,
+    middlewares::current_user::CurrentUser, policies::has_any_role,
 };
 
 // Atomically:
@@ -165,12 +165,17 @@ pub async fn rate_limiting_middleware(
 
     let peer_ip = peer.ip();
 
+    let hostname_cache = request
+        .extensions()
+        .get::<HostnameCache>()
+        .ok_or_else(|| AppError::Internal(anyhow::anyhow!("Hostname cache not initialized")))?;
+
     // Only accept forwarded IP if the connection came from a trusted local IP
-    let ip = if state.local_ips.contains(&peer_ip) {
+    let ip = if hostname_cache.is_allowed(peer_ip) || state.local_ips.contains(&peer_ip) {
         let forwarded_ip = request.headers().get("x-forwarded-ip");
 
         match forwarded_ip {
-            // Without forwarded IP, use peer IP
+            // Without forwarded IP, allow bypass
             None => {
                 return Ok(next.run(request).await);
             }
