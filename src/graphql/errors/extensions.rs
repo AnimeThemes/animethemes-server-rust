@@ -59,11 +59,6 @@ impl ErrorExtensions for AppError {
                     })
                 }
             }
-            AppError::Storage(_) => {
-                Error::new("Internal Server Error").extend_with(|_, extensions| {
-                    extensions.set("code", 500);
-                })
-            }
             AppError::Internal(source) => {
                 if matches!(get_environment(), Environment::Development) {
                     Error::new(format!("INTERNAL => {source:#}")).extend_with(|_, extensions| {

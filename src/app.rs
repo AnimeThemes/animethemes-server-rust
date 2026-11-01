@@ -13,7 +13,7 @@ use axum::{
     routing::{get, post},
 };
 use loco_rs::{
-    Error, Result,
+    Result,
     app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
     boot::{BootResult, StartMode, create_app},
@@ -78,7 +78,7 @@ impl Hooks for App {
         ctx.shared_store.insert(schema);
         ctx.shared_store.insert(typesense);
 
-        let storage = create_storage(ctx.clone()).map_err(|e| Error::Message(e.to_string()))?;
+        let storage = create_storage(ctx.clone())?;
 
         Ok(ctx.into_builder().storage(storage.into()).build())
     }

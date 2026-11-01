@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use loco_rs::{
+    Error, Result,
     app::AppContext,
     storage::{
         self, Storage,
@@ -9,8 +10,6 @@ use loco_rs::{
     },
 };
 use serde::Deserialize;
-
-use crate::AppError;
 
 #[derive(Debug, Deserialize)]
 struct Settings {
@@ -48,20 +47,19 @@ enum DiskConfig {
     },
 }
 
-pub fn create_storage(ctx: AppContext) -> Result<Storage, AppError> {
-    let settings: Settings = serde_json::from_value(ctx.config.settings.ok_or_else(|| {
-        AppError::Internal(anyhow::anyhow!(
-            "Storage settings not found in configuration"
-        ))
-    })?)
-    .map_err(|e| AppError::Internal(e.into()))?;
+pub fn create_storage(ctx: AppContext) -> Result<Storage> {
+    let settings: Settings =
+        serde_json::from_value(ctx.config.settings.clone().ok_or_else(|| {
+            Error::Message("Storage configuration missing: settings not found".into())
+        })?)
+        .map_err(|e| Error::Message(format!("Invalid storage configuration: {e}")))?;
 
     let StorageConfig { default, disks } = settings.storage;
 
     if !disks.contains_key(&default) {
-        return Err(AppError::Internal(anyhow::anyhow!(
-            "Default storage disk '{default}' not found"
-        )));
+        return Err(Error::Message(
+            "Default storage disk '{default}' not found".into(),
+        ));
     }
 
     let mut stores: BTreeMap<String, Box<dyn StoreDriver>> = BTreeMap::new();
