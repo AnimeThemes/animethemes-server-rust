@@ -102,12 +102,12 @@ settings:
                 root: storage/app
             images:
                 driver: s3
-                key: <%= get_env(name="IMAGE_ACCESS_KEY_ID", default="") %>
-                secret: <%= get_env(name="IMAGE_SECRET_ACCESS_KEY", default="") %>
-                region: <%= get_env(name="IMAGE_DEFAULT_REGION", default="") %>
-                bucket: <%= get_env(name="IMAGE_BUCKET", default="") %>
-                endpoint: <%= get_env(name="IMAGE_ENDPOINT", default="") %>
-                url: <%= get_env(name="IMAGE_URL", default="") %>
+                key: '<%= get_env(name="IMAGE_ACCESS_KEY_ID", default="") %>'
+                secret: '<%= get_env(name="IMAGE_SECRET_ACCESS_KEY", default="") %>'
+                region: '<%= get_env(name="IMAGE_DEFAULT_REGION", default="") %>'
+                bucket: '<%= get_env(name="IMAGE_BUCKET", default="") %>'
+                endpoint: '<%= get_env(name="IMAGE_ENDPOINT", default="") %>'
+                url: '<%= get_env(name="IMAGE_URL", default="") %>'
                 visibility: public    
             images_local:
                 driver: local
@@ -115,18 +115,18 @@ settings:
                 url: <%= get_env(name="APP_URL") %>/images
             videos_nyc:
                 driver: s3
-                key: <%= get_env(name="VIDEO_NYC_ACCESS_KEY_ID", default="") %>
-                secret: <%= get_env(name="VIDEO_NYC_SECRET_ACCESS_KEY", default="") %>
-                region: <%= get_env(name="VIDEO_NYC_DEFAULT_REGION", default="") %>
-                bucket: <%= get_env(name="VIDEO_NYC_BUCKET", default="") %>
-                endpoint: <%= get_env(name="VIDEO_NYC_ENDPOINT", default="") %>
+                key: '<%= get_env(name="VIDEO_NYC_ACCESS_KEY_ID", default="") %>'
+                secret: '<%= get_env(name="VIDEO_NYC_SECRET_ACCESS_KEY", default="") %>'
+                region: '<%= get_env(name="VIDEO_NYC_DEFAULT_REGION", default="") %>'
+                bucket: '<%= get_env(name="VIDEO_NYC_BUCKET", default="") %>'
+                endpoint: '<%= get_env(name="VIDEO_NYC_ENDPOINT", default="") %>'
             videos_fra:
                 driver: s3
-                key: <%= get_env(name="VIDEO_FRA_ACCESS_KEY_ID", default="") %>
-                secret: <%= get_env(name="VIDEO_FRA_SECRET_ACCESS_KEY", default="") %>
-                region: <%= get_env(name="VIDEO_FRA_DEFAULT_REGION", default="") %>
-                bucket: <%= get_env(name="VIDEO_FRA_BUCKET", default="") %>
-                endpoint: <%= get_env(name="VIDEO_FRA_ENDPOINT", default="") %>
+                key: '<%= get_env(name="VIDEO_FRA_ACCESS_KEY_ID", default="") %>'
+                secret: '<%= get_env(name="VIDEO_FRA_SECRET_ACCESS_KEY", default="") %>'
+                region: '<%= get_env(name="VIDEO_FRA_DEFAULT_REGION", default="") %>'
+                bucket: '<%= get_env(name="VIDEO_FRA_BUCKET", default="") %>'
+                endpoint: '<%= get_env(name="VIDEO_FRA_ENDPOINT", default="") %>'
             videos_local:
                 driver: local
                 root: storage/videos
@@ -134,18 +134,18 @@ settings:
                 visibility: public
             audios_nyc:
                 driver: s3
-                key: <%= get_env(name="AUDIO_NYC_ACCESS_KEY_ID", default="") %>
-                secret: <%= get_env(name="AUDIO_NYC_SECRET_ACCESS_KEY", default="") %>
-                region: <%= get_env(name="AUDIO_NYC_DEFAULT_REGION", default="") %>
-                bucket: <%= get_env(name="AUDIO_NYC_BUCKET", default="") %>
-                endpoint: <%= get_env(name="AUDIO_NYC_ENDPOINT", default="") %>
+                key: '<%= get_env(name="AUDIO_NYC_ACCESS_KEY_ID", default="") %>'
+                secret: '<%= get_env(name="AUDIO_NYC_SECRET_ACCESS_KEY", default="") %>'
+                region: '<%= get_env(name="AUDIO_NYC_DEFAULT_REGION", default="") %>'
+                bucket: '<%= get_env(name="AUDIO_NYC_BUCKET", default="") %>'
+                endpoint: '<%= get_env(name="AUDIO_NYC_ENDPOINT", default="") %>'
             audios_fra:
                 driver: s3
-                key: <%= get_env(name="AUDIO_FRA_ACCESS_KEY_ID", default="") %>
-                secret: <%= get_env(name="AUDIO_FRA_SECRET_ACCESS_KEY", default="") %>
-                region: <%= get_env(name="AUDIO_FRA_DEFAULT_REGION", default="") %>
-                bucket: <%= get_env(name="AUDIO_FRA_BUCKET", default="") %>
-                endpoint: <%= get_env(name="AUDIO_FRA_ENDPOINT", default="") %>
+                key: '<%= get_env(name="AUDIO_FRA_ACCESS_KEY_ID", default="") %>'
+                secret: '<%= get_env(name="AUDIO_FRA_SECRET_ACCESS_KEY", default="") %>'
+                region: '<%= get_env(name="AUDIO_FRA_DEFAULT_REGION", default="") %>'
+                bucket: '<%= get_env(name="AUDIO_FRA_BUCKET", default="") %>'
+                endpoint: '<%= get_env(name="AUDIO_FRA_ENDPOINT", default="") %>'
             audios_local:
                 driver: local
                 root: storage/audios
@@ -153,22 +153,22 @@ settings:
                 visibility: public
             dumps:
                 driver: s3
-                key: <%= get_env(name="DUMP_ACCESS_KEY_ID", default="") %>
-                secret: <%= get_env(name="DUMP_SECRET_ACCESS_KEY", default="") %>
-                region: <%= get_env(name="DUMP_DEFAULT_REGION", default="") %>
-                bucket: <%= get_env(name="DUMP_BUCKET", default="") %>
-                endpoint: <%= get_env(name="DUMP_ENDPOINT", default="") %>
+                key: '<%= get_env(name="DUMP_ACCESS_KEY_ID", default="") %>'
+                secret: '<%= get_env(name="DUMP_SECRET_ACCESS_KEY", default="") %>'
+                region: '<%= get_env(name="DUMP_DEFAULT_REGION", default="") %>'
+                bucket: '<%= get_env(name="DUMP_BUCKET", default="") %>'
+                endpoint: '<%= get_env(name="DUMP_ENDPOINT", default="") %>'
             dumps_local:
                 driver: local
                 root: storage/dumps
                 url: <%= get_env(name="APP_URL") %>/dumps
             scripts:
                 driver: s3
-                key: <%= get_env(name="SCRIPT_ACCESS_KEY_ID", default="") %>
-                secret: <%= get_env(name="SCRIPT_SECRET_ACCESS_KEY", default="") %>
-                region: <%= get_env(name="SCRIPT_DEFAULT_REGION", default="") %>
-                bucket: <%= get_env(name="SCRIPT_BUCKET", default="") %>
-                endpoint: <%= get_env(name="SCRIPT_ENDPOINT", default="") %>
+                key: '<%= get_env(name="SCRIPT_ACCESS_KEY_ID", default="") %>'
+                secret: '<%= get_env(name="SCRIPT_SECRET_ACCESS_KEY", default="") %>'
+                region: '<%= get_env(name="SCRIPT_DEFAULT_REGION", default="") %>'
+                bucket: '<%= get_env(name="SCRIPT_BUCKET", default="") %>'
+                endpoint: '<%= get_env(name="SCRIPT_ENDPOINT", default="") %>'
             scripts_local:
                 driver: local
                 root: storage/scripts
