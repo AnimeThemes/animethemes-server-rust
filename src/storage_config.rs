@@ -9,7 +9,7 @@ use loco_rs::{
         strategies::single::SingleStrategy,
     },
 };
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 
 #[derive(Debug, Deserialize)]
 struct Settings {
@@ -34,9 +34,13 @@ enum DiskConfig {
         visibility: Option<String>,
     },
     S3 {
+        #[serde(default, deserialize_with = "null_as_empty")]
         key: String,
+        #[serde(default, deserialize_with = "null_as_empty")]
         secret: String,
+        #[serde(default, deserialize_with = "null_as_empty")]
         region: String,
+        #[serde(default, deserialize_with = "null_as_empty")]
         bucket: String,
         #[serde(default)]
         endpoint: Option<String>,
@@ -45,6 +49,13 @@ enum DiskConfig {
         #[serde(default)]
         visibility: Option<String>,
     },
+}
+
+fn null_as_empty<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Option::<String>::deserialize(deserializer)?.unwrap_or_default())
 }
 
 pub fn create_storage(ctx: AppContext) -> Result<Storage> {
