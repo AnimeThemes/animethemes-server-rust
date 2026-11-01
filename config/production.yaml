@@ -93,82 +93,83 @@ scheduler:
 #        ... other fields
 
 # Custom
-storage:
-    default: local
-    disks:
-        local:
-            driver: local
-            root: storage/app
-        images:
-            driver: s3
-            key: <%= get_env(name="IMAGE_ACCESS_KEY_ID") %>
-            secret: <%= get_env(name="IMAGE_SECRET_ACCESS_KEY") %>
-            region: <%= get_env(name="IMAGE_DEFAULT_REGION") %>
-            bucket: <%= get_env(name="IMAGE_BUCKET") %>
-            endpoint: <%= get_env(name="IMAGE_ENDPOINT") %>
-            url: <%= get_env(name="IMAGE_URL", default="") %>
-            visibility: public    
-        images_local:
-            driver: local
-            root: storage/images
-            url: <%= get_env(name="APP_URL") %>/images
-        videos_nyc:
-            driver: s3
-            key: <%= get_env(name="VIDEO_NYC_ACCESS_KEY_ID") %>
-            secret: <%= get_env(name="VIDEO_NYC_SECRET_ACCESS_KEY") %>
-            region: <%= get_env(name="VIDEO_NYC_DEFAULT_REGION") %>
-            bucket: <%= get_env(name="VIDEO_NYC_BUCKET") %>
-            endpoint: <%= get_env(name="VIDEO_NYC_ENDPOINT") %>
-        videos_fra:
-            driver: s3
-            key: <%= get_env(name="VIDEO_FRA_ACCESS_KEY_ID") %>
-            secret: <%= get_env(name="VIDEO_FRA_SECRET_ACCESS_KEY") %>
-            region: <%= get_env(name="VIDEO_FRA_DEFAULT_REGION") %>
-            bucket: <%= get_env(name="VIDEO_FRA_BUCKET") %>
-            endpoint: <%= get_env(name="VIDEO_FRA_ENDPOINT") %>
-        videos_local:
-            driver: local
-            root: storage/videos
-            url: <%= get_env(name="APP_URL") %>/videos
-            visibility: public
-        audios_nyc:
-            driver: s3
-            key: <%= get_env(name="AUDIO_NYC_ACCESS_KEY_ID") %>
-            secret: <%= get_env(name="AUDIO_NYC_SECRET_ACCESS_KEY") %>
-            region: <%= get_env(name="AUDIO_NYC_DEFAULT_REGION") %>
-            bucket: <%= get_env(name="AUDIO_NYC_BUCKET") %>
-            endpoint: <%= get_env(name="AUDIO_NYC_ENDPOINT") %>
-        audios_fra:
-            driver: s3
-            key: <%= get_env(name="AUDIO_FRA_ACCESS_KEY_ID") %>
-            secret: <%= get_env(name="AUDIO_FRA_SECRET_ACCESS_KEY") %>
-            region: <%= get_env(name="AUDIO_FRA_DEFAULT_REGION") %>
-            bucket: <%= get_env(name="AUDIO_FRA_BUCKET") %>
-            endpoint: <%= get_env(name="AUDIO_FRA_ENDPOINT") %>
-        audios_local:
-            driver: local
-            root: storage/audios
-            url: <%= get_env(name="APP_URL") %>/audios
-            visibility: public
-        dumps:
-            driver: s3
-            key: <%= get_env(name="DUMP_ACCESS_KEY_ID") %>
-            secret: <%= get_env(name="DUMP_SECRET_ACCESS_KEY") %>
-            region: <%= get_env(name="DUMP_DEFAULT_REGION") %>
-            bucket: <%= get_env(name="DUMP_BUCKET") %>
-            endpoint: <%= get_env(name="DUMP_ENDPOINT") %>
-        dumps_local:
-            driver: local
-            root: storage/dumps
-            url: <%= get_env(name="APP_URL") %>/dumps
-        scripts:
-            driver: s3
-            key: <%= get_env(name="SCRIPT_ACCESS_KEY_ID") %>
-            secret: <%= get_env(name="SCRIPT_SECRET_ACCESS_KEY") %>
-            region: <%= get_env(name="SCRIPT_DEFAULT_REGION") %>
-            bucket: <%= get_env(name="SCRIPT_BUCKET") %>
-            endpoint: <%= get_env(name="SCRIPT_ENDPOINT") %>
-        scripts_local:
-            driver: local
-            root: storage/scripts
-            url: <%= get_env(name="APP_URL") %>/scripts
+settings:
+    storage:
+        default: local
+        disks:
+            local:
+                driver: local
+                root: storage/app
+            images:
+                driver: s3
+                key: <%= get_env(name="IMAGE_ACCESS_KEY_ID") %>
+                secret: <%= get_env(name="IMAGE_SECRET_ACCESS_KEY") %>
+                region: <%= get_env(name="IMAGE_DEFAULT_REGION") %>
+                bucket: <%= get_env(name="IMAGE_BUCKET") %>
+                endpoint: <%= get_env(name="IMAGE_ENDPOINT") %>
+                url: <%= get_env(name="IMAGE_URL", default="") %>
+                visibility: public    
+            images_local:
+                driver: local
+                root: storage/images
+                url: <%= get_env(name="APP_URL") %>/images
+            videos_nyc:
+                driver: s3
+                key: <%= get_env(name="VIDEO_NYC_ACCESS_KEY_ID") %>
+                secret: <%= get_env(name="VIDEO_NYC_SECRET_ACCESS_KEY") %>
+                region: <%= get_env(name="VIDEO_NYC_DEFAULT_REGION") %>
+                bucket: <%= get_env(name="VIDEO_NYC_BUCKET") %>
+                endpoint: <%= get_env(name="VIDEO_NYC_ENDPOINT") %>
+            videos_fra:
+                driver: s3
+                key: <%= get_env(name="VIDEO_FRA_ACCESS_KEY_ID") %>
+                secret: <%= get_env(name="VIDEO_FRA_SECRET_ACCESS_KEY") %>
+                region: <%= get_env(name="VIDEO_FRA_DEFAULT_REGION") %>
+                bucket: <%= get_env(name="VIDEO_FRA_BUCKET") %>
+                endpoint: <%= get_env(name="VIDEO_FRA_ENDPOINT") %>
+            videos_local:
+                driver: local
+                root: storage/videos
+                url: <%= get_env(name="APP_URL") %>/videos
+                visibility: public
+            audios_nyc:
+                driver: s3
+                key: <%= get_env(name="AUDIO_NYC_ACCESS_KEY_ID") %>
+                secret: <%= get_env(name="AUDIO_NYC_SECRET_ACCESS_KEY") %>
+                region: <%= get_env(name="AUDIO_NYC_DEFAULT_REGION") %>
+                bucket: <%= get_env(name="AUDIO_NYC_BUCKET") %>
+                endpoint: <%= get_env(name="AUDIO_NYC_ENDPOINT") %>
+            audios_fra:
+                driver: s3
+                key: <%= get_env(name="AUDIO_FRA_ACCESS_KEY_ID") %>
+                secret: <%= get_env(name="AUDIO_FRA_SECRET_ACCESS_KEY") %>
+                region: <%= get_env(name="AUDIO_FRA_DEFAULT_REGION") %>
+                bucket: <%= get_env(name="AUDIO_FRA_BUCKET") %>
+                endpoint: <%= get_env(name="AUDIO_FRA_ENDPOINT") %>
+            audios_local:
+                driver: local
+                root: storage/audios
+                url: <%= get_env(name="APP_URL") %>/audios
+                visibility: public
+            dumps:
+                driver: s3
+                key: <%= get_env(name="DUMP_ACCESS_KEY_ID") %>
+                secret: <%= get_env(name="DUMP_SECRET_ACCESS_KEY") %>
+                region: <%= get_env(name="DUMP_DEFAULT_REGION") %>
+                bucket: <%= get_env(name="DUMP_BUCKET") %>
+                endpoint: <%= get_env(name="DUMP_ENDPOINT") %>
+            dumps_local:
+                driver: local
+                root: storage/dumps
+                url: <%= get_env(name="APP_URL") %>/dumps
+            scripts:
+                driver: s3
+                key: <%= get_env(name="SCRIPT_ACCESS_KEY_ID") %>
+                secret: <%= get_env(name="SCRIPT_SECRET_ACCESS_KEY") %>
+                region: <%= get_env(name="SCRIPT_DEFAULT_REGION") %>
+                bucket: <%= get_env(name="SCRIPT_BUCKET") %>
+                endpoint: <%= get_env(name="SCRIPT_ENDPOINT") %>
+            scripts_local:
+                driver: local
+                root: storage/scripts
+                url: <%= get_env(name="APP_URL") %>/scripts

@@ -49,8 +49,12 @@ enum DiskConfig {
 }
 
 pub fn create_storage(ctx: AppContext) -> Result<Storage, AppError> {
-    let settings: Settings = serde_json::from_value(ctx.config.settings.unwrap())
-        .map_err(|e| AppError::Internal(e.into()))?;
+    let settings: Settings = serde_json::from_value(ctx.config.settings.ok_or_else(|| {
+        AppError::Internal(anyhow::anyhow!(
+            "Storage settings not found in configuration"
+        ))
+    })?)
+    .map_err(|e| AppError::Internal(e.into()))?;
 
     let StorageConfig { default, disks } = settings.storage;
 
