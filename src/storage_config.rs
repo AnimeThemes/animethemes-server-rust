@@ -75,6 +75,15 @@ pub fn create_storage(ctx: AppContext) -> Result<Storage> {
                 endpoint,
                 ..
             } => {
+                if key.trim().is_empty()
+                    || secret.trim().is_empty()
+                    || region.trim().is_empty()
+                    || bucket.trim().is_empty()
+                {
+                    tracing::warn!("Skipping storage disk '{name}': missing configuration");
+                    continue;
+                }
+
                 let credentials = drivers::aws::Credential {
                     key_id: key,
                     secret_key: secret,
