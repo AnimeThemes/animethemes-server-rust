@@ -1,79 +1,160 @@
 # Loco configuration file documentation
 
 database:
-  uri: <%= get_env(name="DATABASE_URL", default="sqlite://myapp_development.sqlite?mode=rwc") %>
-  enable_logging: <%= get_env(name="DATABASE_LOGGING", default="false") %>
-  connect_timeout: 500
-  acquire_timeout: 30000
-  idle_timeout: 600000
-  min_connections: 1
-  max_connections: 20
-  auto_migrate: false
-  dangerously_truncate: false
-  dangerously_recreate: false
+      uri: <%= get_env(name="DATABASE_URL", default="sqlite://myapp_development.sqlite?mode=rwc") %>
+      enable_logging: <%= get_env(name="DATABASE_LOGGING", default="false") %>
+      connect_timeout: 500
+      acquire_timeout: 30000
+      idle_timeout: 600000
+      min_connections: 1
+      max_connections: 20
+      auto_migrate: false
+      dangerously_truncate: false
+      dangerously_recreate: false
 
 # Application logging configuration
 logger:
-  # Enable or disable logging.
-  enable: true
-  # Enable pretty backtrace (sets RUST_BACKTRACE=1)
-  pretty_backtrace: true
-  # Log level, options: trace, debug, info, warn or error.
-  level: <%= get_env(name="LOG_LEVEL", default="debug") %>
-  # Define the logging format. options: compact, pretty or json
-  format: compact
-  # By default the logger has filtering only logs that came from your code or logs that came from `loco` framework. to see all third party libraries
-  # Uncomment the line below to override to see all third party libraries you can enable this config and override the logger filters.
-  # override_filter: trace
+      # Enable or disable logging.
+      enable: true
+      # Enable pretty backtrace (sets RUST_BACKTRACE=1)
+      pretty_backtrace: true
+      # Log level, options: trace, debug, info, warn or error.
+      level: <%= get_env(name="LOG_LEVEL", default="debug") %>
+      # Define the logging format. options: compact, pretty or json
+      format: compact
+      # By default the logger has filtering only logs that came from your code or logs that came from `loco` framework. to see all third party libraries
+      # Uncomment the line below to override to see all third party libraries you can enable this config and override the logger filters.
+      # override_filter: trace
 
 # Web server configuration
 server:
-  # Port on which the server will listen. the server binding is 0.0.0.0:{PORT}
-  # Every Loco app defaults to 5150, so a second one on this machine will
-  # collide. Override without editing this file: `PORT=5151 cargo loco start`.
-  port: <%= get_env(name="APP_PORT", default="80") %>
-  # Binding for the server (which interface to bind to)
-  binding: 0.0.0.0
-  # The UI hostname or IP address that mailers will point to.
-  host: <%= get_env(name="APP_URL", default="http://localhost") %>
-  # Out of the box middleware configuration. to disable middleware you can changed the `enable` field to `false` of comment the middleware block
-  middlewares:
+      # Port on which the server will listen. the server binding is 0.0.0.0:{PORT}
+      # Every Loco app defaults to 5150, so a second one on this machine will
+      # collide. Override without editing this file: `PORT=5151 cargo loco start`.
+      port: <%= get_env(name="APP_PORT", default="80") %>
+      # Binding for the server (which interface to bind to)
+      binding: 0.0.0.0
+      # The UI hostname or IP address that mailers will point to.
+      host: <%= get_env(name="APP_URL", default="http://localhost") %>
+      # Out of the box middleware configuration. to disable middleware you can changed the `enable` field to `false` of comment the middleware block
+      middlewares:
 
 # Worker Configuration
 workers:
-  # specifies the worker mode. Options:
-  #   - BackgroundQueue - Workers operate asynchronously in the background, processing queued.
-  #   - ForegroundBlocking - Workers operate in the foreground and block until tasks are completed.
-  #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
-  mode: BackgroundQueue
+      # specifies the worker mode. Options:
+      #   - BackgroundQueue - Workers operate asynchronously in the background, processing queued.
+      #   - ForegroundBlocking - Workers operate in the foreground and block until tasks are completed.
+      #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
+      mode: BackgroundQueue
 
 queue:
-  kind: Redis
-  uri: <%= get_env(name="REDIS_URL", default="redis://redis:6379") %>/1
-  num_workers: 2
+      kind: Redis
+      uri: <%= get_env(name="REDIS_URL", default="redis://redis:6379") %>/1
+      num_workers: 2
 
 cache:
-  kind: Redis
-  uri: <%= get_env(name="REDIS_URL", default="redis://redis:6379") %>/2
-  max_size: 10
+      kind: Redis
+      uri: <%= get_env(name="REDIS_URL", default="redis://redis:6379") %>/2
+      max_size: 10
 
 scheduler:
-  output: stdout
-  jobs:
-    clear_reset_passwords:
-      run: "clear:reset-passwords"
-      schedule: "run every minute"
-    sync_entry_favorites_count:
-      run: "entry:sync-favorites-count"
-      # Every day at 23:56
-      schedule: "0 56 23 * * * *"
-    prune_watch_history:
-      run: "prune:watch-history"
-      # Every day at 00:00
-      schedule: "0 0 * * * *"
+    output: stdout
+    jobs:
+        clear_reset_passwords:
+            run: "clear:reset-passwords"
+            schedule: "run every minute"
+        sync_entry_favorites_count:
+            run: "entry:sync-favorites-count"
+            # Every day at 23:56
+            schedule: "0 56 23 * * * *"
+        prune_watch_history:
+            run: "prune:watch-history"
+            # Every day at 00:00
+            schedule: "0 0 * * * *"
 # Initializers Configuration
 # initializers:
 #  oauth2:
 #    authorization_code: # Authorization code grant type
 #      - client_identifier: google # Identifier for the OAuth2 provider. Replace 'google' with your provider's name if different, must be unique within the oauth2 config.
 #        ... other fields
+
+# Custom
+storage:
+    default: local
+    disks:
+        local:
+            driver: local
+            root: storage/app
+        images:
+            driver: s3
+            key: <%= get_env(name="IMAGE_ACCESS_KEY_ID") %>
+            secret: <%= get_env(name="IMAGE_SECRET_ACCESS_KEY") %>
+            region: <%= get_env(name="IMAGE_DEFAULT_REGION") %>
+            bucket: <%= get_env(name="IMAGE_BUCKET") %>
+            endpoint: <%= get_env(name="IMAGE_ENDPOINT") %>
+            url: <%= get_env(name="IMAGE_URL", default="") %>
+            visibility: public    
+        images_local:
+            driver: local
+            root: public/images
+            url: <%= get_env(name="APP_URL") %>/images
+        videos_nyc:
+            driver: s3
+            key: <%= get_env(name="VIDEO_NYC_ACCESS_KEY_ID") %>
+            secret: <%= get_env(name="VIDEO_NYC_SECRET_ACCESS_KEY") %>
+            region: <%= get_env(name="VIDEO_NYC_DEFAULT_REGION") %>
+            bucket: <%= get_env(name="VIDEO_NYC_BUCKET") %>
+            endpoint: <%= get_env(name="VIDEO_NYC_ENDPOINT") %>
+        videos_fra:
+            driver: s3
+            key: <%= get_env(name="VIDEO_FRA_ACCESS_KEY_ID") %>
+            secret: <%= get_env(name="VIDEO_FRA_SECRET_ACCESS_KEY") %>
+            region: <%= get_env(name="VIDEO_FRA_DEFAULT_REGION") %>
+            bucket: <%= get_env(name="VIDEO_FRA_BUCKET") %>
+            endpoint: <%= get_env(name="VIDEO_FRA_ENDPOINT") %>
+        videos_local:
+            driver: local
+            root: public/videos
+            url: <%= get_env(name="APP_URL") %>/videos
+            visibility: public
+        audios_nyc:
+            driver: s3
+            key: <%= get_env(name="AUDIO_NYC_ACCESS_KEY_ID") %>
+            secret: <%= get_env(name="AUDIO_NYC_SECRET_ACCESS_KEY") %>
+            region: <%= get_env(name="AUDIO_NYC_DEFAULT_REGION") %>
+            bucket: <%= get_env(name="AUDIO_NYC_BUCKET") %>
+            endpoint: <%= get_env(name="AUDIO_NYC_ENDPOINT") %>
+        audios_fra:
+            driver: s3
+            key: <%= get_env(name="AUDIO_FRA_ACCESS_KEY_ID") %>
+            secret: <%= get_env(name="AUDIO_FRA_SECRET_ACCESS_KEY") %>
+            region: <%= get_env(name="AUDIO_FRA_DEFAULT_REGION") %>
+            bucket: <%= get_env(name="AUDIO_FRA_BUCKET") %>
+            endpoint: <%= get_env(name="AUDIO_FRA_ENDPOINT") %>
+        audios_local:
+            driver: local
+            root: public/audios
+            url: <%= get_env(name="APP_URL") %>/audios
+            visibility: public
+        dumps:
+            driver: s3
+            key: <%= get_env(name="DUMP_ACCESS_KEY_ID") %>
+            secret: <%= get_env(name="DUMP_SECRET_ACCESS_KEY") %>
+            region: <%= get_env(name="DUMP_DEFAULT_REGION") %>
+            bucket: <%= get_env(name="DUMP_BUCKET") %>
+            endpoint: <%= get_env(name="DUMP_ENDPOINT") %>
+        dumps_local:
+            driver: local
+            root: public/dumps
+            url: <%= get_env(name="APP_URL") %>/dumps
+        scripts:
+            driver: s3
+            key: <%= get_env(name="SCRIPT_ACCESS_KEY_ID") %>
+            secret: <%= get_env(name="SCRIPT_SECRET_ACCESS_KEY") %>
+            region: <%= get_env(name="SCRIPT_DEFAULT_REGION") %>
+            bucket: <%= get_env(name="SCRIPT_BUCKET") %>
+            endpoint: <%= get_env(name="SCRIPT_ENDPOINT") %>
+        scripts_local:
+            driver: local
+            root: public/scripts
+            url: <%= get_env(name="APP_URL") %>/scripts

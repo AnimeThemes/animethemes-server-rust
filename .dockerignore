@@ -11,3 +11,10 @@ docker-compose*.yml
 *.sqlite
 README.md
 .rustfmt.toml
+
+# Storage
+storage/audios
+storage/images
+storage/videos
+storage/dumps
+storage/scripts

@@ -24,6 +24,7 @@ pub mod schema;
 pub mod scopes;
 pub mod seeds;
 pub mod session;
+pub mod storage_config;
 pub mod tasks;
 pub mod traits;
 pub mod typesense;
@@ -50,6 +51,8 @@ pub enum AppError {
     Database(#[from] sea_orm::DbErr),
     #[error("Internal server error")]
     Internal(#[source] anyhow::Error),
+    #[error(transparent)]
+    Storage(#[from] loco_rs::storage::StorageError),
 }
 
 impl AppError {
@@ -86,6 +89,7 @@ impl Into<LocoError> for AppError {
             AppError::RateLimitingExceeded => LocoError::Message("Too Many Requests".to_string()),
             AppError::Database(error) => LocoError::DB(error),
             AppError::Internal(_) => LocoError::InternalServerError,
+            AppError::Storage(error) => LocoError::Message(error.to_string()),
         }
     }
 }
@@ -117,6 +121,14 @@ impl IntoResponse for AppError {
                 tracing::error!(
                     error = %format!("{error:#}"),
                     "internal error"
+                );
+
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
+            }
+            AppError::Storage(error) => {
+                tracing::error!(
+                    error = %format!("{error:#}"),
+                    "storage error"
                 );
 
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()

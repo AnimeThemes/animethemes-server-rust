@@ -20,3 +20,10 @@ target/
 *.sql
 .env
 .env.production
+
+# Storage
+storage/audios
+storage/images
+storage/videos
+storage/dumps
+storage/scripts

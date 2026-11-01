@@ -13,7 +13,7 @@ use axum::{
     routing::{get, post},
 };
 use loco_rs::{
-    Result,
+    Error, Result,
     app::{AppContext, Hooks, Initializer},
     bgworker::{BackgroundWorker, Queue},
     boot::{BootResult, StartMode, create_app},
@@ -26,6 +26,7 @@ use loco_rs::{
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use url::Url;
 
+use crate::storage_config::create_storage;
 use crate::{
     caches::hostname_cache::HostnameCache,
     middlewares::{
@@ -77,7 +78,9 @@ impl Hooks for App {
         ctx.shared_store.insert(schema);
         ctx.shared_store.insert(typesense);
 
-        Ok(ctx)
+        let storage = create_storage(ctx.clone()).map_err(|e| Error::Message(e.to_string()))?;
+
+        Ok(ctx.into_builder().storage(storage.into()).build())
     }
 
     async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
@@ -89,6 +92,7 @@ impl Hooks for App {
 
         AppRoutes::with_default_routes() // controller routes below
             .add_route(controllers::verify_email::routes())
+            .add_route(controllers::streams::video_stream_controller::routes())
             .add_route(Routes::new().add("/", get(graphiql)).add(
                 "/graphql",
                 post(graphql_handler).route_layer(from_fn_with_state(
