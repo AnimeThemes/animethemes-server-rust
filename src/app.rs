@@ -94,6 +94,7 @@ impl Hooks for App {
 
         AppRoutes::with_default_routes() // controller routes below
             .add_route(controllers::verify_email::routes())
+            .add_route(controllers::streams::audio_stream_controller::routes())
             .add_route(controllers::streams::video_stream_controller::routes())
             .add_route(Routes::new().add("/", get(graphiql)).add(
                 "/graphql",
