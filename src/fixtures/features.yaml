@@ -1,0 +1,17 @@
+---
+ - id: 1
+   name: registration
+   scope_type: global
+   value: true
+ - id: 2
+   name: allow-playlist-management
+   scope_type: global
+   value: true
+ - id: 3
+   name: allow-audio-streams
+   scope_type: global
+   value: true
+ - id: 4
+   name: allow-video-streams
+   scope_type: global
+   value: true

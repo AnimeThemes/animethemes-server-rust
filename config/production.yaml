@@ -11,79 +11,79 @@
 #   depending on which features you generated.
 
 database:
-      uri: <%= get_env(name="DATABASE_URL") %>
-      enable_logging: <%= get_env(name="DATABASE_LOGGING", default="false") %>
-      connect_timeout: 5000
-      acquire_timeout: 30000
-      idle_timeout: 60000
-      min_connections: 1
-      max_connections: 20
-      auto_migrate: false
-      dangerously_truncate: false
-      dangerously_recreate: false
+    uri: <%= get_env(name="DATABASE_URL") %>
+    enable_logging: <%= get_env(name="DATABASE_LOGGING", default="false") %>
+    connect_timeout: 5000
+    acquire_timeout: 30000
+    idle_timeout: 60000
+    min_connections: 1
+    max_connections: 20
+    auto_migrate: false
+    dangerously_truncate: false
+    dangerously_recreate: false
 
 # Application logging configuration
 logger:
-      # Enable or disable logging.
-      enable: true
-      # Enable pretty backtrace (sets RUST_BACKTRACE=1). Off in production: it
-      # costs performance and puts source paths into your logs.
-      pretty_backtrace: false
-      # Log level, options: trace, debug, info, warn or error.
-      level: <%= get_env(name="LOG_LEVEL", default="info") %>
-      # Define the logging format. options: compact, pretty or json
-      # `json` is the machine-readable one, for a log aggregator.
-      format: json
-      # By default the logger has filtering only logs that came from your code or logs that came from `loco` framework. to see all third party libraries
-      # Uncomment the line below to override to see all third party libraries you can enable this config and override the logger filters.
-      # override_filter: trace
+    # Enable or disable logging.
+    enable: true
+    # Enable pretty backtrace (sets RUST_BACKTRACE=1). Off in production: it
+    # costs performance and puts source paths into your logs.
+    pretty_backtrace: false
+    # Log level, options: trace, debug, info, warn or error.
+    level: <%= get_env(name="LOG_LEVEL", default="info") %>
+    # Define the logging format. options: compact, pretty or json
+    # `json` is the machine-readable one, for a log aggregator.
+    format: json
+    # By default the logger has filtering only logs that came from your code or logs that came from `loco` framework. to see all third party libraries
+    # Uncomment the line below to override to see all third party libraries you can enable this config and override the logger filters.
+    # override_filter: trace
 
 # Web server configuration
 server:
-      # Port on which the server will listen. the server binding is 0.0.0.0:{PORT}
-      port: <%= get_env(name="APP_PORT", default="5150") %>
-      # Binding for the server (which interface to bind to).
-      # `0.0.0.0`, not `localhost`: inside a container or a VM, a server bound to
-      # loopback is unreachable from outside it.
-      binding: <%= get_env(name="BINDING", default="0.0.0.0") %>
-      # The UI hostname or IP address that mailers will point to.
-      # Required: links in outgoing mail have to name the real host.
-      host: <%= get_env(name="APP_URL") %>
-      # Out of the box middleware configuration. to disable middleware you can changed the `enable` field to `false` of comment the middleware block
-      middlewares:
+    # Port on which the server will listen. the server binding is 0.0.0.0:{PORT}
+    port: <%= get_env(name="APP_PORT", default="5150") %>
+    # Binding for the server (which interface to bind to).
+    # `0.0.0.0`, not `localhost`: inside a container or a VM, a server bound to
+    # loopback is unreachable from outside it.
+    binding: <%= get_env(name="BINDING", default="0.0.0.0") %>
+    # The UI hostname or IP address that mailers will point to.
+    # Required: links in outgoing mail have to name the real host.
+    host: <%= get_env(name="APP_URL") %>
+    # Out of the box middleware configuration. to disable middleware you can changed the `enable` field to `false` of comment the middleware block
+    middlewares:
 
 # Worker Configuration
 workers:
-      # specifies the worker mode. Options:
-      #   - BackgroundQueue - Workers operate asynchronously in the background, processing queued.
-      #   - ForegroundBlocking - Workers operate in the foreground and block until tasks are completed.
-      #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
-      mode: BackgroundQueue
+    # specifies the worker mode. Options:
+    #   - BackgroundQueue - Workers operate asynchronously in the background, processing queued.
+    #   - ForegroundBlocking - Workers operate in the foreground and block until tasks are completed.
+    #   - BackgroundAsync - Workers operate asynchronously in the background, processing tasks with async capabilities.
+    mode: BackgroundQueue
 
 queue:
-      kind: Redis
-      uri: <%= get_env(name="REDIS_URL", default="redis://redis:6379") %>/1
-      num_workers: 2
+    kind: Redis
+    uri: <%= get_env(name="REDIS_URL", default="redis://redis:6379") %>/1
+    num_workers: 2
 
 cache:
-      kind: Redis
-      uri: <%= get_env(name="REDIS_URL", default="redis://redis:6379") %>/2
-      max_size: 10
+    kind: Redis
+    uri: <%= get_env(name="REDIS_URL", default="redis://redis:6379") %>/2
+    max_size: 10
 
 scheduler:
-      output: stdout
-      jobs:
-          clear_reset_passwords:
-              run: "clear:reset-passwords"
-              schedule: "run every minute"
-          sync_entry_favorites_count:
-              run: "entry:sync-favorites-count"
-              # Every day at 23:56
-              schedule: "0 56 23 * * * *"
-          prune_watch_history:
-              run: "prune:watch-history"
-              # Every day at 00:00
-              schedule: "0 0 * * * *"
+    output: stdout
+    jobs:
+        clear_reset_passwords:
+            run: "clear:reset-passwords"
+            schedule: "run every minute"
+        sync_entry_favorites_count:
+            run: "entry:sync-favorites-count"
+            # Every day at 23:56
+            schedule: "0 56 23 * * * *"
+        prune_watch_history:
+            run: "prune:watch-history"
+            # Every day at 00:00
+            schedule: "0 0 * * * *"
 
 # Initializers Configuration
 # initializers:

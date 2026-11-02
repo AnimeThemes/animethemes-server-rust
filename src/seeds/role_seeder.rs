@@ -1,33 +1,40 @@
 use std::path::Path;
 
-use loco_rs::{Error, Result, app::AppContext, environment::Environment};
-use sea_orm::{ActiveValue::NotSet, EntityTrait, IntoActiveModel};
+use loco_rs::{Error, Result, app::AppContext};
+use sea_orm::{ActiveValue, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
 
 use crate::entities::auth::role;
 
 pub async fn seed_roles(ctx: &AppContext, base: &Path) -> Result<()> {
-    if ctx.environment != Environment::Development {
-        return Ok(());
-    }
-
     let contents = tokio::fs::read(base.join("roles.yaml")).await?;
 
     let roles: Vec<role::Model> =
         serde_yaml::from_slice(&contents).map_err(|e| Error::Message(e.to_string()))?;
 
-    let roles = roles
-        .into_iter()
-        .map(|model| {
-            let mut active = model.into_active_model();
+    for model in roles {
+        let existing = role::Entity::find()
+            .filter(role::Column::Name.eq(model.name.clone()))
+            .one(&ctx.db)
+            .await?;
 
-            active.created_at = NotSet;
-            active.updated_at = NotSet;
+        let mut active = model.into_active_model();
 
-            active
-        })
-        .collect::<Vec<_>>();
+        active.created_at = ActiveValue::NotSet;
+        active.updated_at = ActiveValue::NotSet;
 
-    role::Entity::insert_many(roles).exec(&ctx.db).await?;
+        match existing {
+            Some(existing) => {
+                active.id = ActiveValue::Set(existing.id);
+
+                role::Entity::update(active).exec(&ctx.db).await?;
+            }
+            None => {
+                active.id = ActiveValue::NotSet;
+
+                role::Entity::insert(active).exec(&ctx.db).await?;
+            }
+        }
+    }
 
     Ok(())
 }

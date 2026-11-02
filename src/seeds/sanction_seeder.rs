@@ -1,35 +1,40 @@
 use std::path::Path;
 
-use loco_rs::{Error, Result, app::AppContext, environment::Environment};
-use sea_orm::{ActiveValue::NotSet, EntityTrait, IntoActiveModel};
+use loco_rs::{Error, Result, app::AppContext};
+use sea_orm::{ActiveValue, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
 
 use crate::entities::auth::sanction;
 
 pub async fn seed_sanctions(ctx: &AppContext, base: &Path) -> Result<()> {
-    if ctx.environment != Environment::Development {
-        return Ok(());
-    }
-
     let contents = tokio::fs::read(base.join("sanctions.yaml")).await?;
 
     let sanctions: Vec<sanction::Model> =
         serde_yaml::from_slice(&contents).map_err(|e| Error::Message(e.to_string()))?;
 
-    let sanctions = sanctions
-        .into_iter()
-        .map(|model| {
-            let mut active = model.into_active_model();
+    for model in sanctions {
+        let existing = sanction::Entity::find()
+            .filter(sanction::Column::Name.eq(model.name.clone()))
+            .one(&ctx.db)
+            .await?;
 
-            active.created_at = NotSet;
-            active.updated_at = NotSet;
+        let mut active = model.into_active_model();
 
-            active
-        })
-        .collect::<Vec<_>>();
+        active.created_at = ActiveValue::NotSet;
+        active.updated_at = ActiveValue::NotSet;
 
-    sanction::Entity::insert_many(sanctions)
-        .exec(&ctx.db)
-        .await?;
+        match existing {
+            Some(existing) => {
+                active.id = ActiveValue::Set(existing.id);
+
+                sanction::Entity::update(active).exec(&ctx.db).await?;
+            }
+            None => {
+                active.id = ActiveValue::NotSet;
+
+                sanction::Entity::insert(active).exec(&ctx.db).await?;
+            }
+        }
+    }
 
     Ok(())
 }
