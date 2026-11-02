@@ -1,27 +1,37 @@
 use std::{collections::HashMap, env};
 
 use axum::{
-    extract::{Path, Query, Request, State},
-    middleware::{self, Next},
-    response::{IntoResponse, Response},
+    Extension,
+    extract::{Path, Query, State},
+    middleware::{self},
+    response::Response,
 };
 use loco_rs::{app::AppContext, prelude::Routes};
-use reqwest::{StatusCode, header::HOST};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 
 use crate::{
     AppError,
     actions::stream::nginx_stream::{Disposition, NginxStream, Streamable},
+    controllers::streams::media_host_only,
     entities::content::video,
+    enums::features::Feature,
+    features::functions::FeatureManager,
+    scopes::without_trashed,
 };
 
 async fn show(
     State(ctx): State<AppContext>,
+    Extension(feature_manager): Extension<FeatureManager>,
     Path(basename): Path<String>,
     Query(query): Query<HashMap<String, String>>,
 ) -> Result<Response, AppError> {
+    feature_manager
+        .enabled(Feature::AllowVideoStreams, None)
+        .await?;
+
     let video = video::Entity::find()
         .filter(video::Column::Basename.eq(basename))
+        .filter(without_trashed::<video::Entity>())
         .one(&ctx.db)
         .await?
         .ok_or_else(|| AppError::NotFound)?;
@@ -46,24 +56,6 @@ async fn show(
     let response = NginxStream::stream(&ctx, &file, disposition).await;
 
     response.map_err(|e| AppError::Internal(anyhow::anyhow!("Video streaming failed: {e}")))
-}
-
-async fn media_host_only(
-    State(video_url): State<String>,
-    request: Request,
-    next: Next,
-) -> Response {
-    let allowed = request
-        .headers()
-        .get(HOST)
-        .and_then(|host| host.to_str().ok())
-        .is_some_and(|host| host.eq_ignore_ascii_case(video_url.as_str()));
-
-    if !allowed {
-        return StatusCode::NOT_FOUND.into_response();
-    }
-
-    next.run(request).await
 }
 
 pub fn routes() -> Routes {

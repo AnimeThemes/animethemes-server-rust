@@ -3,6 +3,8 @@ use std::fmt::{self, Display, Formatter};
 pub enum Feature {
     Registration,
     AllowPlaylistManagement,
+    AllowAudioStreams,
+    AllowVideoStreams,
 }
 
 impl Display for Feature {
@@ -10,6 +12,8 @@ impl Display for Feature {
         let name = match self {
             Feature::Registration => "registration",
             Feature::AllowPlaylistManagement => "allow-playlist-management",
+            Feature::AllowAudioStreams => "allow-audio-streams",
+            Feature::AllowVideoStreams => "allow-video-streams",
         };
 
         f.write_str(name)
