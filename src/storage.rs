@@ -9,23 +9,21 @@ use loco_rs::{
         strategies::single::SingleStrategy,
     },
 };
-use serde::{Deserialize, Deserializer};
+use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
-struct Settings {
-    pub storage: StorageConfig,
-}
+use crate::settings::{Settings, null_as_empty};
 
-#[derive(Debug, Deserialize)]
-struct StorageConfig {
+#[derive(Clone, Debug, Deserialize)]
+pub struct StorageConfig {
     pub default: String,
     pub disks: BTreeMap<String, DiskConfig>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(tag = "driver", rename_all = "lowercase")]
 #[allow(dead_code)]
-enum DiskConfig {
+pub enum DiskConfig {
+    // https://loco.rs/docs/how-to/configure-storage/#2-pick-a-driver
     Local {
         root: String,
         #[serde(default)]
@@ -51,19 +49,11 @@ enum DiskConfig {
     },
 }
 
-fn null_as_empty<'de, D>(deserializer: D) -> Result<String, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    Ok(Option::<String>::deserialize(deserializer)?.unwrap_or_default())
-}
-
 pub fn create_storage(ctx: AppContext) -> Result<Storage> {
-    let settings: Settings =
-        serde_json::from_value(ctx.config.settings.clone().ok_or_else(|| {
-            Error::Message("Storage configuration missing: settings not found".into())
-        })?)
-        .map_err(|e| Error::Message(format!("Invalid storage configuration: {e}")))?;
+    let settings = ctx
+        .shared_store
+        .get::<Settings>()
+        .ok_or_else(|| Error::Message("Settings not found".into()))?;
 
     let StorageConfig { default, disks } = settings.storage;
 

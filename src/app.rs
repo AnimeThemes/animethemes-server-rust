@@ -26,7 +26,6 @@ use loco_rs::{
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use url::Url;
 
-use crate::storage_config::create_storage;
 use crate::{
     caches::hostname_cache::HostnameCache,
     middlewares::{
@@ -42,6 +41,7 @@ use crate::{
 };
 #[allow(unused_imports)]
 use crate::{controllers, tasks, workers::downloader::DownloadWorker};
+use crate::{settings, storage::create_storage};
 
 pub struct App;
 #[async_trait]
@@ -74,9 +74,11 @@ impl Hooks for App {
         init_typesense(typesense.clone());
 
         let schema = schema::create_schema(ctx.clone(), typesense.clone());
+        let settings = settings::load_settings(ctx.clone())?;
 
         ctx.shared_store.insert(schema);
         ctx.shared_store.insert(typesense);
+        ctx.shared_store.insert(settings);
 
         let storage = create_storage(ctx.clone())?;
 
