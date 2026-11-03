@@ -15,24 +15,20 @@ impl GraphQLSort for RatingSort {
     type Entity = rating::Entity;
 
     fn cursor_sort(&self) -> Option<CursorSort<<Self::Entity as EntityTrait>::Column>> {
-        let (column, direction) = match self {
+        let (column, order) = match self {
             Self::Score => (rating::Column::Score, Order::Asc),
             Self::ScoreDesc => (rating::Column::Score, Order::Desc),
             Self::Random => return None,
         };
 
-        Some(CursorSort {
-            column,
-            order: direction,
-        })
+        Some(CursorSort { column, order })
     }
 
     fn apply_sort(&self, query: Select<Self::Entity>) -> Select<Self::Entity> {
-        let cursor_sort = self.cursor_sort();
-
-        match cursor_sort {
-            Some(cursor_sort) => query.order_by(cursor_sort.column, cursor_sort.order),
-            None => query.order_by_asc(Expr::cust("RAND()")),
+        match self {
+            Self::Score => query.order_by_asc(rating::Column::Score),
+            Self::ScoreDesc => query.order_by_desc(rating::Column::Score),
+            Self::Random => query.order_by_asc(Expr::cust("RAND()")),
         }
     }
 }

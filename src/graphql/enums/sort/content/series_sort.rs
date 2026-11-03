@@ -21,34 +21,32 @@ impl GraphQLSort for SeriesSort {
     type Entity = series::Entity;
 
     fn cursor_sort(&self) -> Option<CursorSort<<Self::Entity as EntityTrait>::Column>> {
-        let (column, direction) = match self {
+        let (column, order) = match self {
             Self::Id => (series::Column::Id, Order::Asc),
             Self::IdDesc => (series::Column::Id, Order::Desc),
-
             Self::TitleRomaji => (series::Column::Title, Order::Asc),
             Self::TitleRomajiDesc => (series::Column::Title, Order::Desc),
-
             Self::CreatedAt => (series::Column::CreatedAt, Order::Asc),
             Self::CreatedAtDesc => (series::Column::CreatedAt, Order::Desc),
-
             Self::UpdatedAt => (series::Column::UpdatedAt, Order::Asc),
             Self::UpdatedAtDesc => (series::Column::UpdatedAt, Order::Desc),
-
             Self::Random => return None,
         };
 
-        Some(CursorSort {
-            column,
-            order: direction,
-        })
+        Some(CursorSort { column, order })
     }
 
     fn apply_sort(&self, query: Select<Self::Entity>) -> Select<Self::Entity> {
-        let cursor_sort = self.cursor_sort();
-
-        match cursor_sort {
-            Some(cursor_sort) => query.order_by(cursor_sort.column, cursor_sort.order),
-            None => query.order_by_asc(Expr::cust("RAND()")),
+        match self {
+            Self::Id => query.order_by_asc(series::Column::Id),
+            Self::IdDesc => query.order_by_desc(series::Column::Id),
+            Self::TitleRomaji => query.order_by_asc(series::Column::Title),
+            Self::TitleRomajiDesc => query.order_by_desc(series::Column::Title),
+            Self::CreatedAt => query.order_by_asc(series::Column::CreatedAt),
+            Self::CreatedAtDesc => query.order_by_desc(series::Column::CreatedAt),
+            Self::UpdatedAt => query.order_by_asc(series::Column::UpdatedAt),
+            Self::UpdatedAtDesc => query.order_by_desc(series::Column::UpdatedAt),
+            Self::Random => query.order_by_asc(Expr::cust("RAND()")),
         }
     }
 }
