@@ -1,5 +1,5 @@
 use crate::{
-    entities::content::{anime, entry, theme},
+    entities::content::{anime, entry, entry_videos, theme},
     enums::content::{animeformat::AnimeFormat, themetype::ThemeType},
     scopes::without_trashed,
 };
@@ -51,7 +51,12 @@ impl ThemeQuery {
 
         let mut query = theme::Entity::find()
             .join(JoinType::InnerJoin, theme::Relation::Anime.def())
-            .join(JoinType::InnerJoin, theme::Relation::Entry.def());
+            .join(JoinType::InnerJoin, theme::Relation::Entry.def())
+            .join(
+                JoinType::InnerJoin,
+                entry_videos::Relation::Entry.def().rev(),
+            )
+            .join(JoinType::InnerJoin, entry_videos::Relation::Video.def());
 
         if let Some(r#type) = input.r#type {
             query = query.filter(theme::Column::Type.is_in(r#type));

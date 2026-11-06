@@ -82,15 +82,15 @@ docker compose run --rm server-rs task assign:role id:1 role:"Admin"
 Import models into our indices using:
 
 ```sh
-docker compose run --rm server-rs task search:index-anime
-docker compose run --rm server-rs task search:index-artist
-docker compose run --rm server-rs task search:index-entry
-docker compose run --rm server-rs task search:index-playlist
-docker compose run --rm server-rs task search:index-series
-docker compose run --rm server-rs task search:index-song
-docker compose run --rm server-rs task search:index-studio
-docker compose run --rm server-rs task search:index-theme
-docker compose run --rm server-rs task search:index-video
+docker compose run --rm beta-server-rs task search:index-anime
+docker compose run --rm beta-server-rs task search:index-artist
+docker compose run --rm beta-server-rs task search:index-entry
+docker compose run --rm beta-server-rs task search:index-playlist
+docker compose run --rm beta-server-rs task search:index-series
+docker compose run --rm beta-server-rs task search:index-song
+docker compose run --rm beta-server-rs task search:index-studio
+docker compose run --rm beta-server-rs task search:index-theme
+docker compose run --rm beta-server-rs task search:index-video
 ```
 
 ### MySQL Terminal
