@@ -37,10 +37,16 @@ impl EntryQuery {
 
         query = query.order_by_desc(entry::Column::TracksCount);
 
-        let cursor_sorts = vec![CursorSort {
-            column: entry::Column::CreatedAt,
-            order: Order::Asc,
-        }];
+        let cursor_sorts = vec![
+            CursorSort {
+                column: entry::Column::TracksCount,
+                order: Order::Desc,
+            },
+            CursorSort {
+                column: entry::Column::CreatedAt,
+                order: Order::Asc,
+            },
+        ];
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
