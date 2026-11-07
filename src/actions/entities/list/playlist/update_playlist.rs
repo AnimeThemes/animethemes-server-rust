@@ -35,8 +35,8 @@ impl UpdatePlaylistAction {
         }
 
         if let Some(description) = &params.description {
-            if !(1usize..=1000).contains(&description.chars().count()) {
-                description_errors.push("The description must be between 1 and 1000 characters.");
+            if !(0usize..=1000).contains(&description.chars().count()) {
+                description_errors.push("The description must be between 0 and 1000 characters.");
             }
         }
 
@@ -72,7 +72,11 @@ impl UpdatePlaylistAction {
         }
 
         if let Some(description) = params.description {
-            playlist.description = Set(Some(description));
+            if description.trim().is_empty() {
+                playlist.description = Set(None);
+            } else {
+                playlist.description = Set(Some(description));
+            }
         }
 
         if let Some(visibility) = params.visibility {
