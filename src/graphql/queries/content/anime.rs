@@ -115,7 +115,7 @@ impl AnimeQuery {
     }
 
     /// Filter anime by its external id on given site
-    pub async fn find_anime_by_external_site(
+    pub async fn filter_anime_by_external_site(
         &self,
         ctx: &Context<'_>,
         site: ResourceSite,
