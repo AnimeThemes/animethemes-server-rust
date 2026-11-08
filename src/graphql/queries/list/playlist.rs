@@ -2,11 +2,11 @@ use async_graphql::{
     Context, Error, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
+use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
 use crate::{
     AppError,
-    entities::list::playlist,
+    entities::list::{playlist, track},
     graphql::{
         cursor::{CursorSort, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, list::playlist_sort::PlaylistSort},
@@ -21,6 +21,7 @@ use crate::{
 #[derive(InputObject, Default)]
 struct PlaylistFilterInput {
     name_like: Option<String>,
+    tracks_exist: Option<bool>,
 }
 
 #[derive(Default)]
@@ -65,6 +66,10 @@ impl PlaylistQuery {
 
         if let Some(name_like) = filter.name_like {
             query = query.filter(playlist::Column::Name.like(name_like))
+        }
+
+        if filter.tracks_exist == Some(true) {
+            query = query.has_related(track::Entity, Condition::all())
         }
 
         if let Some(sorts) = sort.clone() {

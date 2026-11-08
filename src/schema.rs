@@ -37,10 +37,7 @@ pub fn create_schemas(ctx: AppContext, typesense: TypesenseClient) -> GraphQLSch
         .register_loaders(ctx.db)
         .finish();
 
-    GraphQLSchemas {
-        public,
-        internal,
-    }
+    GraphQLSchemas { public, internal }
 }
 
 pub async fn graphql_handler(
