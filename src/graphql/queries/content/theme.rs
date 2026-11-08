@@ -4,7 +4,7 @@ use crate::{
     scopes::without_trashed,
 };
 use async_graphql::{
-    Context, InputObject, Object, Result,
+    Context, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
 };
 use sea_orm::{
@@ -45,6 +45,15 @@ impl ThemeQuery {
         #[graphql(default = 15)] first: u64,
         input: Option<ThemeShuffleInput>,
     ) -> Result<Vec<Theme>> {
+        let pagination = PaginationInput {
+            after: None,
+            before: None,
+            first: Some(first as i32),
+            last: None,
+        };
+
+        pagination.validate(ctx).extend()?;
+
         let db = ctx.data::<DatabaseConnection>()?;
 
         let input = input.unwrap_or_default();
@@ -95,6 +104,10 @@ impl ThemeQuery {
         filter: Option<ThemeFilterInput>,
         sort: Option<Vec<ThemeSort>>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Theme, EmptyFields, EmptyFields>> {
+        if let Some(pagination) = &pagination {
+            pagination.validate(ctx).extend()?;
+        }
+
         let mut query: sea_orm::prelude::Select<theme::Entity> =
             theme::Entity::find().filter(without_trashed::<theme::Entity>());
 

@@ -53,6 +53,9 @@ end
 return { allowed, count, ttl }
 "#;
 
+#[derive(Clone, Copy)]
+pub struct CanBypass(pub bool);
+
 #[derive(Clone)]
 pub struct GraphqlRateLimitState {
     redis: ConnectionManager,
@@ -144,34 +147,46 @@ fn add_rate_limit_headers(
 
 pub async fn rate_limiting_middleware(
     State(state): State<GraphqlRateLimitState>,
-    request: Request,
+    mut request: Request,
     next: Next,
 ) -> Result<Response, AppError> {
-    let current_user = request.extensions().get::<CurrentUser>();
+    let (is_admin, user_key) = match request.extensions().get::<CurrentUser>() {
+        Some(current_user) => (
+            has_any_role(&current_user.roles, vec![Roles::Admin]),
+            Some(format!(
+                "rate_limiting:graphql:user:{}",
+                current_user.user.id
+            )),
+        ),
+        None => (false, None),
+    };
 
     // Bypass for admins
-    if let Some(current_user) = current_user {
-        if has_any_role(&current_user.roles, vec![Roles::Admin]) {
-            return Ok(next.run(request).await);
-        }
+    if is_admin {
+        request.extensions_mut().insert(CanBypass(true));
+        return Ok(next.run(request).await);
     }
 
     // Get the client IP
-    let Some(ConnectInfo(peer)) = request.extensions().get::<ConnectInfo<SocketAddr>>() else {
-        return Err(AppError::Internal(anyhow::Error::msg(
-            "Couldn't get client IP",
-        )));
+    let peer_ip = request
+        .extensions()
+        .get::<ConnectInfo<SocketAddr>>()
+        .map(|ConnectInfo(peer)| peer.ip())
+        .ok_or_else(|| AppError::Internal(anyhow::anyhow!("Couldn't get client IP")))?;
+
+    let can_bypass = {
+        let hostname_cache = request
+            .extensions()
+            .get::<HostnameCache>()
+            .ok_or_else(|| AppError::Internal(anyhow::anyhow!("Hostname cache not initialized")))?;
+
+        hostname_cache.is_allowed(peer_ip) || state.local_ips.contains(&peer_ip)
     };
 
-    let peer_ip = peer.ip();
-
-    let hostname_cache = request
-        .extensions()
-        .get::<HostnameCache>()
-        .ok_or_else(|| AppError::Internal(anyhow::anyhow!("Hostname cache not initialized")))?;
+    request.extensions_mut().insert(CanBypass(can_bypass));
 
     // Only accept forwarded IP if the connection came from a trusted local IP
-    let ip = if hostname_cache.is_allowed(peer_ip) || state.local_ips.contains(&peer_ip) {
+    let ip = if can_bypass {
         let forwarded_ip = request.headers().get("x-forwarded-ip");
 
         match forwarded_ip {
@@ -200,14 +215,7 @@ pub async fn rate_limiting_middleware(
     };
 
     // Get the key for rate limiting
-    let key = match current_user {
-        Some(current_user) => {
-            format!("rate_limiting:graphql:user:{}", current_user.user.id)
-        }
-        None => {
-            format!("rate_limiting:graphql:ip:{ip}")
-        }
-    };
+    let key = user_key.unwrap_or_else(|| format!("rate_limiting:graphql:ip:{ip}"));
 
     // Execute the atomic check in Redis
     let (allowed, count, ttl_ms) = match state.check(&key).await {

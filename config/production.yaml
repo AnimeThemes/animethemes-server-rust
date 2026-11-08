@@ -36,7 +36,7 @@ logger:
     format: json
     # By default the logger has filtering only logs that came from your code or logs that came from `loco` framework. to see all third party libraries
     # Uncomment the line below to override to see all third party libraries you can enable this config and override the logger filters.
-    # override_filter: trace
+    override_filter: "warn,tower_http=debug,animethemes_server_rust=debug"
 
 # Web server configuration
 server:

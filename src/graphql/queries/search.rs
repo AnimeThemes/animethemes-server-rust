@@ -10,6 +10,7 @@ use crate::{
             SearchAnimeSort, SearchArtistSort, SearchPlaylistSort, SearchSeriesSort, SearchSort,
             SearchStudioSort, SearchThemeSort,
         },
+        inputs::pagination_input::PaginationInput,
         types::{OffsetPageInfo, OffsetPagination},
     },
     scopes::list::playlist::public_playlists,
@@ -25,7 +26,7 @@ use crate::{
     enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason, themetype::ThemeType},
     typesense::search::OffsetPageInfo as OffsetPageInfoTypesense,
 };
-use async_graphql::{Context, InputObject, Object, ObjectType, Result};
+use async_graphql::{Context, InputObject, Object, ObjectType, Result, ResultExt};
 use sea_orm::{ActiveEnum, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter};
 
 use crate::graphql::types::{
@@ -405,11 +406,20 @@ pub struct SearchQuery;
 impl SearchQuery {
     async fn search(
         &self,
-        _ctx: &Context<'_>,
+        ctx: &Context<'_>,
         search: String,
         #[graphql(default = 10)] first: i32,
         #[graphql(default = 1)] page: i32,
     ) -> Result<Search> {
+        let pagination = PaginationInput {
+            after: None,
+            before: None,
+            first: Some(first),
+            last: None,
+        };
+
+        pagination.validate(ctx).extend()?;
+
         Ok(Search {
             term: search,
             first: first,

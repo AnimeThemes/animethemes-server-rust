@@ -6,7 +6,7 @@ use crate::{
     graphql::{cursor::PaginationCursor, enums::sort::content::anime_sort::AnimeSort},
 };
 use async_graphql::{
-    ComplexObject, Context, Object, Result, SimpleObject,
+    ComplexObject, Context, Object, Result, ResultExt, SimpleObject,
     connection::{Connection, EmptyFields, OpaqueCursor},
 };
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
@@ -70,6 +70,10 @@ impl AnimeYearSeason {
         filter: Option<AnimeFilterInput>,
         sort: Option<Vec<AnimeSort>>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Anime, EmptyFields, EmptyFields>> {
+        if let Some(pagination) = &pagination {
+            pagination.validate(ctx).extend()?;
+        }
+
         let mut filter = filter.unwrap_or_default();
 
         filter.animeyear_year = Some(self.year);

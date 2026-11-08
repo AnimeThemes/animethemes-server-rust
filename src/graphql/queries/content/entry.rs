@@ -1,6 +1,6 @@
 use crate::{entities::content::entry, scopes::without_trashed};
 use async_graphql::{
-    Context, InputObject, Object, Result,
+    Context, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
 };
 use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter, QueryOrder};
@@ -27,6 +27,10 @@ impl EntryQuery {
         pagination: Option<PaginationInput>,
         filter: Option<EntryFilterInput>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Entry, EmptyFields, EmptyFields>> {
+        if let Some(pagination) = &pagination {
+            pagination.validate(ctx).extend()?;
+        }
+
         let mut query = entry::Entity::find().filter(without_trashed::<entry::Entity>());
 
         let filter = filter.unwrap_or_default();

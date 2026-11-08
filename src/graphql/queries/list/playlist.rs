@@ -1,5 +1,5 @@
 use async_graphql::{
-    Context, Error, InputObject, Object, Result,
+    Context, Error, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
 };
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
@@ -51,6 +51,10 @@ impl PlaylistQuery {
         sort: Option<Vec<PlaylistSort>>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Playlist, EmptyFields, EmptyFields>>
     {
+        if let Some(pagination) = &pagination {
+            pagination.validate(ctx).extend()?;
+        }
+
         let user = ctx.data_opt::<CurrentUser>();
 
         PlaylistPolicy::check(user, PolicyAction::ViewAny, None).authorize()?;

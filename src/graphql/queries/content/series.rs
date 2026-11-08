@@ -1,5 +1,5 @@
 use async_graphql::{
-    Context, InputObject, Object, Result,
+    Context, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
 };
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
@@ -44,6 +44,10 @@ impl SeriesQuery {
         filter: Option<SeriesFilterInput>,
         sort: Option<Vec<SeriesSort>>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Series, EmptyFields, EmptyFields>> {
+        if let Some(pagination) = &pagination {
+            pagination.validate(ctx).extend()?;
+        }
+
         let mut query = series::Entity::find().filter(without_trashed::<series::Entity>());
 
         let filter = filter.unwrap_or_default();

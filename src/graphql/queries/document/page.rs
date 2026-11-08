@@ -1,5 +1,5 @@
 use async_graphql::{
-    Context, InputObject, Object, Result,
+    Context, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
 };
 use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, Order, QueryFilter};
@@ -63,6 +63,10 @@ impl PageQuery {
         pagination: Option<PaginationInput>,
         filter: Option<PageFilterInput>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Page, EmptyFields, EmptyFields>> {
+        if let Some(pagination) = &pagination {
+            pagination.validate(ctx).extend()?;
+        }
+
         let user = ctx.data_opt::<CurrentUser>();
         let user_roles = user.as_ref().map(|u| u.roles.clone()).unwrap_or_default();
 

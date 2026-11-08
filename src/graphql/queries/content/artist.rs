@@ -1,5 +1,5 @@
 use async_graphql::{
-    Context, InputObject, Object, Result,
+    Context, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
 };
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
@@ -44,6 +44,10 @@ impl ArtistQuery {
         filter: Option<ArtistFilterInput>,
         sort: Option<Vec<ArtistSort>>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Artist, EmptyFields, EmptyFields>> {
+        if let Some(pagination) = &pagination {
+            pagination.validate(ctx).extend()?;
+        }
+
         let mut query = artist::Entity::find().filter(without_trashed::<artist::Entity>());
 
         let filter = filter.unwrap_or_default();
