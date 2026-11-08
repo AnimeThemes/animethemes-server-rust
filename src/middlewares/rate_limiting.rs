@@ -169,9 +169,16 @@ pub async fn rate_limiting_middleware(
 
     // Get the client IP
     let peer_ip = request
-        .extensions()
-        .get::<ConnectInfo<SocketAddr>>()
-        .map(|ConnectInfo(peer)| peer.ip())
+        .headers()
+        .get("x-real-ip")
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.parse::<IpAddr>().ok())
+        .or_else(|| {
+            request
+                .extensions()
+                .get::<ConnectInfo<SocketAddr>>()
+                .map(|ConnectInfo(peer)| peer.ip())
+        })
         .ok_or_else(|| AppError::Internal(anyhow::anyhow!("Couldn't get client IP")))?;
 
     let can_bypass = {
