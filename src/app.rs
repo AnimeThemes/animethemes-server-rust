@@ -1,4 +1,5 @@
 use migration::Migrator;
+use reqwest::header::USER_AGENT;
 use std::env;
 use std::path::Path;
 
@@ -23,7 +24,7 @@ use loco_rs::{
     prelude::Routes,
     task::Tasks,
 };
-use tower_http::cors::{AllowOrigin, CorsLayer};
+use tower_http::cors::{AllowCredentials, AllowOrigin, CorsLayer};
 use url::Url;
 
 use crate::{
@@ -107,25 +108,24 @@ impl Hooks for App {
 
     async fn after_routes(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
         let client_url = env::var("CLIENT_URL").expect("CLIENT_URL is required in .env");
-        let parsed_url = Url::parse(&client_url).expect("Invalid CLIENT_URL");
+
+        let client_origin = Url::parse(&client_url)
+            .expect("Invalid CLIENT_URL")
+            .origin();
 
         let cors = CorsLayer::new()
-            .allow_origin(AllowOrigin::predicate(
-                move |origin: &HeaderValue, _request_parts| {
-                    let Ok(origin) = origin.to_str() else {
-                        return false;
-                    };
-
-                    let Ok(origin) = Url::parse(origin) else {
-                        return false;
-                    };
-
-                    origin.scheme() == parsed_url.scheme() && origin.host() == parsed_url.host()
-                },
-            ))
+            .allow_origin(AllowOrigin::mirror_request())
             .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
-            .allow_headers([CONTENT_TYPE, AUTHORIZATION])
-            .allow_credentials(true);
+            .allow_headers([CONTENT_TYPE, AUTHORIZATION, USER_AGENT])
+            .allow_credentials(AllowCredentials::predicate(
+                move |origin: &HeaderValue, _request_parts| {
+                    origin
+                        .to_str()
+                        .ok()
+                        .and_then(|s| Url::parse(s).ok())
+                        .is_some_and(|url| url.origin() == client_origin)
+                },
+            ));
 
         let session_layer = create_session_layer(&ctx).await;
 
