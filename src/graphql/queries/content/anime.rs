@@ -1,9 +1,18 @@
-use crate::enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason};
+use crate::{
+    AppError,
+    entities::content::{externalresource, resourceable},
+    enums::content::{
+        animeformat::AnimeFormat, animeseason::AnimeSeason, resourcesite::ResourceSite,
+    },
+    rules::validation_error::ValidationError,
+};
 use async_graphql::{
     Context, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
 };
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
+use sea_orm::{
+    ColumnTrait, DatabaseConnection, EntityTrait, JoinType, Order, QueryFilter, QuerySelect,
+};
 
 use crate::{
     entities::content::anime,
@@ -103,5 +112,75 @@ impl AnimeQuery {
         });
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
+    }
+
+    /// Filter anime by its external id on given site
+    pub async fn find_anime_by_external_site(
+        &self,
+        ctx: &Context<'_>,
+        site: ResourceSite,
+        id: Option<Vec<u64>>,
+        link: Option<String>,
+    ) -> Result<Vec<Anime>> {
+        let mut errors = Vec::new();
+
+        let mut id_errors = Vec::new();
+
+        let has_id = id.as_ref().is_some_and(|ids| !ids.is_empty());
+        let has_link = link.as_ref().is_some_and(|link| !link.trim().is_empty());
+
+        if !has_id && !has_link {
+            id_errors.push("Either 'id' or 'link' must be provided");
+
+            errors.push(ValidationError::new(
+                "link",
+                vec!["Either 'id' or 'link' must be provided"],
+            ));
+        }
+
+        if id.as_ref().is_some_and(|ids| ids.len() > 100) {
+            id_errors.push("'Id' must contain at most 100 entries");
+        }
+
+        if !id_errors.is_empty() {
+            errors.push(ValidationError::new("id", id_errors));
+        }
+
+        if !errors.is_empty() {
+            return Err(AppError::Validation(errors)).extend()?;
+        }
+
+        let mut query = anime::Entity::find()
+            .filter(without_trashed::<anime::Entity>())
+            .join_rev(
+                JoinType::InnerJoin,
+                resourceable::Entity::belongs_to(anime::Entity)
+                    .from(resourceable::Column::ResourceableId)
+                    .to(anime::Column::Id)
+                    .into(),
+            )
+            .join(
+                JoinType::InnerJoin,
+                resourceable::Entity::belongs_to(externalresource::Entity)
+                    .from(resourceable::Column::ResourceId)
+                    .to(externalresource::Column::Id)
+                    .into(),
+            )
+            .filter(resourceable::Column::ResourceableType.eq("anime"))
+            .filter(externalresource::Column::Site.eq(site))
+            .distinct();
+
+        if let Some(ids) = id {
+            query = query.filter(externalresource::Column::ExternalId.is_in(ids));
+        }
+
+        if let Some(link) = link {
+            query = query.filter(externalresource::Column::Link.eq(link));
+        }
+
+        let db = ctx.data::<DatabaseConnection>()?;
+        let models = query.all(db).await?;
+
+        Ok(models.into_iter().map(Anime::from).collect())
     }
 }
