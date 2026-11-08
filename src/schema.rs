@@ -20,7 +20,7 @@ pub struct GraphQLSchemas {
 pub fn create_schemas(ctx: AppContext, typesense: TypesenseClient) -> GraphQLSchemas {
     let public = Schema::build(Query::default(), Mutation::default(), EmptySubscription)
         .limit_depth(15)
-        .limit_complexity(500)
+        .limit_complexity(5000)
         .data(ctx.clone())
         .data(ctx.db.clone())
         .data(typesense.clone())
