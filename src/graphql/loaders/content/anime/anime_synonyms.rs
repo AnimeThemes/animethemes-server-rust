@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
-use crate::entities::content::synonym;
+use crate::{entities::content::synonym, scopes::without_trashed};
 
 pub struct AnimeSynonymsLoader {
     pub db: DatabaseConnection,
@@ -15,6 +15,7 @@ impl Loader<u64> for AnimeSynonymsLoader {
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
         let models = synonym::Entity::find()
+            .filter(without_trashed::<synonym::Entity>())
             .filter(synonym::Column::SynonymableType.eq("anime"))
             .filter(synonym::Column::SynonymableId.is_in(keys))
             .all(&self.db)

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
-use crate::entities::content::theme;
+use crate::{entities::content::theme, scopes::without_trashed};
 
 pub struct ThemesLoader {
     pub db: DatabaseConnection,
@@ -15,6 +15,7 @@ impl Loader<u64> for ThemesLoader {
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
         let models = theme::Entity::find()
+            .filter(without_trashed::<theme::Entity>())
             .filter(theme::Column::AnimeId.is_in(keys))
             .all(&self.db)
             .await?;

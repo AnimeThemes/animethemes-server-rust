@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
-use crate::entities::content::song_staff;
+use crate::{entities::content::song_staff, scopes::without_trashed};
 
 pub struct ArtistSongStaffsLoader {
     pub db: DatabaseConnection,
@@ -15,6 +15,7 @@ impl Loader<u64> for ArtistSongStaffsLoader {
 
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
         let models = song_staff::Entity::find()
+            .filter(without_trashed::<song_staff::Entity>())
             .filter(song_staff::Column::ArtistId.is_in(keys))
             .all(&self.db)
             .await?;
