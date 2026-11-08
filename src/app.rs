@@ -73,10 +73,10 @@ impl Hooks for App {
 
         init_typesense(typesense.clone());
 
-        let schema = schema::create_schema(ctx.clone(), typesense.clone());
+        let schemas = schema::create_schemas(ctx.clone(), typesense.clone());
         let settings = settings::load_settings(ctx.clone())?;
 
-        ctx.shared_store.insert(schema);
+        ctx.shared_store.insert(schemas);
         ctx.shared_store.insert(typesense);
         ctx.shared_store.insert(settings);
 
