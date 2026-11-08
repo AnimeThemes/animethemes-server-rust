@@ -1,4 +1,4 @@
-use crate::entities::content::image;
+use crate::{entities::content::image, graphql::cursor::CursorSortKey};
 use async_graphql::Enum;
 use sea_orm::{EntityTrait, Order, QueryOrder, Select, sea_query::Expr};
 
@@ -19,17 +19,22 @@ impl GraphQLSort for ImageSort {
     type Entity = image::Entity;
 
     fn cursor_sort(&self) -> Option<CursorSort<<Self::Entity as EntityTrait>::Column>> {
-        let (column, order) = match self {
-            Self::Id => (image::Column::Id, Order::Asc),
-            Self::IdDesc => (image::Column::Id, Order::Desc),
-            Self::CreatedAt => (image::Column::CreatedAt, Order::Asc),
-            Self::CreatedAtDesc => (image::Column::CreatedAt, Order::Desc),
-            Self::UpdatedAt => (image::Column::UpdatedAt, Order::Asc),
-            Self::UpdatedAtDesc => (image::Column::UpdatedAt, Order::Desc),
-            Self::Random => return None,
+        let (key, order) = match self {
+            Self::Id => (CursorSortKey::Column(image::Column::Id), Order::Asc),
+            Self::IdDesc => (CursorSortKey::Column(image::Column::Id), Order::Desc),
+            Self::CreatedAt => (CursorSortKey::Column(image::Column::CreatedAt), Order::Asc),
+            Self::CreatedAtDesc => (CursorSortKey::Column(image::Column::CreatedAt), Order::Desc),
+            Self::UpdatedAt => (CursorSortKey::Column(image::Column::UpdatedAt), Order::Asc),
+            Self::UpdatedAtDesc => (CursorSortKey::Column(image::Column::UpdatedAt), Order::Desc),
+            Self::Random => (
+                CursorSortKey::Random {
+                    id: image::Column::Id,
+                },
+                Order::Asc,
+            ),
         };
 
-        Some(CursorSort { column, order })
+        Some(CursorSort { key, order })
     }
 
     fn apply_sort(&self, query: Select<Self::Entity>) -> Select<Self::Entity> {

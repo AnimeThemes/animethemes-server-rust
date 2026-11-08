@@ -7,7 +7,7 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 use crate::{
     entities::content::studio,
     graphql::{
-        cursor::{CursorSort, PaginationCursor, cursor_paginate},
+        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, content::studio_sort::StudioSort},
         inputs::pagination_input::PaginationInput,
         types::content::studio::Studio,
@@ -56,12 +56,6 @@ impl StudioQuery {
             query = query.filter(studio::Column::Name.like(name_like))
         }
 
-        if let Some(sorts) = sort.clone() {
-            for sort in sorts {
-                query = sort.apply_sort(query);
-            }
-        }
-
         let mut cursor_sorts = sort
             .as_deref()
             .unwrap_or_default()
@@ -69,10 +63,15 @@ impl StudioQuery {
             .filter_map(StudioSort::cursor_sort)
             .collect::<Vec<_>>();
 
-        cursor_sorts.push(CursorSort {
-            column: studio::Column::Id,
-            order: Order::Asc,
-        });
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(studio::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(studio::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }

@@ -1,4 +1,4 @@
-use crate::entities::list::playlist;
+use crate::{entities::list::playlist, graphql::cursor::CursorSortKey};
 use async_graphql::Enum;
 use sea_orm::{EntityTrait, Order, QueryOrder, Select, sea_query::Expr};
 
@@ -21,19 +21,36 @@ impl GraphQLSort for PlaylistSort {
     type Entity = playlist::Entity;
 
     fn cursor_sort(&self) -> Option<CursorSort<<Self::Entity as EntityTrait>::Column>> {
-        let (column, order) = match self {
-            Self::Id => (playlist::Column::Id, Order::Asc),
-            Self::IdDesc => (playlist::Column::Id, Order::Desc),
-            Self::Name => (playlist::Column::Name, Order::Asc),
-            Self::NameDesc => (playlist::Column::Name, Order::Desc),
-            Self::CreatedAt => (playlist::Column::CreatedAt, Order::Asc),
-            Self::CreatedAtDesc => (playlist::Column::CreatedAt, Order::Desc),
-            Self::UpdatedAt => (playlist::Column::UpdatedAt, Order::Asc),
-            Self::UpdatedAtDesc => (playlist::Column::UpdatedAt, Order::Desc),
-            Self::Random => return None,
+        let (key, order) = match self {
+            Self::Id => (CursorSortKey::Column(playlist::Column::Id), Order::Asc),
+            Self::IdDesc => (CursorSortKey::Column(playlist::Column::Id), Order::Desc),
+            Self::Name => (CursorSortKey::Column(playlist::Column::Name), Order::Asc),
+            Self::NameDesc => (CursorSortKey::Column(playlist::Column::Name), Order::Desc),
+            Self::CreatedAt => (
+                CursorSortKey::Column(playlist::Column::CreatedAt),
+                Order::Asc,
+            ),
+            Self::CreatedAtDesc => (
+                CursorSortKey::Column(playlist::Column::CreatedAt),
+                Order::Desc,
+            ),
+            Self::UpdatedAt => (
+                CursorSortKey::Column(playlist::Column::UpdatedAt),
+                Order::Asc,
+            ),
+            Self::UpdatedAtDesc => (
+                CursorSortKey::Column(playlist::Column::UpdatedAt),
+                Order::Desc,
+            ),
+            Self::Random => (
+                CursorSortKey::Random {
+                    id: playlist::Column::Id,
+                },
+                Order::Asc,
+            ),
         };
 
-        Some(CursorSort { column, order })
+        Some(CursorSort { key, order })
     }
 
     fn apply_sort(&self, query: Select<Self::Entity>) -> Select<Self::Entity> {

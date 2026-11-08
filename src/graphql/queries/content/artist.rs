@@ -7,7 +7,7 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 use crate::{
     entities::content::artist,
     graphql::{
-        cursor::{CursorSort, PaginationCursor, cursor_paginate},
+        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, content::artist_sort::ArtistSort},
         inputs::pagination_input::PaginationInput,
         types::content::artist::Artist,
@@ -56,12 +56,6 @@ impl ArtistQuery {
             query = query.filter(artist::Column::Name.like(name_main_like))
         }
 
-        if let Some(sorts) = sort.clone() {
-            for sort in sorts {
-                query = sort.apply_sort(query);
-            }
-        }
-
         let mut cursor_sorts = sort
             .as_deref()
             .unwrap_or_default()
@@ -69,10 +63,15 @@ impl ArtistQuery {
             .filter_map(ArtistSort::cursor_sort)
             .collect::<Vec<_>>();
 
-        cursor_sorts.push(CursorSort {
-            column: artist::Column::Id,
-            order: Order::Asc,
-        });
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(artist::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(artist::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }

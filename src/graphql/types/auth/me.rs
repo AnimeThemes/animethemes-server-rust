@@ -9,7 +9,7 @@ use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter};
 use crate::{
     entities::{auth::user, list::playlist, user::watchhistory},
     graphql::{
-        cursor::{CursorSort, PaginationCursor, cursor_paginate},
+        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
         enums::sort::{
             GraphQLSort, list::playlist_sort::PlaylistSort, user::rating_sort::RatingSort,
         },
@@ -75,13 +75,7 @@ impl Me {
         sort: Option<Vec<PlaylistSort>>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, Playlist, EmptyFields, EmptyFields>>
     {
-        let mut query = playlist::Entity::find().filter(playlist::Column::UserId.eq(self.id));
-
-        if let Some(sorts) = sort.clone() {
-            for sort in sorts {
-                query = sort.apply_sort(query);
-            }
-        }
+        let query = playlist::Entity::find().filter(playlist::Column::UserId.eq(self.id));
 
         let mut cursor_sorts = sort
             .as_deref()
@@ -90,10 +84,15 @@ impl Me {
             .filter_map(PlaylistSort::cursor_sort)
             .collect::<Vec<_>>();
 
-        cursor_sorts.push(CursorSort {
-            column: playlist::Column::Id,
-            order: Order::Asc,
-        });
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(playlist::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(playlist::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
@@ -117,7 +116,7 @@ impl Me {
         let query = watchhistory::Entity::find().filter(watchhistory::Column::UserId.eq(self.id));
 
         let cursor_sorts = vec![CursorSort {
-            column: watchhistory::Column::Id,
+            key: CursorSortKey::Column(watchhistory::Column::Id),
             order: Order::Asc,
         }];
 

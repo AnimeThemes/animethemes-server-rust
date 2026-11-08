@@ -7,7 +7,7 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 use crate::{
     entities::content::series,
     graphql::{
-        cursor::{CursorSort, PaginationCursor, cursor_paginate},
+        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, content::series_sort::SeriesSort},
         inputs::pagination_input::PaginationInput,
         types::content::series::Series,
@@ -56,12 +56,6 @@ impl SeriesQuery {
             query = query.filter(series::Column::Title.like(title_romaji_like))
         }
 
-        if let Some(sorts) = sort.clone() {
-            for sort in sorts {
-                query = sort.apply_sort(query);
-            }
-        }
-
         let mut cursor_sorts = sort
             .as_deref()
             .unwrap_or_default()
@@ -69,10 +63,15 @@ impl SeriesQuery {
             .filter_map(SeriesSort::cursor_sort)
             .collect::<Vec<_>>();
 
-        cursor_sorts.push(CursorSort {
-            column: series::Column::Id,
-            order: Order::Asc,
-        });
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(series::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(series::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }

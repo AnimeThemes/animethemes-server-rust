@@ -8,7 +8,7 @@ use crate::{
     AppError,
     entities::list::{playlist, track},
     graphql::{
-        cursor::{CursorSort, PaginationCursor, cursor_paginate},
+        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, list::playlist_sort::PlaylistSort},
         inputs::pagination_input::PaginationInput,
         types::list::playlist::Playlist,
@@ -72,23 +72,22 @@ impl PlaylistQuery {
             query = query.has_related(track::Entity, Condition::all())
         }
 
-        if let Some(sorts) = sort.clone() {
-            for sort in sorts {
-                query = sort.apply_sort(query);
-            }
-        }
-
         let mut cursor_sorts = sort
-            .clone()
-            .unwrap_or(vec![])
+            .as_deref()
+            .unwrap_or_default()
             .iter()
             .filter_map(PlaylistSort::cursor_sort)
             .collect::<Vec<_>>();
 
-        cursor_sorts.push(CursorSort {
-            column: playlist::Column::Id,
-            order: Order::Asc,
-        });
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(playlist::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(playlist::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }

@@ -10,7 +10,7 @@ use crate::{
         document::{page, page_roles},
     },
     graphql::{
-        cursor::{CursorSort, PaginationCursor, cursor_paginate},
+        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
         enums::sort::{GraphQLSort, document::page_sort::PageSort},
         inputs::pagination_input::PaginationInput,
         types::document::page::Page,
@@ -81,7 +81,7 @@ impl PageQuery {
         }
 
         let cursor_sorts = vec![CursorSort {
-            column: page::Column::CreatedAt,
+            key: CursorSortKey::Column(page::Column::CreatedAt),
             order: Order::Asc,
         }];
 
@@ -107,23 +107,22 @@ impl PageQuery {
                 .add(page::Column::Slug.like("status/%")),
         );
 
-        if let Some(sorts) = sort.clone() {
-            for sort in sorts {
-                query = sort.apply_sort(query);
-            }
-        }
-
         let mut cursor_sorts = sort
-            .clone()
-            .unwrap_or(vec![])
+            .as_deref()
+            .unwrap_or_default()
             .iter()
             .filter_map(PageSort::cursor_sort)
             .collect::<Vec<_>>();
 
-        cursor_sorts.push(CursorSort {
-            column: page::Column::Id,
-            order: Order::Asc,
-        });
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(page::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(page::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }

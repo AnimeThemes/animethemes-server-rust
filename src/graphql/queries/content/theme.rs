@@ -1,6 +1,7 @@
 use crate::{
     entities::content::{anime, entry, entry_videos, theme},
     enums::content::{animeformat::AnimeFormat, themetype::ThemeType},
+    graphql::cursor::CursorSortKey,
     scopes::without_trashed,
 };
 use async_graphql::{
@@ -121,12 +122,6 @@ impl ThemeQuery {
             query = query.filter(theme::Column::Type.eq(r#type))
         }
 
-        if let Some(sorts) = sort.clone() {
-            for sort in sorts {
-                query = sort.apply_sort(query);
-            }
-        }
-
         let mut cursor_sorts = sort
             .as_deref()
             .unwrap_or_default()
@@ -134,10 +129,15 @@ impl ThemeQuery {
             .filter_map(ThemeSort::cursor_sort)
             .collect::<Vec<_>>();
 
-        cursor_sorts.push(CursorSort {
-            column: theme::Column::Id,
-            order: Order::Asc,
-        });
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(theme::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(theme::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }

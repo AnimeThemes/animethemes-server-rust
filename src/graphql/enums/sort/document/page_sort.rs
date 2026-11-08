@@ -1,4 +1,4 @@
-use crate::entities::document::page;
+use crate::{entities::document::page, graphql::cursor::CursorSortKey};
 use async_graphql::Enum;
 use sea_orm::{EntityTrait, Order, QueryOrder, Select, sea_query::Expr};
 
@@ -21,19 +21,24 @@ impl GraphQLSort for PageSort {
     type Entity = page::Entity;
 
     fn cursor_sort(&self) -> Option<CursorSort<<Self::Entity as EntityTrait>::Column>> {
-        let (column, order) = match self {
-            Self::Id => (page::Column::Id, Order::Asc),
-            Self::IdDesc => (page::Column::Id, Order::Desc),
-            Self::Name => (page::Column::Name, Order::Asc),
-            Self::NameDesc => (page::Column::Name, Order::Desc),
-            Self::CreatedAt => (page::Column::CreatedAt, Order::Asc),
-            Self::CreatedAtDesc => (page::Column::CreatedAt, Order::Desc),
-            Self::UpdatedAt => (page::Column::UpdatedAt, Order::Asc),
-            Self::UpdatedAtDesc => (page::Column::UpdatedAt, Order::Desc),
-            Self::Random => return None,
+        let (key, order) = match self {
+            Self::Id => (CursorSortKey::Column(page::Column::Id), Order::Asc),
+            Self::IdDesc => (CursorSortKey::Column(page::Column::Id), Order::Desc),
+            Self::Name => (CursorSortKey::Column(page::Column::Name), Order::Asc),
+            Self::NameDesc => (CursorSortKey::Column(page::Column::Name), Order::Desc),
+            Self::CreatedAt => (CursorSortKey::Column(page::Column::CreatedAt), Order::Asc),
+            Self::CreatedAtDesc => (CursorSortKey::Column(page::Column::CreatedAt), Order::Desc),
+            Self::UpdatedAt => (CursorSortKey::Column(page::Column::UpdatedAt), Order::Asc),
+            Self::UpdatedAtDesc => (CursorSortKey::Column(page::Column::UpdatedAt), Order::Desc),
+            Self::Random => (
+                CursorSortKey::Random {
+                    id: page::Column::Id,
+                },
+                Order::Asc,
+            ),
         };
 
-        Some(CursorSort { column, order })
+        Some(CursorSort { key, order })
     }
 
     fn apply_sort(&self, query: Select<Self::Entity>) -> Select<Self::Entity> {

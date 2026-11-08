@@ -1,4 +1,4 @@
-use crate::entities::content::video;
+use crate::{entities::content::video, graphql::cursor::CursorSortKey};
 use async_graphql::Enum;
 use sea_orm::{EntityTrait, Order, QueryOrder, Select, sea_query::Expr};
 
@@ -19,17 +19,22 @@ impl GraphQLSort for VideoSort {
     type Entity = video::Entity;
 
     fn cursor_sort(&self) -> Option<CursorSort<<Self::Entity as EntityTrait>::Column>> {
-        let (column, order) = match self {
-            Self::Id => (video::Column::Id, Order::Asc),
-            Self::IdDesc => (video::Column::Id, Order::Desc),
-            Self::CreatedAt => (video::Column::CreatedAt, Order::Asc),
-            Self::CreatedAtDesc => (video::Column::CreatedAt, Order::Desc),
-            Self::UpdatedAt => (video::Column::UpdatedAt, Order::Asc),
-            Self::UpdatedAtDesc => (video::Column::UpdatedAt, Order::Desc),
-            Self::Random => return None,
+        let (key, order) = match self {
+            Self::Id => (CursorSortKey::Column(video::Column::Id), Order::Asc),
+            Self::IdDesc => (CursorSortKey::Column(video::Column::Id), Order::Desc),
+            Self::CreatedAt => (CursorSortKey::Column(video::Column::CreatedAt), Order::Asc),
+            Self::CreatedAtDesc => (CursorSortKey::Column(video::Column::CreatedAt), Order::Desc),
+            Self::UpdatedAt => (CursorSortKey::Column(video::Column::UpdatedAt), Order::Asc),
+            Self::UpdatedAtDesc => (CursorSortKey::Column(video::Column::UpdatedAt), Order::Desc),
+            Self::Random => (
+                CursorSortKey::Random {
+                    id: video::Column::Id,
+                },
+                Order::Asc,
+            ),
         };
 
-        Some(CursorSort { column, order })
+        Some(CursorSort { key, order })
     }
 
     fn apply_sort(&self, query: Select<Self::Entity>) -> Select<Self::Entity> {

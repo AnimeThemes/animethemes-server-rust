@@ -1,4 +1,4 @@
-use crate::{entities::content::entry, scopes::without_trashed};
+use crate::{entities::content::entry, graphql::cursor::CursorSortKey, scopes::without_trashed};
 use async_graphql::{
     Context, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
@@ -43,11 +43,11 @@ impl EntryQuery {
 
         let cursor_sorts = vec![
             CursorSort {
-                column: entry::Column::TracksCount,
+                key: CursorSortKey::Column(entry::Column::TracksCount),
                 order: Order::Desc,
             },
             CursorSort {
-                column: entry::Column::CreatedAt,
+                key: CursorSortKey::Column(entry::Column::CreatedAt),
                 order: Order::Asc,
             },
         ];

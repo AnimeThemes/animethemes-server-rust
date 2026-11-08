@@ -1,4 +1,4 @@
-use crate::entities::content::video;
+use crate::{entities::content::video, graphql::cursor::CursorSortKey};
 use async_graphql::{
     Context, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
@@ -56,12 +56,6 @@ impl VideoQuery {
             query = query.filter(video::Column::Nc.eq(nc))
         }
 
-        if let Some(sorts) = sort.clone() {
-            for sort in sorts {
-                query = sort.apply_sort(query);
-            }
-        }
-
         let mut cursor_sorts = sort
             .as_deref()
             .unwrap_or_default()
@@ -69,10 +63,15 @@ impl VideoQuery {
             .filter_map(VideoSort::cursor_sort)
             .collect::<Vec<_>>();
 
-        cursor_sorts.push(CursorSort {
-            column: video::Column::Id,
-            order: Order::Asc,
-        });
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(video::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(video::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }

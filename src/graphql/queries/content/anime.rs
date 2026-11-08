@@ -4,6 +4,7 @@ use crate::{
     enums::content::{
         animeformat::AnimeFormat, animeseason::AnimeSeason, resourcesite::ResourceSite,
     },
+    graphql::cursor::CursorSortKey,
     rules::validation_error::ValidationError,
 };
 use async_graphql::{
@@ -93,12 +94,6 @@ impl AnimeQuery {
             query = query.filter(anime::Column::Year.eq(animeyear_year))
         }
 
-        if let Some(sorts) = sort.clone() {
-            for sort in sorts {
-                query = sort.apply_sort(query);
-            }
-        }
-
         let mut cursor_sorts = sort
             .as_deref()
             .unwrap_or_default()
@@ -106,10 +101,15 @@ impl AnimeQuery {
             .filter_map(AnimeSort::cursor_sort)
             .collect::<Vec<_>>();
 
-        cursor_sorts.push(CursorSort {
-            column: anime::Column::Id,
-            order: Order::Asc,
-        });
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(anime::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(anime::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }

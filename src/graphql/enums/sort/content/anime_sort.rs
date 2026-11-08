@@ -1,4 +1,4 @@
-use crate::entities::content::anime;
+use crate::{entities::content::anime, graphql::cursor::CursorSortKey};
 use async_graphql::Enum;
 use sea_orm::{EntityTrait, Order, QueryOrder, Select, sea_query::Expr};
 
@@ -27,25 +27,42 @@ impl GraphQLSort for AnimeSort {
     type Entity = anime::Entity;
 
     fn cursor_sort(&self) -> Option<CursorSort<<Self::Entity as EntityTrait>::Column>> {
-        let (column, order) = match self {
-            Self::Id => (anime::Column::Id, Order::Asc),
-            Self::IdDesc => (anime::Column::Id, Order::Desc),
-            Self::TitleRomaji => (anime::Column::Title, Order::Asc),
-            Self::TitleRomajiDesc => (anime::Column::Title, Order::Desc),
-            Self::TitleEnglish => (anime::Column::TitleEnglish, Order::Asc),
-            Self::TitleEnglishDesc => (anime::Column::TitleEnglish, Order::Desc),
-            Self::TitleNative => (anime::Column::TitleNative, Order::Asc),
-            Self::TitleNativeDesc => (anime::Column::TitleNative, Order::Desc),
-            Self::Year => (anime::Column::Year, Order::Asc),
-            Self::YearDesc => (anime::Column::Year, Order::Desc),
-            Self::CreatedAt => (anime::Column::CreatedAt, Order::Asc),
-            Self::CreatedAtDesc => (anime::Column::CreatedAt, Order::Desc),
-            Self::UpdatedAt => (anime::Column::UpdatedAt, Order::Asc),
-            Self::UpdatedAtDesc => (anime::Column::UpdatedAt, Order::Desc),
-            Self::Random => return None,
+        let (key, order) = match self {
+            Self::Id => (CursorSortKey::Column(anime::Column::Id), Order::Asc),
+            Self::IdDesc => (CursorSortKey::Column(anime::Column::Id), Order::Desc),
+            Self::TitleRomaji => (CursorSortKey::Column(anime::Column::Title), Order::Asc),
+            Self::TitleRomajiDesc => (CursorSortKey::Column(anime::Column::Title), Order::Desc),
+            Self::TitleEnglish => (
+                CursorSortKey::Column(anime::Column::TitleEnglish),
+                Order::Asc,
+            ),
+            Self::TitleEnglishDesc => (
+                CursorSortKey::Column(anime::Column::TitleEnglish),
+                Order::Desc,
+            ),
+            Self::TitleNative => (
+                CursorSortKey::Column(anime::Column::TitleNative),
+                Order::Asc,
+            ),
+            Self::TitleNativeDesc => (
+                CursorSortKey::Column(anime::Column::TitleNative),
+                Order::Desc,
+            ),
+            Self::Year => (CursorSortKey::Column(anime::Column::Year), Order::Asc),
+            Self::YearDesc => (CursorSortKey::Column(anime::Column::Year), Order::Desc),
+            Self::CreatedAt => (CursorSortKey::Column(anime::Column::CreatedAt), Order::Asc),
+            Self::CreatedAtDesc => (CursorSortKey::Column(anime::Column::CreatedAt), Order::Desc),
+            Self::UpdatedAt => (CursorSortKey::Column(anime::Column::UpdatedAt), Order::Asc),
+            Self::UpdatedAtDesc => (CursorSortKey::Column(anime::Column::UpdatedAt), Order::Desc),
+            Self::Random => (
+                CursorSortKey::Random {
+                    id: anime::Column::Id,
+                },
+                Order::Asc,
+            ),
         };
 
-        Some(CursorSort { column, order })
+        Some(CursorSort { key, order })
     }
 
     fn apply_sort(&self, query: Select<Self::Entity>) -> Select<Self::Entity> {

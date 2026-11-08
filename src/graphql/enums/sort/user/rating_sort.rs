@@ -1,4 +1,4 @@
-use crate::entities::user::rating;
+use crate::{entities::user::rating, graphql::cursor::CursorSortKey};
 use async_graphql::Enum;
 use sea_orm::{EntityTrait, Order, QueryOrder, Select, sea_query::Expr};
 
@@ -15,13 +15,18 @@ impl GraphQLSort for RatingSort {
     type Entity = rating::Entity;
 
     fn cursor_sort(&self) -> Option<CursorSort<<Self::Entity as EntityTrait>::Column>> {
-        let (column, order) = match self {
-            Self::Score => (rating::Column::Score, Order::Asc),
-            Self::ScoreDesc => (rating::Column::Score, Order::Desc),
-            Self::Random => return None,
+        let (key, order) = match self {
+            Self::Score => (CursorSortKey::Column(rating::Column::Score), Order::Asc),
+            Self::ScoreDesc => (CursorSortKey::Column(rating::Column::Score), Order::Desc),
+            Self::Random => (
+                CursorSortKey::Random {
+                    id: rating::Column::Id,
+                },
+                Order::Asc,
+            ),
         };
 
-        Some(CursorSort { column, order })
+        Some(CursorSort { key, order })
     }
 
     fn apply_sort(&self, query: Select<Self::Entity>) -> Select<Self::Entity> {

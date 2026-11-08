@@ -1,4 +1,7 @@
-use crate::{entities::content::image, enums::content::imagefacet::ImageFacet};
+use crate::{
+    entities::content::image, enums::content::imagefacet::ImageFacet,
+    graphql::cursor::CursorSortKey,
+};
 use async_graphql::{
     Context, InputObject, Object, Result, ResultExt,
     connection::{Connection, EmptyFields, OpaqueCursor},
@@ -44,12 +47,6 @@ impl ImageQuery {
             query = query.filter(image::Column::Facet.eq(facet));
         }
 
-        if let Some(sorts) = sort.clone() {
-            for sort in sorts {
-                query = sort.apply_sort(query);
-            }
-        }
-
         let mut cursor_sorts = sort
             .as_deref()
             .unwrap_or_default()
@@ -57,10 +54,15 @@ impl ImageQuery {
             .filter_map(ImageSort::cursor_sort)
             .collect::<Vec<_>>();
 
-        cursor_sorts.push(CursorSort {
-            column: image::Column::Id,
-            order: Order::Asc,
-        });
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(image::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(image::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }

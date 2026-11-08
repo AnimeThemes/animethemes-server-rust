@@ -4,9 +4,10 @@ use async_graphql::{
 };
 use axum::Error;
 use sea_orm::{
-    ColumnTrait, Condition, DatabaseConnection, EntityTrait, ModelTrait, Order, QueryFilter,
-    QueryOrder, QuerySelect, Select, Value,
+    ColumnTrait, Condition, DatabaseConnection, EntityTrait, ExprTrait, ModelTrait, Order,
+    QueryFilter, QueryOrder, QuerySelect, Select, Value,
 };
+use sea_query::{Expr, Func};
 use serde::{Deserialize, Serialize};
 
 use crate::graphql::inputs::pagination_input::PaginationInput;
@@ -14,14 +15,55 @@ use crate::graphql::inputs::pagination_input::PaginationInput;
 const DEFAULT_PAGE_SIZE: usize = 15;
 
 #[derive(Debug, Clone)]
+pub enum CursorSortKey<C> {
+    Column(C),
+    Random { id: C },
+}
+
+#[derive(Debug, Clone)]
 pub struct CursorSort<C> {
-    pub column: C,
+    pub key: CursorSortKey<C>,
     pub order: Order,
+}
+
+fn random_expr(value: Expr, seed: u64) -> Expr {
+    Func::md5(Expr::cust_with_exprs(
+        "CONCAT(?, ':', ?)",
+        [value, Expr::val(seed.to_string())],
+    ))
+    .into()
+}
+
+impl<C: ColumnTrait + Copy> CursorSort<C> {
+    fn expression(&self, seed: u64) -> Expr {
+        match &self.key {
+            CursorSortKey::Column(column) => (*column).into_expr(),
+
+            CursorSortKey::Random { id } => random_expr((*id).into_expr(), seed),
+        }
+    }
+
+    fn cursor_expression(&self, value: Value, seed: u64) -> Expr {
+        match &self.key {
+            CursorSortKey::Column(_) => Expr::val(value),
+
+            CursorSortKey::Random { .. } => random_expr(Expr::val(value), seed),
+        }
+    }
+
+    fn source_column(&self) -> C {
+        match &self.key {
+            CursorSortKey::Column(column) => *column,
+            CursorSortKey::Random { id } => *id,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PaginationCursor {
     pub values: Vec<Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seed: Option<u64>,
 }
 
 pub async fn cursor_paginate<E, Node>(
@@ -53,6 +95,41 @@ where
 
             let limit = first.or(last).unwrap_or(DEFAULT_PAGE_SIZE);
 
+            if sorts.is_empty() {
+                return Err(Error::new("At least one cursor sort is required"));
+            }
+
+            let has_random_sort = sorts
+                .iter()
+                .any(|sort| matches!(&sort.key, CursorSortKey::Random { .. }));
+
+            let after_seed = after.as_ref().and_then(|OpaqueCursor(cursor)| cursor.seed);
+            let before_seed = before.as_ref().and_then(|OpaqueCursor(cursor)| cursor.seed);
+
+            if has_random_sort {
+                if (has_after && after_seed.is_none()) || (has_before && before_seed.is_none()) {
+                    return Err(Error::new(
+                        "After and before are prohibited when using Random sort",
+                    ));
+                }
+
+                if let (Some(a), Some(b)) = (after_seed, before_seed) {
+                    if a != b {
+                        return Err(Error::new("Pagination cursors have different seeds"));
+                    }
+                }
+            }
+
+            let seed = if has_random_sort {
+                after_seed
+                    .or(before_seed)
+                    .unwrap_or_else(rand::random::<u64>)
+            } else {
+                0
+            };
+
+            let cursor_seed = has_random_sort.then_some(seed);
+
             let mut builder = builder;
 
             let build_condition = |values: &[Value], is_after: bool| -> Result<Condition, Error> {
@@ -66,16 +143,22 @@ where
                     let mut branch = Condition::all();
 
                     for j in 0..i {
-                        branch = branch.add(ColumnTrait::eq(&sorts[j].column, values[j].clone()));
+                        let left = sorts[j].expression(seed);
+
+                        let right = sorts[j].cursor_expression(values[j].clone(), seed);
+
+                        branch = branch.add(left.eq(right));
                     }
 
+                    let left = sorts[i].expression(seed);
+
+                    let right = sorts[i].cursor_expression(values[i].clone(), seed);
+
                     let comparison = match (&sorts[i].order, is_after) {
-                        (Order::Asc, true) => ColumnTrait::gt(&sorts[i].column, values[i].clone()),
-                        (Order::Desc, true) => ColumnTrait::lt(&sorts[i].column, values[i].clone()),
-                        (Order::Asc, false) => ColumnTrait::lt(&sorts[i].column, values[i].clone()),
-                        (Order::Desc, false) => {
-                            ColumnTrait::gt(&sorts[i].column, values[i].clone())
-                        }
+                        (Order::Asc, true) => left.gt(right),
+                        (Order::Desc, true) => left.lt(right),
+                        (Order::Asc, false) => left.lt(right),
+                        (Order::Desc, false) => left.gt(right),
                         _ => {
                             return Err(Error::new("Unsupported sort order"));
                         }
@@ -102,16 +185,14 @@ where
                 let order = match (&sort.order, is_backward) {
                     (Order::Asc, false) => Order::Asc,
                     (Order::Desc, false) => Order::Desc,
-
                     (Order::Asc, true) => Order::Desc,
                     (Order::Desc, true) => Order::Asc,
-
                     _ => {
                         return Err(Error::new("Unsupported sort order"));
                     }
                 };
 
-                builder = builder.order_by(sort.column, order);
+                builder = builder.order_by(sort.expression(seed), order);
             }
 
             let mut models = builder
@@ -145,9 +226,18 @@ where
             let mut connection = Connection::new(has_previous_page, has_next_page);
 
             connection.edges.extend(models.into_iter().map(|model| {
-                let values = sorts.iter().map(|sort| model.get(sort.column)).collect();
+                let values = sorts
+                    .iter()
+                    .map(|sort| model.get(sort.source_column()))
+                    .collect();
 
-                Edge::new(OpaqueCursor(PaginationCursor { values }), Node::from(model))
+                Edge::new(
+                    OpaqueCursor(PaginationCursor {
+                        values,
+                        seed: cursor_seed,
+                    }),
+                    Node::from(model),
+                )
             }));
 
             Ok::<_, Error>(connection)
