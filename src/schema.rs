@@ -6,10 +6,7 @@ use loco_rs::{app::AppContext, prelude::SharedStore};
 use tower_sessions::Session;
 
 use crate::{
-    features::functions::FeatureManager,
-    graphql::{loaders::loaders::RegisterLoaders, mutation::Mutation, query::Query},
-    middlewares::{current_user::CurrentUser, rate_limiting::CanBypass},
-    typesense::client::TypesenseClient,
+    features::functions::FeatureManager, graphql::{loaders::loaders::RegisterLoaders, mutation::Mutation, query::Query}, middlewares::{current_user::CurrentUser, rate_limiting::CanBypass}, typesense::client::TypesenseClient,
 };
 
 type AppSchema = Schema<Query, Mutation, EmptySubscription>;
@@ -23,7 +20,7 @@ pub struct GraphQLSchemas {
 pub fn create_schemas(ctx: AppContext, typesense: TypesenseClient) -> GraphQLSchemas {
     let public = Schema::build(Query::default(), Mutation::default(), EmptySubscription)
         .limit_depth(15)
-        .limit_complexity(250)
+        .limit_complexity(500)
         .data(ctx.clone())
         .data(ctx.db.clone())
         .data(typesense.clone())
