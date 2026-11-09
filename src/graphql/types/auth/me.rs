@@ -11,7 +11,9 @@ use crate::{
     graphql::{
         cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
         enums::sort::{
-            GraphQLSort, list::playlist_sort::PlaylistSort, user::rating_sort::RatingSort,
+            GraphQLSort,
+            list::playlist_sort::PlaylistSort,
+            user::{rating_sort::RatingSort, watchhistory_sort::WatchHistorySort},
         },
         inputs::pagination_input::PaginationInput,
         loaders::auth::user::{
@@ -111,14 +113,27 @@ impl Me {
         &self,
         ctx: &Context<'_>,
         pagination: Option<PaginationInput>,
+        sort: Option<Vec<WatchHistorySort>>,
     ) -> Result<Connection<OpaqueCursor<PaginationCursor>, WatchHistory, EmptyFields, EmptyFields>>
     {
         let query = watchhistory::Entity::find().filter(watchhistory::Column::UserId.eq(self.id));
 
-        let cursor_sorts = vec![CursorSort {
-            key: CursorSortKey::Column(watchhistory::Column::Id),
-            order: Order::Asc,
-        }];
+        let mut cursor_sorts = sort
+            .as_deref()
+            .unwrap_or_default()
+            .iter()
+            .filter_map(WatchHistorySort::cursor_sort)
+            .collect::<Vec<_>>();
+
+        if !cursor_sorts
+            .iter()
+            .any(|sort| matches!(&sort.key, CursorSortKey::Column(watchhistory::Column::Id)))
+        {
+            cursor_sorts.push(CursorSort {
+                key: CursorSortKey::Column(watchhistory::Column::Id),
+                order: Order::Asc,
+            });
+        }
 
         cursor_paginate(query, ctx, cursor_sorts, pagination).await
     }
