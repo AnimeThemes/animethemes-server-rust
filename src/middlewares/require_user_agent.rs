@@ -1,20 +1,12 @@
 use axum::{
-    extract::{Request, State},
+    extract::Request,
     middleware::Next,
     response::{IntoResponse, Response},
 };
-use loco_rs::app::AppContext;
-
-use tower_sessions::Session;
 
 use crate::AppError;
 
-pub async fn require_user_agent_middleware(
-    State(_ctx): State<AppContext>,
-    _session: Session,
-    request: Request,
-    next: Next,
-) -> Response {
+pub async fn require_user_agent_middleware(request: Request, next: Next) -> Response {
     let user_agent = request.headers().get("User-Agent");
 
     match user_agent {

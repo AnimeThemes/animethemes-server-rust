@@ -10,7 +10,7 @@ use axum::{
         HeaderValue, Method,
         header::{AUTHORIZATION, CONTENT_TYPE},
     },
-    middleware::from_fn_with_state,
+    middleware::{self},
     routing::{get, post},
 };
 use loco_rs::{
@@ -29,12 +29,7 @@ use url::Url;
 
 use crate::{
     caches::hostname_cache::HostnameCache,
-    middlewares::{
-        current_user::current_user_middleware,
-        features::features_middleware,
-        rate_limiting::{GraphqlRateLimitState, rate_limiting_middleware},
-        require_user_agent::require_user_agent_middleware,
-    },
+    middlewares::{self, rate_limiting::GraphqlRateLimitState},
     schema::{self, graphiql, graphql_handler},
     seeds,
     session::create_session_layer,
@@ -97,13 +92,19 @@ impl Hooks for App {
             .add_route(controllers::verify_email::routes())
             .add_route(controllers::streams::audio_stream_controller::routes())
             .add_route(controllers::streams::video_stream_controller::routes())
-            .add_route(Routes::new().add("/", get(graphiql)).add(
-                "/graphql",
-                post(graphql_handler).route_layer(from_fn_with_state(
-                    rate_limit_state,
-                    rate_limiting_middleware,
-                )),
-            ))
+            .add_route(
+                Routes::new().add("/", get(graphiql)).add(
+                    "/graphql",
+                    post(graphql_handler)
+                        .route_layer(middleware::from_fn(
+                            middlewares::require_json_content::require_json_content_middleware,
+                        ))
+                        .route_layer(middleware::from_fn_with_state(
+                            rate_limit_state,
+                            middlewares::rate_limiting::rate_limiting_middleware,
+                        )),
+                ),
+            )
     }
 
     async fn after_routes(router: AxumRouter, ctx: &AppContext) -> Result<AxumRouter> {
@@ -132,11 +133,16 @@ impl Hooks for App {
         let hostname_cache = HostnameCache::new().await;
 
         Ok(router
-            .layer(from_fn_with_state(ctx.clone(), features_middleware))
-            .layer(from_fn_with_state(ctx.clone(), current_user_middleware))
-            .layer(from_fn_with_state(
+            .layer(middleware::from_fn_with_state(
                 ctx.clone(),
-                require_user_agent_middleware,
+                middlewares::features::features_middleware,
+            ))
+            .layer(middleware::from_fn_with_state(
+                ctx.clone(),
+                middlewares::current_user::current_user_middleware,
+            ))
+            .layer(middleware::from_fn(
+                middlewares::require_user_agent::require_user_agent_middleware,
             ))
             .layer(session_layer)
             .layer(axum::Extension(hostname_cache))
