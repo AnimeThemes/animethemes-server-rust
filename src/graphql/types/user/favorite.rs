@@ -17,6 +17,7 @@ use crate::graphql::types::content::entry::Entry;
 #[graphql(complex)]
 pub struct Favorite {
     pub id: u64,
+    pub position: i32,
     #[graphql(skip)]
     pub favoriteable_type: String,
     #[graphql(skip)]
@@ -52,6 +53,7 @@ impl From<favorite::Model> for Favorite {
     fn from(model: favorite::Model) -> Self {
         Self {
             id: model.id,
+            position: model.position,
             favoriteable_type: model.favoriteable_type,
             favoriteable_id: model.favoriteable_id,
             user_id: model.user_id,

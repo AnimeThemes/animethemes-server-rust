@@ -41,6 +41,7 @@ impl ActiveModelBehavior for ActiveModel {}
 #[derive(PartialEq, Eq)]
 pub enum Sanctions {
     PlaylistManagement,
+    FavoriteManagement,
 }
 
 impl Sanctions {
@@ -48,6 +49,9 @@ impl Sanctions {
         match self {
             Sanctions::PlaylistManagement => {
                 format!("You are not allowed to manage playlists {}.", message)
+            }
+            Sanctions::FavoriteManagement => {
+                format!("You are not allowed to manage favorites {}.", message)
             }
         }
     }
@@ -59,6 +63,7 @@ impl FromStr for Sanctions {
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
             "playlist management" => Ok(Sanctions::PlaylistManagement),
+            "favorite management" => Ok(Sanctions::FavoriteManagement),
             _ => Err(()),
         }
     }
@@ -68,6 +73,7 @@ impl fmt::Display for Sanctions {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let value = match self {
             Sanctions::PlaylistManagement => "playlist management",
+            Sanctions::FavoriteManagement => "favorite management",
         };
 
         f.write_str(value)

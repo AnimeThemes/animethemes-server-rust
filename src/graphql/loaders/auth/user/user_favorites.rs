@@ -2,10 +2,14 @@ use std::collections::HashMap;
 
 use crate::{
     entities::user::favorite,
-    graphql::{loaders::group_by_query, types::auth::me::UserFavoritesFilterInput},
+    graphql::{
+        enums::sort::{GraphQLSort, user::favorite_sort::FavoriteSort},
+        loaders::group_by_query,
+        types::auth::me::UserFavoritesFilterInput,
+    },
 };
 use async_graphql::dataloader::Loader;
-use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter, Select};
 
 pub struct UserFavoritesLoader {
     pub db: DatabaseConnection,
@@ -14,6 +18,7 @@ pub struct UserFavoritesLoader {
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub struct UserFavoritesLoaderQuery {
     pub filter: Option<UserFavoritesFilterInput>,
+    pub sort: Option<Vec<FavoriteSort>>,
 }
 
 impl UserFavoritesLoaderQuery {
@@ -29,6 +34,16 @@ impl UserFavoritesLoaderQuery {
         }
 
         condition
+    }
+
+    fn sort(&self, mut query: Select<favorite::Entity>) -> Select<favorite::Entity> {
+        if let Some(sorts) = &self.sort {
+            for sort in sorts {
+                query = sort.apply_sort(query);
+            }
+        }
+
+        query
     }
 }
 
@@ -56,8 +71,9 @@ impl Loader<UserFavoritesLoaderKey> for UserFavoritesLoader {
 
             let builder = favorite::Entity::find()
                 .filter(favorite::Column::UserId.is_in(ids))
-                .filter(query.condition())
-                .order_by_id_desc();
+                .filter(query.condition());
+
+            let builder = query.sort(builder).order_by_id_desc();
 
             let models = builder.all(&self.db).await?;
 

@@ -11,6 +11,7 @@ use crate::middlewares::current_user::CurrentUser;
 
 pub mod document;
 pub mod list;
+pub mod user;
 
 #[derive(Debug, Clone, Copy)]
 pub enum PolicyAction {

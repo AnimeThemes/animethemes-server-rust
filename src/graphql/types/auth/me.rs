@@ -13,7 +13,10 @@ use crate::{
         enums::sort::{
             GraphQLSort,
             list::playlist_sort::PlaylistSort,
-            user::{rating_sort::RatingSort, watchhistory_sort::WatchHistorySort},
+            user::{
+                favorite_sort::FavoriteSort, rating_sort::RatingSort,
+                watchhistory_sort::WatchHistorySort,
+            },
         },
         inputs::pagination_input::PaginationInput,
         loaders::auth::user::{
@@ -143,13 +146,14 @@ impl Me {
         &self,
         ctx: &Context<'_>,
         filter: Option<UserFavoritesFilterInput>,
+        sort: Option<Vec<FavoriteSort>>,
     ) -> Result<Vec<Favorite>> {
         let loader = ctx.data_unchecked::<DataLoader<UserFavoritesLoader>>();
 
         let models = loader
             .load_one(UserFavoritesLoaderKey {
                 key: self.id,
-                query: UserFavoritesLoaderQuery { filter },
+                query: UserFavoritesLoaderQuery { filter, sort },
             })
             .await?
             .unwrap_or_default();

@@ -2,10 +2,11 @@ use crate::AppError;
 use crate::entities::content::entry;
 use crate::entities::user::favorite;
 use crate::rules::validation_error::ValidationError;
+use crate::traits::sortable::Sortable;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter,
-    SelectExt,
+    SelectExt, TransactionTrait,
 };
 
 pub enum FavoriteableType {
@@ -23,6 +24,10 @@ impl FavoriteableType {
 pub struct ToggleFavoriteActionParameters {
     pub favoriteable: FavoriteableType,
     pub user_id: u64,
+}
+
+pub struct UpdateFavoriteActionParameters {
+    pub position: Option<i32>,
 }
 
 pub struct FavoriteAction;
@@ -89,5 +94,45 @@ impl FavoriteAction {
         let model = model.insert(db).await?;
 
         Ok(Some(model))
+    }
+
+    async fn validate_update(params: &UpdateFavoriteActionParameters) -> Result<(), AppError> {
+        let mut errors = Vec::new();
+
+        let mut position_errors = Vec::new();
+
+        if let Some(position) = params.position {
+            if position < 1 {
+                position_errors.push("The position must be greater than 0.");
+            }
+        }
+
+        if !position_errors.is_empty() {
+            errors.push(ValidationError::new("position", position_errors));
+        }
+
+        if !errors.is_empty() {
+            return Err(AppError::Validation(errors));
+        }
+
+        Ok(())
+    }
+
+    pub async fn update_favorite(
+        db: &DatabaseConnection,
+        mut favorite: favorite::Model,
+        params: UpdateFavoriteActionParameters,
+    ) -> Result<favorite::Model, AppError> {
+        Self::validate_update(&params).await?;
+
+        let txn = db.begin().await?;
+
+        if let Some(position) = params.position {
+            favorite = favorite.move_to(&txn, position).await?;
+        }
+
+        txn.commit().await?;
+
+        Ok(favorite)
     }
 }
