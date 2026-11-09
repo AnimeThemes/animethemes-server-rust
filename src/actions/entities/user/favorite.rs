@@ -6,7 +6,7 @@ use crate::traits::sortable::Sortable;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter,
-    SelectExt, TransactionTrait,
+    QueryOrder, QuerySelect, SelectExt, TransactionTrait,
 };
 
 pub enum FavoriteableType {
@@ -72,26 +72,44 @@ impl FavoriteAction {
             FavoriteableType::Entry(id) => *id,
         };
 
+        let txn = db.begin().await?;
+
         let existing = favorite::Entity::find()
             .filter(favorite::Column::UserId.eq(params.user_id))
             .filter(favorite::Column::FavoriteableType.eq(params.favoriteable.to_morph()))
             .filter(favorite::Column::FavoriteableId.eq(favoriteable_id))
-            .one(db)
+            .one(&txn)
             .await?;
 
         if let Some(model) = existing {
-            model.delete(db).await?;
+            model.delete(&txn).await?;
+            txn.commit().await?;
             return Ok(None);
         }
+
+        let max_position: i32 = favorite::Entity::find()
+            .select_only()
+            .column(favorite::Column::Position)
+            .filter(favorite::Column::UserId.eq(params.user_id))
+            .filter(favorite::Column::FavoriteableType.eq(params.favoriteable.to_morph()))
+            .order_by_desc(favorite::Column::Position)
+            .into_tuple()
+            .one(&txn)
+            .await?
+            .unwrap_or(0)
+            + 1;
 
         let model = favorite::ActiveModel {
             favoriteable_type: Set(params.favoriteable.to_morph().to_string()),
             favoriteable_id: Set(favoriteable_id),
             user_id: Set(params.user_id),
+            position: Set(max_position),
             ..Default::default()
         };
 
-        let model = model.insert(db).await?;
+        let model = model.insert(&txn).await?;
+
+        txn.commit().await?;
 
         Ok(Some(model))
     }
