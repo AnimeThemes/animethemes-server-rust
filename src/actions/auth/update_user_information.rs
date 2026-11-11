@@ -1,4 +1,4 @@
-use loco_rs::validator::ValidateEmail;
+use loco_rs::{app::AppContext, validator::ValidateEmail};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DatabaseConnection, EntityTrait,
     QueryFilter, SelectExt,
@@ -79,11 +79,11 @@ impl UpdateUserInformation {
     }
 
     pub async fn update(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         user: user::Model,
         params: UpdateUserInformationParameters,
     ) -> Result<bool, AppError> {
-        Self::validate(db, &user, &params).await?;
+        Self::validate(&ctx.db, &user, &params).await?;
 
         let current_email = user.email.clone();
 
@@ -103,7 +103,7 @@ impl UpdateUserInformation {
             active_user.email_verified_at = Set(None);
         }
 
-        let user = active_user.update(db).await?;
+        let user = active_user.update(&ctx.db).await?;
 
         if email_has_changed {
             VerifyEmail::send_verification_email(&user).await?;

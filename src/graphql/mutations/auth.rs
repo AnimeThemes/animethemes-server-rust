@@ -15,7 +15,8 @@ use crate::{
     graphql::is_development,
 };
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
-use sea_orm::{DatabaseConnection, EntityTrait};
+use loco_rs::app::AppContext;
+use sea_orm::EntityTrait;
 use tower_sessions::Session;
 
 use crate::{graphql::types::auth::me::Me, middlewares::current_user::CurrentUser};
@@ -79,10 +80,8 @@ impl AuthMutation {
             .await
             .extend()?;
 
-        let db = ctx.data::<DatabaseConnection>()?;
-
         let user = Register::register(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             RegisterParameters {
                 name: input.name,
                 email: input.email,
@@ -103,10 +102,8 @@ impl AuthMutation {
 
     #[graphql(visible = "is_development")]
     pub async fn login(&self, ctx: &Context<'_>, input: LoginInput) -> Result<Me> {
-        let db = ctx.data::<DatabaseConnection>()?;
-
         let user = LoginAction::login(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             LoginActionParameters {
                 email: input.email,
                 password: input.password,
@@ -135,10 +132,8 @@ impl AuthMutation {
             .user
             .clone();
 
-        let db = ctx.data::<DatabaseConnection>()?;
-
         let result = UpdateUserInformation::update(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             user,
             UpdateUserInformationParameters {
                 name: input.name,
@@ -164,10 +159,8 @@ impl AuthMutation {
             .user
             .clone();
 
-        let db = ctx.data::<DatabaseConnection>()?;
-
         UpdateUserPassword::update(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             user,
             UpdateUserPasswordParameters {
                 current_password: input.current_password,
@@ -183,9 +176,7 @@ impl AuthMutation {
 
     #[graphql(visible = "is_development")]
     pub async fn forgot_password(&self, ctx: &Context<'_>, email: String) -> Result<bool> {
-        let db = ctx.data::<DatabaseConnection>()?;
-
-        ForgotPassword::send_reset_password_email(&db, email)
+        ForgotPassword::send_reset_password_email(ctx.data_unchecked::<AppContext>(), email)
             .await
             .extend()?;
 
@@ -198,10 +189,8 @@ impl AuthMutation {
         ctx: &Context<'_>,
         input: ResetPasswordInput,
     ) -> Result<bool> {
-        let db = ctx.data::<DatabaseConnection>()?;
-
         ResetPassword::reset_password(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             ResetPasswordParams {
                 email: input.email,
                 password: input.password,
@@ -222,10 +211,8 @@ impl AuthMutation {
             .map_err(|_| Error::from(AppError::Unauthenticated))
             .extend()?;
 
-        let db = ctx.data::<DatabaseConnection>()?;
-
         let user = user::Entity::find_by_id(user.user.id)
-            .one(db)
+            .one(&ctx.data_unchecked::<AppContext>().db)
             .await?
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 

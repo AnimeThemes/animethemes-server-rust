@@ -54,7 +54,7 @@ pub async fn verify_email(
 
         let user = active_user.update(&ctx.db).await?;
 
-        RoleAction::assign_role(&ctx.db, &user, Roles::Verified).await?;
+        RoleAction::assign_role(&ctx, &user, Roles::Verified).await?;
     }
 
     let redirect = env::var("CLIENT_PROFILE_URL")

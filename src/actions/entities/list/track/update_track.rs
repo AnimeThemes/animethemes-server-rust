@@ -1,3 +1,4 @@
+use loco_rs::app::AppContext;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt,
     TransactionTrait,
@@ -76,13 +77,13 @@ impl UpdateTrackAction {
     }
 
     pub async fn update(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         track: track::Model,
         params: UpdateTrackActionParameters,
     ) -> Result<track::Model, AppError> {
-        Self::validate(db, &track, &params).await?;
+        Self::validate(&ctx.db, &track, &params).await?;
 
-        let txn = db.begin().await?;
+        let txn = ctx.db.begin().await?;
 
         let mut active_model: track::ActiveModel = track.clone().into();
 

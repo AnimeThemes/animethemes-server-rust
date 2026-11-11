@@ -30,7 +30,7 @@ impl Task for CreateUser {
             .map_err(|_| LocoError::string("password is required"))?;
 
         Register::register(
-            &app_context.db,
+            &app_context,
             RegisterParameters {
                 name: name.to_string(),
                 email: email.to_string(),

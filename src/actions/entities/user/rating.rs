@@ -2,6 +2,7 @@ use crate::AppError;
 use crate::entities::content::entry;
 use crate::entities::user::rating;
 use crate::rules::validation_error::ValidationError;
+use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt};
 use sea_query::OnConflict;
@@ -41,10 +42,10 @@ impl RatingAction {
     }
 
     pub async fn rate_entry(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         params: RateEntryActionParameters,
     ) -> Result<Option<rating::Model>, AppError> {
-        Self::validate(db, &params).await?;
+        Self::validate(&ctx.db, &params).await?;
 
         match params.score {
             Some(score) => {
@@ -61,7 +62,7 @@ impl RatingAction {
                             .update_column(rating::Column::Score)
                             .to_owned(),
                     )
-                    .exec_with_returning(db)
+                    .exec_with_returning(&ctx.db)
                     .await?;
 
                 Ok(Some(model))
@@ -71,7 +72,7 @@ impl RatingAction {
                 rating::Entity::delete_many()
                     .filter(rating::Column::UserId.eq(params.user_id))
                     .filter(rating::Column::EntryId.eq(params.entry_id))
-                    .exec(db)
+                    .exec(&ctx.db)
                     .await?;
 
                 Ok(None)
@@ -79,10 +80,10 @@ impl RatingAction {
         }
     }
 
-    pub async fn delete_all(db: &DatabaseConnection, user_id: u64) -> Result<(), AppError> {
+    pub async fn delete_all(ctx: &AppContext, user_id: u64) -> Result<(), AppError> {
         rating::Entity::delete_many()
             .filter(rating::Column::UserId.eq(user_id))
-            .exec(db)
+            .exec(&ctx.db)
             .await?;
 
         Ok(())

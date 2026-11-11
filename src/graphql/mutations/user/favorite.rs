@@ -7,6 +7,7 @@ use crate::graphql::types::user::favorite::Favorite;
 use crate::policies::user::favorite::FavoritePolicy;
 use crate::policies::{Policy, PolicyAction};
 use async_graphql::{Context, Error, InputObject, Object, OneofObject, Result, ResultExt};
+use loco_rs::app::AppContext;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::AppError;
@@ -45,14 +46,12 @@ impl FavoriteMutation {
             .map_err(|_| Error::from(AppError::Unauthenticated))
             .extend()?;
 
-        let db = ctx.data::<DatabaseConnection>()?;
-
         FavoritePolicy::check(Some(user), PolicyAction::Create, None)
             .authorize()
             .extend()?;
 
         let model = FavoriteAction::toggle(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             ToggleFavoriteActionParameters {
                 favoriteable: favoriteable.into(),
                 user_id: user.user.clone().id,
@@ -88,7 +87,7 @@ impl FavoriteMutation {
             .extend()?;
 
         let model = FavoriteAction::update_favorite(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             favorite,
             UpdateFavoriteActionParameters {
                 position: input.position,

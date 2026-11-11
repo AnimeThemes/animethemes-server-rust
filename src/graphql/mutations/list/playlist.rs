@@ -11,6 +11,7 @@ use crate::enums::features::Feature;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
 use crate::features::functions::FeatureManager;
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
+use loco_rs::app::AppContext;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::graphql::types::list::playlist::Playlist;
@@ -57,10 +58,8 @@ impl PlaylistMutation {
             .authorize()
             .extend()?;
 
-        let db = ctx.data::<DatabaseConnection>()?;
-
         let playlist = CreatePlaylistAction::create(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             CreatePlaylistActionParameters {
                 name: input.name,
                 description: input.description,
@@ -105,7 +104,7 @@ impl PlaylistMutation {
             .extend()?;
 
         let playlist = UpdatePlaylistAction::update(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             playlist,
             UpdatePlaylistActionParameters {
                 name: input.name,
@@ -144,7 +143,9 @@ impl PlaylistMutation {
             .authorize()
             .extend()?;
 
-        let result = DeletePlaylistAction::delete(db, playlist).await.extend()?;
+        let result = DeletePlaylistAction::delete(ctx.data_unchecked::<AppContext>(), playlist)
+            .await
+            .extend()?;
 
         Ok(result)
     }

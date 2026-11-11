@@ -11,6 +11,7 @@ pub mod app;
 pub mod caches;
 pub mod controllers;
 pub mod data;
+pub mod discord;
 pub mod entities;
 pub mod enums;
 pub mod features;

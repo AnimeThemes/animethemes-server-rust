@@ -2,6 +2,7 @@ use crate::AppError;
 use crate::entities::content::entry_videos;
 use crate::entities::user::watchhistory;
 use crate::rules::validation_error::ValidationError;
+use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt,
@@ -53,12 +54,12 @@ impl MarkAsWatchedAction {
     }
 
     pub async fn create(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         params: MarkAsWatchedActionParameters,
     ) -> Result<watchhistory::Model, AppError> {
-        Self::validate(db, &params).await?;
+        Self::validate(&ctx.db, &params).await?;
 
-        let txn = db.begin().await?;
+        let txn = ctx.db.begin().await?;
 
         watchhistory::Entity::delete_many()
             .filter(watchhistory::Column::EntryId.eq(params.entry_id))
@@ -81,10 +82,10 @@ impl MarkAsWatchedAction {
         Ok(model)
     }
 
-    pub async fn delete_all(db: &DatabaseConnection, user_id: u64) -> Result<(), AppError> {
+    pub async fn delete_all(ctx: &AppContext, user_id: u64) -> Result<(), AppError> {
         watchhistory::Entity::delete_many()
             .filter(watchhistory::Column::UserId.eq(user_id))
-            .exec(db)
+            .exec(&ctx.db)
             .await?;
 
         Ok(())

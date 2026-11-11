@@ -1,7 +1,8 @@
 use bcrypt::hash;
+use loco_rs::app::AppContext;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait,
-    IntoActiveModel, ModelTrait, QueryFilter,
+    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait,
+    QueryFilter,
 };
 use sha2::{Digest, Sha256};
 
@@ -44,7 +45,7 @@ impl ResetPassword {
     }
 
     pub async fn reset_password(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         params: ResetPasswordParams,
     ) -> Result<(), AppError> {
         Self::validate(&params)?;
@@ -52,20 +53,22 @@ impl ResetPassword {
         let token = password_reset_tokens::Entity::find()
             .filter(password_reset_tokens::Column::Email.eq(params.email.clone()))
             .filter(password_reset_tokens::Column::Token.eq(Self::hash_token(&params.token)))
-            .one(db)
+            .one(&ctx.db)
             .await?;
 
         if let Some(token) = token {
-            let user = user::Entity::find_by_email(params.email).one(db).await?;
+            let user = user::Entity::find_by_email(params.email)
+                .one(&ctx.db)
+                .await?;
 
             if let Some(user) = user {
                 let mut active_model = user.into_active_model();
 
                 active_model.password = Set(hash(params.password, 12).map_err(AppError::internal)?);
                 active_model.updated_at = Set(chrono::Utc::now());
-                active_model.save(db).await?;
+                active_model.save(&ctx.db).await?;
 
-                token.delete(db).await?;
+                token.delete(&ctx.db).await?;
 
                 return Ok(());
             }

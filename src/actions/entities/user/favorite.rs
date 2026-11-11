@@ -3,6 +3,7 @@ use crate::entities::content::entry;
 use crate::entities::user::favorite;
 use crate::rules::validation_error::ValidationError;
 use crate::traits::sortable::Sortable;
+use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter,
@@ -64,16 +65,16 @@ impl FavoriteAction {
     }
 
     pub async fn toggle(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         params: ToggleFavoriteActionParameters,
     ) -> Result<Option<favorite::Model>, AppError> {
-        Self::validate(db, &params).await?;
+        Self::validate(&ctx.db, &params).await?;
 
         let favoriteable_id = match &params.favoriteable {
             FavoriteableType::Entry(id) => *id,
         };
 
-        let txn = db.begin().await?;
+        let txn = ctx.db.begin().await?;
 
         let existing = favorite::Entity::find()
             .filter(favorite::Column::UserId.eq(params.user_id))
@@ -145,13 +146,13 @@ impl FavoriteAction {
     }
 
     pub async fn update_favorite(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         mut favorite: favorite::Model,
         params: UpdateFavoriteActionParameters,
     ) -> Result<favorite::Model, AppError> {
         Self::validate_update(&params).await?;
 
-        let txn = db.begin().await?;
+        let txn = ctx.db.begin().await?;
 
         if let Some(position) = params.position {
             favorite = favorite.move_to(&txn, position).await?;

@@ -1,4 +1,4 @@
-use sea_orm::DatabaseConnection;
+use loco_rs::app::AppContext;
 
 use crate::{
     AppError,
@@ -15,11 +15,11 @@ pub struct LoginAction;
 
 impl LoginAction {
     pub async fn login(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         params: LoginActionParameters,
     ) -> Result<user::Model, AppError> {
         let user = user::Entity::find_by_email(params.email)
-            .one(db)
+            .one(&ctx.db)
             .await?
             .ok_or(AppError::Unauthorized)?;
 

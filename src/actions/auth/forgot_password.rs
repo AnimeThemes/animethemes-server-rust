@@ -1,6 +1,5 @@
-use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter,
-};
+use loco_rs::app::AppContext;
+use sea_orm::{ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter};
 use sha2::{Digest, Sha256};
 
 use crate::{
@@ -20,15 +19,15 @@ impl ForgotPassword {
     }
 
     pub async fn send_reset_password_email(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         email: String,
     ) -> Result<(), AppError> {
-        let user = user::Entity::find_by_email(&email).one(db).await?;
+        let user = user::Entity::find_by_email(&email).one(&ctx.db).await?;
 
         if let Some(user) = user {
             password_reset_tokens::Entity::delete_many()
                 .filter(password_reset_tokens::Column::Email.eq(&user.email))
-                .exec(db)
+                .exec(&ctx.db)
                 .await?;
 
             let token = uuid::Uuid::new_v4().to_string();
@@ -38,7 +37,7 @@ impl ForgotPassword {
                 token: Set(Self::hash_token(&token)),
                 ..Default::default()
             }
-            .insert(db)
+            .insert(&ctx.db)
             .await?;
 
             let message = Messages::reset_password_email(&user.name, &user.email, &token);

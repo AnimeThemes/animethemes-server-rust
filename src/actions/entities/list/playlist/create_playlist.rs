@@ -1,12 +1,13 @@
 use std::env;
 
 use anyhow::Context;
+use loco_rs::{app::AppContext, prelude::BackgroundWorker};
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
 };
 
 use crate::{
-    AppError,
+    AppError, discord,
     entities::{auth::role::Roles, list::playlist},
     enums::list::playlistvisibility::PlaylistVisibility,
     middlewares::current_user::CurrentUser,
@@ -16,6 +17,7 @@ use crate::{
         client::typesense,
         documents::playlist_document::{PlaylistDocument, build_playlist_documents},
     },
+    workers::discord_notification::{DiscordNotificationWorker, DiscordNotificationWorkerArgs},
 };
 use sea_orm::ActiveValue::Set;
 
@@ -61,7 +63,7 @@ impl CreatePlaylistAction {
     }
 
     pub async fn create(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         params: CreatePlaylistActionParameters,
         user: &CurrentUser,
     ) -> Result<playlist::Model, AppError> {
@@ -69,7 +71,7 @@ impl CreatePlaylistAction {
 
         let count = playlist::Entity::find()
             .filter(playlist::Column::UserId.eq(params.user_id))
-            .count(db)
+            .count(&ctx.db)
             .await?;
 
         let max_playlists: u64 = env::var("USER_MAX_PLAYLISTS")
@@ -91,9 +93,23 @@ impl CreatePlaylistAction {
             ..Default::default()
         };
 
-        let playlist = playlist.insert(db).await?;
+        let playlist = playlist.insert(&ctx.db).await?;
 
-        Self::update_search(db, &playlist).await?;
+        Self::update_search(&ctx.db, &playlist).await?;
+
+        DiscordNotificationWorker::perform_later(
+            ctx,
+            DiscordNotificationWorkerArgs {
+                channel_id: discord::playlist::Playlist::get_discord_channel(),
+                message: serde_json::to_value(
+                    discord::playlist::Playlist::new(playlist.clone(), Some(user.clone()))
+                        .created_message(),
+                )
+                .unwrap(),
+            },
+        )
+        .await
+        .map_err(AppError::internal)?;
 
         Ok(playlist)
     }

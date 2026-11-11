@@ -1,7 +1,7 @@
 use crate::AppError;
 use crate::actions::entities::user::watch::{MarkAsWatchedAction, MarkAsWatchedActionParameters};
 use async_graphql::{Context, Error, Object, Result, ResultExt};
-use sea_orm::DatabaseConnection;
+use loco_rs::app::AppContext;
 
 use crate::graphql::types::user::watchhistory::WatchHistory;
 use crate::middlewares::current_user::CurrentUser;
@@ -18,10 +18,8 @@ impl WatchMutation {
             .map_err(|_| Error::from(AppError::Unauthenticated))
             .extend()?;
 
-        let db = ctx.data::<DatabaseConnection>()?;
-
         let model = MarkAsWatchedAction::create(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             MarkAsWatchedActionParameters {
                 entry_id,
                 video_id,
@@ -41,9 +39,7 @@ impl WatchMutation {
             .map_err(|_| Error::from(AppError::Unauthenticated))
             .extend()?;
 
-        let db = ctx.data::<DatabaseConnection>()?;
-
-        MarkAsWatchedAction::delete_all(db, user.user.clone().id)
+        MarkAsWatchedAction::delete_all(ctx.data_unchecked::<AppContext>(), user.user.clone().id)
             .await
             .extend()?;
 

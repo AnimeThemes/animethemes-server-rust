@@ -1,5 +1,6 @@
 use std::env;
 
+use loco_rs::app::AppContext;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, PaginatorTrait,
     QueryFilter, QueryOrder, QuerySelect, SelectExt, TransactionTrait,
@@ -75,16 +76,16 @@ impl InsertTrackAction {
     }
 
     pub async fn insert(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         playlist: playlist::Model,
         params: InsertTrackActionParameters,
         user: &CurrentUser,
     ) -> Result<track::Model, AppError> {
-        Self::validate(db, &params).await?;
+        Self::validate(&ctx.db, &params).await?;
 
         let count = track::Entity::find()
             .filter(track::Column::PlaylistId.eq(playlist.id))
-            .count(db)
+            .count(&ctx.db)
             .await?;
 
         let max_tracks: u64 = env::var("PLAYLIST_MAX_TRACKS")
@@ -98,7 +99,7 @@ impl InsertTrackAction {
             ));
         }
 
-        let txn = db.begin().await?;
+        let txn = ctx.db.begin().await?;
 
         let max_position: i32 = track::Entity::find()
             .select_only()

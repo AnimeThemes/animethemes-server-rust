@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use loco_rs::app::AppContext;
 use sea_orm::{ActiveModelTrait, DatabaseConnection};
 
 use crate::{
@@ -56,7 +57,7 @@ impl UpdatePlaylistAction {
     }
 
     pub async fn update(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         playlist: playlist::Model,
         params: UpdatePlaylistActionParameters,
     ) -> Result<playlist::Model, AppError> {
@@ -83,9 +84,9 @@ impl UpdatePlaylistAction {
             playlist.visibility = Set(visibility);
         }
 
-        let playlist = playlist.update(db).await?;
+        let playlist = playlist.update(&ctx.db).await?;
 
-        Self::update_search(db, &playlist).await?;
+        Self::update_search(&ctx.db, &playlist).await?;
 
         Ok(playlist)
     }

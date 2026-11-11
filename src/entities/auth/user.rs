@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use chrono::Utc;
 use sea_orm::{ActiveValue::Set, entity::prelude::*};
+use sha2::{Digest, Sha256};
 
 use crate::entities::{auth::role, list::playlist};
 
@@ -26,6 +27,18 @@ pub struct Model {
 
     #[sea_orm(has_many)]
     pub playlists: HasMany<playlist::Entity>,
+}
+
+impl Model {
+    pub fn avatar_url(&self) -> String {
+        let email = self.email.trim().to_lowercase();
+        let hash = Sha256::digest(email.as_bytes());
+
+        format!(
+            "https://gravatar.com/avatar/{}?s=256&d=identicon",
+            hex::encode(hash)
+        )
+    }
 }
 
 #[async_trait]

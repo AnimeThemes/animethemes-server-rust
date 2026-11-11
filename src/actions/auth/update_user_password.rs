@@ -1,5 +1,6 @@
 use bcrypt::{hash, verify};
-use sea_orm::{ActiveModelTrait, ActiveValue::Set, DatabaseConnection};
+use loco_rs::app::AppContext;
+use sea_orm::{ActiveModelTrait, ActiveValue::Set};
 
 use crate::{AppError, entities::auth::user, rules::validation_error::ValidationError};
 
@@ -72,7 +73,7 @@ impl UpdateUserPassword {
     }
 
     pub async fn update(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         user: user::Model,
         params: UpdateUserPasswordParameters,
     ) -> Result<bool, AppError> {
@@ -82,7 +83,7 @@ impl UpdateUserPassword {
 
         user.password = Set(hash(&params.new_password, 12).map_err(AppError::internal)?);
 
-        user.update(db).await?;
+        user.update(&ctx.db).await?;
 
         Ok(true)
     }

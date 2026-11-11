@@ -1,5 +1,5 @@
 use bcrypt::hash;
-use loco_rs::validator::ValidateEmail;
+use loco_rs::{app::AppContext, validator::ValidateEmail};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DatabaseConnection, EntityTrait,
     QueryFilter, SelectExt,
@@ -129,10 +129,10 @@ impl Register {
     }
 
     pub async fn register(
-        db: &DatabaseConnection,
+        ctx: &AppContext,
         params: RegisterParameters,
     ) -> Result<user::Model, AppError> {
-        Self::validate(db, &params).await?;
+        Self::validate(&ctx.db, &params).await?;
 
         let model = user::ActiveModel {
             name: Set(params.name.clone()),
@@ -141,7 +141,7 @@ impl Register {
             ..Default::default()
         };
 
-        let user = model.insert(db).await?;
+        let user = model.insert(&ctx.db).await?;
 
         VerifyEmail::send_verification_email(&user).await?;
 

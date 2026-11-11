@@ -10,6 +10,7 @@ use crate::{
     features::functions::FeatureManager,
 };
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
+use loco_rs::app::AppContext;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::{
@@ -68,7 +69,7 @@ impl PlaylistTrackMutation {
             .extend()?;
 
         let track = InsertTrackAction::insert(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             playlist,
             InsertTrackActionParameters {
                 entry_id: input.entry_id,
@@ -121,7 +122,7 @@ impl PlaylistTrackMutation {
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
         let track = UpdateTrackAction::update(
-            &db,
+            ctx.data_unchecked::<AppContext>(),
             track,
             UpdateTrackActionParameters {
                 entry_id: input.entry_id,
@@ -171,7 +172,9 @@ impl PlaylistTrackMutation {
             .await?
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
-        DeleteTrackAction::delete(&db, track).await.extend()?;
+        DeleteTrackAction::delete(ctx.data_unchecked::<AppContext>(), track)
+            .await
+            .extend()?;
 
         Ok(true)
     }

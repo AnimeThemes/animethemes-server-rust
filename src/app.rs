@@ -34,9 +34,10 @@ use crate::{
     seeds,
     session::create_session_layer,
     typesense::client::{create_typesense_client, init_typesense},
+    workers,
 };
 #[allow(unused_imports)]
-use crate::{controllers, tasks, workers::downloader::DownloadWorker};
+use crate::{controllers, tasks};
 use crate::{settings, storage::create_storage};
 
 pub struct App;
@@ -150,7 +151,9 @@ impl Hooks for App {
     }
 
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {
-        queue.register(DownloadWorker::build(ctx)).await?;
+        queue
+            .register(workers::discord_notification::DiscordNotificationWorker::build(ctx))
+            .await?;
         Ok(())
     }
 

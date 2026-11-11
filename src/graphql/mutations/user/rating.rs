@@ -1,7 +1,7 @@
 use crate::actions::entities::user::rating::{RateEntryActionParameters, RatingAction};
 use crate::graphql::types::user::rating::Rating;
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
-use sea_orm::DatabaseConnection;
+use loco_rs::app::AppContext;
 
 use crate::AppError;
 use crate::middlewares::current_user::CurrentUser;
@@ -29,10 +29,8 @@ impl RatingMutation {
             .map_err(|_| Error::from(AppError::Unauthenticated))
             .extend()?;
 
-        let db = ctx.data::<DatabaseConnection>()?;
-
         let model = RatingAction::rate_entry(
-            db,
+            ctx.data_unchecked::<AppContext>(),
             RateEntryActionParameters {
                 entry_id,
                 score: input.score,
@@ -52,9 +50,9 @@ impl RatingMutation {
             .map_err(|_| Error::from(AppError::Unauthenticated))
             .extend()?;
 
-        let db = ctx.data::<DatabaseConnection>()?;
-
-        RatingAction::delete_all(db, user.user.id).await.extend()?;
+        RatingAction::delete_all(ctx.data_unchecked::<AppContext>(), user.user.id)
+            .await
+            .extend()?;
 
         Ok(true)
     }
