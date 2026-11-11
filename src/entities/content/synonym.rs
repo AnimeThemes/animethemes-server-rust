@@ -13,7 +13,7 @@ pub struct Model {
     #[sea_orm(primary_key, column_name = "synonym_id")]
     pub id: u64,
     pub language: Option<String>,
-    pub synonymable_type: String,
+    pub synonymable_type: SynonymableType,
     pub synonymable_id: u64,
     pub text: String,
     #[sea_orm(column_type = "Timestamp")]
@@ -37,3 +37,12 @@ impl SoftDeleteEntity for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+#[derive(Debug, Copy, Clone, Eq, Hash, EnumIter, PartialEq, DeriveActiveEnum)]
+#[sea_orm(rs_type = "String", db_type = "String(StringLen::N(255))")]
+pub enum SynonymableType {
+    #[sea_orm(string_value = "anime")]
+    Anime,
+    #[sea_orm(string_value = "artist")]
+    Artist,
+}

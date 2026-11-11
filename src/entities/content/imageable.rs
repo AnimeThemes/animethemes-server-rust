@@ -11,7 +11,7 @@ pub struct Model {
     pub id: u64,
     pub depth: i32,
     pub image_id: u64,
-    pub imageable_type: String,
+    pub imageable_type: ImageableType,
     pub imageable_id: u64,
     #[sea_orm(column_type = "Timestamp")]
     pub created_at: chrono::DateTime<Utc>,
@@ -23,3 +23,14 @@ pub struct Model {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+#[derive(Debug, Copy, Clone, Eq, Hash, EnumIter, PartialEq, DeriveActiveEnum)]
+#[sea_orm(rs_type = "String", db_type = "String(StringLen::N(255))")]
+pub enum ImageableType {
+    #[sea_orm(string_value = "anime")]
+    Anime,
+    #[sea_orm(string_value = "artist")]
+    Artist,
+    #[sea_orm(string_value = "studio")]
+    Studio,
+}

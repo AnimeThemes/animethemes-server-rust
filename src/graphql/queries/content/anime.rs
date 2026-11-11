@@ -166,7 +166,9 @@ impl AnimeQuery {
                     .to(externalresource::Column::Id)
                     .into(),
             )
-            .filter(resourceable::Column::ResourceableType.eq("anime"))
+            .filter(
+                resourceable::Column::ResourceableType.eq(resourceable::ResourceableType::Anime),
+            )
             .filter(externalresource::Column::Site.eq(site))
             .distinct();
 

@@ -5,7 +5,7 @@ use async_graphql::{
 };
 
 use crate::{
-    entities::content::studio,
+    entities::content::{imageable, resourceable, studio},
     graphql::{
         loaders::content::{
             imageable::{ImageableKey, ImageableLoader},
@@ -95,7 +95,7 @@ impl Studio {
         let rows = loader
             .load_one(ImageableKey {
                 id: self.id,
-                imageable_type: "studio".to_string(),
+                imageable_type: imageable::ImageableType::Studio,
             })
             .await?
             .unwrap_or_default();
@@ -135,7 +135,7 @@ impl Studio {
         let rows = loader
             .load_one(ResourceableKey {
                 id: self.id,
-                resourceable_type: "studio".to_string(),
+                resourceable_type: resourceable::ResourceableType::Studio,
             })
             .await?
             .unwrap_or_default();

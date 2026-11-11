@@ -81,7 +81,8 @@ pub fn build_artist_documents<'a>(
     Box::pin(async move {
         let synonyms: Vec<Vec<synonym::Model>> = models
             .load_many(
-                synonym::Entity::find().filter(synonym::Column::SynonymableType.eq("artist")),
+                synonym::Entity::find()
+                    .filter(synonym::Column::SynonymableType.eq(synonym::SynonymableType::Artist)),
                 database,
             )
             .await?;

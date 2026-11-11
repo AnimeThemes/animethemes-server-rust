@@ -16,7 +16,7 @@ impl Loader<u64> for AnimeSynonymsLoader {
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
         let models = synonym::Entity::find()
             .filter(without_trashed::<synonym::Entity>())
-            .filter(synonym::Column::SynonymableType.eq("anime"))
+            .filter(synonym::Column::SynonymableType.eq(synonym::SynonymableType::Anime))
             .filter(synonym::Column::SynonymableId.is_in(keys))
             .all(&self.db)
             .await?;

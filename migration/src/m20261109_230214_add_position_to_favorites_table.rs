@@ -11,16 +11,16 @@ impl MigrationName for Migration {
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        manager
-            .alter_table(
-                Table::alter()
-                    .table("favorites")
-                    .add_column_if_not_exists(
-                        ColumnDef::new("position").integer().not_null().default(1),
-                    )
-                    .to_owned(),
-            )
-            .await?;
+        if !manager.has_column("favorites", "position").await? {
+            manager
+                .alter_table(
+                    Table::alter()
+                        .table("favorites")
+                        .add_column(ColumnDef::new("position").integer().not_null().default(1))
+                        .to_owned(),
+                )
+                .await?;
+        }
 
         Ok(())
     }

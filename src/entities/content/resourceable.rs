@@ -11,7 +11,7 @@ pub struct Model {
     pub id: u64,
     pub r#as: Option<String>,
     pub resource_id: u64,
-    pub resourceable_type: String,
+    pub resourceable_type: ResourceableType,
     pub resourceable_id: u64,
     #[sea_orm(column_type = "Timestamp")]
     pub created_at: chrono::DateTime<Utc>,
@@ -23,3 +23,18 @@ pub struct Model {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+#[derive(Debug, Copy, Clone, Eq, Hash, EnumIter, PartialEq, DeriveActiveEnum)]
+#[sea_orm(rs_type = "String", db_type = "String(StringLen::N(255))")]
+pub enum ResourceableType {
+    #[sea_orm(string_value = "anime")]
+    Anime,
+    #[sea_orm(string_value = "artist")]
+    Artist,
+    #[sea_orm(string_value = "entry")]
+    Entry,
+    #[sea_orm(string_value = "song")]
+    Song,
+    #[sea_orm(string_value = "studio")]
+    Studio,
+}

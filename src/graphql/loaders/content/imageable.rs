@@ -10,7 +10,7 @@ pub struct ImageableLoader {
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct ImageableKey {
-    pub imageable_type: String,
+    pub imageable_type: imageable::ImageableType,
     pub id: u64,
 }
 
@@ -24,7 +24,8 @@ impl Loader<ImageableKey> for ImageableLoader {
     ) -> Result<HashMap<ImageableKey, Self::Value>, Self::Error> {
         let ids: Vec<u64> = keys.iter().map(|k| k.id).collect();
 
-        let types: Vec<String> = keys.iter().map(|k| k.imageable_type.clone()).collect();
+        let types: Vec<imageable::ImageableType> =
+            keys.iter().map(|k| k.imageable_type.clone()).collect();
 
         let rows = imageable::Entity::find()
             .filter(imageable::Column::ImageableType.is_in(types))

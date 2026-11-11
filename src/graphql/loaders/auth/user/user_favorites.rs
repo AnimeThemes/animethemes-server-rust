@@ -29,7 +29,7 @@ impl UserFavoritesLoaderQuery {
             if let Some(entry_id) = filter.entry_id.clone() {
                 condition = condition
                     .add(favorite::Column::FavoriteableId.eq(entry_id))
-                    .add(favorite::Column::FavoriteableType.eq("entry"));
+                    .add(favorite::Column::FavoriteableType.eq(favorite::FavoriteableType::Entry));
             }
         }
 

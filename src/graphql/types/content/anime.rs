@@ -1,6 +1,9 @@
-use crate::enums::{
-    LocalizedEnum,
-    content::{animeformat::AnimeFormat, animeseason::AnimeSeason},
+use crate::{
+    entities::content::{imageable, resourceable},
+    enums::{
+        LocalizedEnum,
+        content::{animeformat::AnimeFormat, animeseason::AnimeSeason},
+    },
 };
 use async_graphql::{
     ComplexObject, Context, Result, SimpleObject,
@@ -118,7 +121,7 @@ impl Anime {
         let rows = loader
             .load_one(ImageableKey {
                 id: self.id,
-                imageable_type: "anime".to_string(),
+                imageable_type: imageable::ImageableType::Anime,
             })
             .await?
             .unwrap_or_default();
@@ -158,7 +161,7 @@ impl Anime {
         let rows = loader
             .load_one(ResourceableKey {
                 id: self.id,
-                resourceable_type: "anime".to_string(),
+                resourceable_type: resourceable::ResourceableType::Anime,
             })
             .await?
             .unwrap_or_default();

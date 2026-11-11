@@ -10,7 +10,7 @@ pub struct ResourceableLoader {
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct ResourceableKey {
-    pub resourceable_type: String,
+    pub resourceable_type: resourceable::ResourceableType,
     pub id: u64,
 }
 
@@ -24,7 +24,8 @@ impl Loader<ResourceableKey> for ResourceableLoader {
     ) -> Result<HashMap<ResourceableKey, Self::Value>, Self::Error> {
         let ids: Vec<u64> = keys.iter().map(|k| k.id).collect();
 
-        let types: Vec<String> = keys.iter().map(|k| k.resourceable_type.clone()).collect();
+        let types: Vec<resourceable::ResourceableType> =
+            keys.iter().map(|k| k.resourceable_type.clone()).collect();
 
         let rows = resourceable::Entity::find()
             .filter(resourceable::Column::ResourceableType.is_in(types))

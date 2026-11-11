@@ -12,7 +12,7 @@ use crate::{
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: u64,
-    pub favoriteable_type: String,
+    pub favoriteable_type: FavoriteableType,
     pub favoriteable_id: u64,
     pub user_id: u64,
     pub position: i32,
@@ -27,6 +27,13 @@ pub struct Model {
 
 impl ActiveModelBehavior for ActiveModel {}
 
+#[derive(Debug, Copy, Clone, Eq, EnumIter, PartialEq, DeriveActiveEnum)]
+#[sea_orm(rs_type = "String", db_type = "String(StringLen::N(255))")]
+pub enum FavoriteableType {
+    #[sea_orm(string_value = "entry")]
+    Entry,
+}
+
 impl Sortable for Model {
     fn order_column() -> <Self::Entity as EntityTrait>::Column {
         self::Column::Position
@@ -35,6 +42,6 @@ impl Sortable for Model {
     fn sort_scope(&self) -> sea_orm::Condition {
         Condition::all()
             .add(self::Column::UserId.eq(self.user_id))
-            .add(self::Column::FavoriteableType.eq(self.favoriteable_type.as_str()))
+            .add(self::Column::FavoriteableType.eq(self.favoriteable_type))
     }
 }

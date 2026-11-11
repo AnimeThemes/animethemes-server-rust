@@ -74,7 +74,8 @@ pub fn build_anime_documents<'a>(
     Box::pin(async move {
         let synonyms: Vec<Vec<synonym::Model>> = models
             .load_many(
-                synonym::Entity::find().filter(synonym::Column::SynonymableType.eq("anime")),
+                synonym::Entity::find()
+                    .filter(synonym::Column::SynonymableType.eq(synonym::SynonymableType::Anime)),
                 database,
             )
             .await?;

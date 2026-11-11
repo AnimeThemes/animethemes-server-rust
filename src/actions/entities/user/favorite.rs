@@ -9,14 +9,15 @@ use sea_orm::{
     QueryOrder, QuerySelect, SelectExt, TransactionTrait,
 };
 
+#[derive(Copy, Clone)]
 pub enum FavoriteableType {
     Entry(u64),
 }
 
-impl FavoriteableType {
-    pub fn to_morph(&self) -> &str {
-        match self {
-            FavoriteableType::Entry(_) => "entry",
+impl From<FavoriteableType> for favorite::FavoriteableType {
+    fn from(value: FavoriteableType) -> Self {
+        match value {
+            FavoriteableType::Entry(_) => favorite::FavoriteableType::Entry,
         }
     }
 }
@@ -76,7 +77,10 @@ impl FavoriteAction {
 
         let existing = favorite::Entity::find()
             .filter(favorite::Column::UserId.eq(params.user_id))
-            .filter(favorite::Column::FavoriteableType.eq(params.favoriteable.to_morph()))
+            .filter(
+                favorite::Column::FavoriteableType
+                    .eq::<favorite::FavoriteableType>(params.favoriteable.into()),
+            )
             .filter(favorite::Column::FavoriteableId.eq(favoriteable_id))
             .one(&txn)
             .await?;
@@ -91,7 +95,10 @@ impl FavoriteAction {
             .select_only()
             .column(favorite::Column::Position)
             .filter(favorite::Column::UserId.eq(params.user_id))
-            .filter(favorite::Column::FavoriteableType.eq(params.favoriteable.to_morph()))
+            .filter(
+                favorite::Column::FavoriteableType
+                    .eq::<favorite::FavoriteableType>(params.favoriteable.into()),
+            )
             .order_by_desc(favorite::Column::Position)
             .into_tuple()
             .one(&txn)
@@ -100,7 +107,7 @@ impl FavoriteAction {
             + 1;
 
         let model = favorite::ActiveModel {
-            favoriteable_type: Set(params.favoriteable.to_morph().to_string()),
+            favoriteable_type: Set(params.favoriteable.into()),
             favoriteable_id: Set(favoriteable_id),
             user_id: Set(params.user_id),
             position: Set(max_position),

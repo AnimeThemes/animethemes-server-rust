@@ -5,7 +5,7 @@ use async_graphql::{
 };
 
 use crate::{
-    entities::content::artist,
+    entities::content::{artist, imageable, resourceable},
     graphql::{
         loaders::content::{
             artist::{
@@ -194,7 +194,7 @@ impl Artist {
         let rows = loader
             .load_one(ImageableKey {
                 id: self.id,
-                imageable_type: "artist".to_string(),
+                imageable_type: imageable::ImageableType::Artist,
             })
             .await?
             .unwrap_or_default();
@@ -234,7 +234,7 @@ impl Artist {
         let rows = loader
             .load_one(ResourceableKey {
                 id: self.id,
-                resourceable_type: "artist".to_string(),
+                resourceable_type: resourceable::ResourceableType::Artist,
             })
             .await?
             .unwrap_or_default();

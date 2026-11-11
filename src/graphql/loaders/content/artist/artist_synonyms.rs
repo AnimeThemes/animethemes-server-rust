@@ -16,7 +16,7 @@ impl Loader<u64> for ArtistSynonymsLoader {
     async fn load(&self, keys: &[u64]) -> Result<HashMap<u64, Self::Value>, Self::Error> {
         let models = synonym::Entity::find()
             .filter(without_trashed::<synonym::Entity>())
-            .filter(synonym::Column::SynonymableType.eq("artist"))
+            .filter(synonym::Column::SynonymableType.eq(synonym::SynonymableType::Artist))
             .filter(synonym::Column::SynonymableId.is_in(keys))
             .all(&self.db)
             .await?;

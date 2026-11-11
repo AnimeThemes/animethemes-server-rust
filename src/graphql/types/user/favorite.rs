@@ -8,9 +8,16 @@ use crate::{
         types::auth::user::User,
     },
 };
-use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::{
+    ComplexObject, Context, Error, Result, SimpleObject, Union, dataloader::DataLoader,
+};
 
 use crate::graphql::types::content::entry::Entry;
+
+#[derive(Union)]
+enum Favoriteable {
+    Entry(Entry),
+}
 
 /// Represents a favorite of a user.
 #[derive(SimpleObject)]
@@ -19,7 +26,7 @@ pub struct Favorite {
     pub id: u64,
     pub position: i32,
     #[graphql(skip)]
-    pub favoriteable_type: String,
+    pub favoriteable_type: favorite::FavoriteableType,
     #[graphql(skip)]
     pub favoriteable_id: u64,
     #[graphql(skip)]
@@ -29,13 +36,28 @@ pub struct Favorite {
 #[ComplexObject]
 impl Favorite {
     async fn entry(&self, ctx: &Context<'_>) -> Result<Option<Entry>> {
-        if self.favoriteable_type != "entry" {
+        if self.favoriteable_type != favorite::FavoriteableType::Entry {
             return Ok(None);
         }
 
         let loader = ctx.data_unchecked::<DataLoader<FavoriteEntryLoader>>();
 
         Ok(loader.load_one(self.favoriteable_id).await?.map(Into::into))
+    }
+
+    async fn favoriteable(&self, ctx: &Context<'_>) -> Result<Favoriteable> {
+        match self.favoriteable_type {
+            favorite::FavoriteableType::Entry => {
+                let loader = ctx.data_unchecked::<DataLoader<FavoriteEntryLoader>>();
+
+                let entry = loader
+                    .load_one(self.favoriteable_id)
+                    .await?
+                    .ok_or(AppError::NotFound)?;
+
+                Ok(Favoriteable::Entry(entry.into()))
+            }
+        }
     }
 
     async fn user(&self, ctx: &Context<'_>) -> Result<User> {
