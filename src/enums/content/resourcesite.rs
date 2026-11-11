@@ -19,18 +19,22 @@ pub enum ResourceSite {
     Anilist,
 
     #[sea_orm(num_value = 4)]
+    #[graphql(deprecation = "No longer actively maintained")]
     AnimePlanet,
 
     #[sea_orm(num_value = 5)]
+    #[graphql(deprecation = "No longer actively maintained")]
     ANN,
 
     #[sea_orm(num_value = 6)]
+    #[graphql(deprecation = "No longer actively maintained")]
     Kitsu,
 
     #[sea_orm(num_value = 7)]
     MAL,
 
     #[sea_orm(num_value = 8)]
+    #[graphql(deprecation = "No longer actively maintained")]
     Wiki,
 
     #[sea_orm(num_value = 9)]
