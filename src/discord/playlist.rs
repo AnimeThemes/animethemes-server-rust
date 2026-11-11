@@ -24,8 +24,8 @@ impl Playlist {
     }
 
     pub fn get_discord_channel() -> u64 {
-        env::var("DISCORD_DB_UPDATES_CHANNEL_ID")
-            .expect("DISCORD_DB_UPDATES_CHANNEL_ID is required in .env")
+        env::var("DISCORD_ADMIN_CHANNEL_ID")
+            .expect("DISCORD_ADMIN_CHANNEL_ID is required in .env")
             .parse()
             .unwrap()
     }
