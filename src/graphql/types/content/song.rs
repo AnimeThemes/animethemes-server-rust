@@ -1,10 +1,22 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::{
+    ComplexObject, Context, Result, SimpleObject,
+    connection::{Connection, Edge, EmptyFields},
+    dataloader::DataLoader,
+};
 
 use crate::{
-    entities::content::song,
+    entities::content::{resourceable, song},
     graphql::{
-        loaders::content::song::{song_staffs::SongStaffsLoader, song_themes::SongThemesLoader},
-        types::content::{song_staff::SongStaff, theme::Theme},
+        loaders::content::{
+            resourceable::{ResourceableKey, ResourceableLoader},
+            song::{song_staffs::SongStaffsLoader, song_themes::SongThemesLoader},
+        },
+        types::content::{
+            externalresource::ExternalResource,
+            resourceable::{ResourceableConnection, ResourceableEdge, ResourceableEdgeFields},
+            song_staff::SongStaff,
+            theme::Theme,
+        },
     },
 };
 
@@ -53,6 +65,46 @@ impl Song {
         let models = loader.load_one(self.id).await?.unwrap_or_default();
 
         Ok(models.into_iter().map(SongStaff::from).collect())
+    }
+
+    async fn resources(
+        &self,
+        ctx: &Context<'_>,
+    ) -> Result<
+        Connection<
+            u64,
+            ExternalResource,
+            EmptyFields,
+            ResourceableEdgeFields,
+            ResourceableConnection,
+            ResourceableEdge,
+        >,
+    > {
+        let loader = ctx.data_unchecked::<DataLoader<ResourceableLoader>>();
+
+        let rows = loader
+            .load_one(ResourceableKey {
+                id: self.id,
+                resourceable_type: resourceable::ResourceableType::Song,
+            })
+            .await?
+            .unwrap_or_default();
+
+        let mut connection = Connection::with_additional_fields(false, false, EmptyFields);
+
+        for (pivot, resource) in rows {
+            connection.edges.push(Edge::with_additional_fields(
+                resource.id,
+                resource.into(),
+                ResourceableEdgeFields {
+                    r#as: pivot.r#as,
+                    created_at: pivot.created_at,
+                    updated_at: pivot.updated_at,
+                },
+            ));
+        }
+
+        Ok(connection)
     }
 }
 

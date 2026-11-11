@@ -16,7 +16,7 @@ impl Playlist {
 
     pub fn created_message(&self) -> serenity::all::CreateMessage {
         let embed = created_embed(self.user.clone()).description(format!(
-            "Playlist **{}** has been created.",
+            "Playlist '**{}**' has been created.",
             self.playlist.name
         ));
 
