@@ -1,15 +1,21 @@
 use loco_rs::app::AppContext;
+use loco_rs::prelude::BackgroundWorker;
 use loco_rs::validator::ValidateEmail;
-use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter,
     SelectExt,
 };
 
-use crate::AppError;
 use crate::actions::auth::verify_email::VerifyEmail;
 use crate::entities::auth::user;
+use crate::enums::features::Feature;
+use crate::features::functions::FeatureManager;
+use crate::middlewares::current_user::CurrentUser;
 use crate::rules::validation_error::ValidationError;
+use crate::workers::discord_notification::{
+    DiscordNotificationWorker, DiscordNotificationWorkerArgs,
+};
+use crate::{AppError, discord};
 
 #[derive(Clone)]
 pub struct UpdateUserInformationParameters {
@@ -82,33 +88,55 @@ impl UpdateUserInformation {
 
     pub async fn update(
         ctx: &AppContext,
+        auth_user: CurrentUser,
         user: user::Model,
         params: UpdateUserInformationParameters,
     ) -> Result<bool, AppError> {
         Self::validate(&ctx.db, &user, &params).await?;
 
-        let current_email = user.email.clone();
+        let old_user = user.clone();
 
         let mut active_user: user::ActiveModel = user.into();
 
         if let Some(name) = params.name {
-            active_user.name = Set(name);
+            active_user.name.set_ne(name);
         }
 
-        let email_has_changed = matches!(
-            params.email.as_deref(),
-            Some(email) if email != current_email
-        );
+        if let Some(email) = params.email.clone() {
+            active_user.email.set_ne(email);
+        }
+
+        let email_has_changed = active_user.get(user::Column::Email).is_set();
 
         if email_has_changed {
-            active_user.email = Set(params.email.unwrap());
-            active_user.email_verified_at = Set(None);
+            active_user.email_verified_at.set_ne(None);
         }
 
         let user = active_user.update(&ctx.db).await?;
 
         if email_has_changed {
             VerifyEmail::send_verification_email(&user).await?;
+        }
+
+        let feature_manager = ctx.shared_store.get::<FeatureManager>();
+
+        if let Some(feature_manager) = feature_manager
+            && feature_manager.is_enabled(Feature::AllowDiscordNotifications, None, false)
+        {
+            DiscordNotificationWorker::perform_later(
+                ctx,
+                DiscordNotificationWorkerArgs {
+                    channel_id: discord::user::User::get_discord_channel(),
+                    message: serde_json::to_value(
+                        discord::user::User::new(old_user, Some(auth_user))
+                            .updated_message(user)
+                            .ok(),
+                    )
+                    .unwrap(),
+                },
+            )
+            .await
+            .map_err(AppError::internal)?;
         }
 
         Ok(true)

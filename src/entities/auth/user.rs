@@ -2,13 +2,14 @@ use async_trait::async_trait;
 use chrono::Utc;
 use sea_orm::ActiveValue::Set;
 use sea_orm::entity::prelude::*;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 use crate::entities::auth::role;
 use crate::entities::list::playlist;
 
 #[sea_orm::model]
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "users")]
 pub struct Model {
     #[sea_orm(primary_key)]
@@ -16,6 +17,7 @@ pub struct Model {
     pub name: String,
     #[sea_orm(unique)]
     pub email: String,
+    #[serde(skip_serializing)]
     pub password: String,
     #[sea_orm(column_type = "Timestamp")]
     pub email_verified_at: Option<chrono::DateTime<Utc>>,
@@ -24,9 +26,11 @@ pub struct Model {
     #[sea_orm(column_type = "Timestamp")]
     pub updated_at: chrono::DateTime<Utc>,
 
+    #[serde(skip)]
     #[sea_orm(has_many, via = "user_roles")]
     pub roles: HasMany<role::Entity>,
 
+    #[serde(skip)]
     #[sea_orm(has_many)]
     pub playlists: HasMany<playlist::Entity>,
 }

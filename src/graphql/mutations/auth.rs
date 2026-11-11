@@ -128,13 +128,12 @@ impl AuthMutation {
         let user = ctx
             .data::<CurrentUser>()
             .map_err(|_| Error::from(AppError::Unauthenticated))
-            .extend()?
-            .user
-            .clone();
+            .extend()?;
 
         let result = UpdateUserInformation::update(
             ctx.data_unchecked::<AppContext>(),
-            user,
+            user.clone(),
+            user.user.clone(),
             UpdateUserInformationParameters {
                 name: input.name,
                 email: input.email,
