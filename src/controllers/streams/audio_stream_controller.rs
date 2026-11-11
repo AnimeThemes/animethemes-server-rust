@@ -23,9 +23,7 @@ async fn show(
     Path(basename): Path<String>,
     Query(query): Query<HashMap<String, String>>,
 ) -> Result<Response, AppError> {
-    feature_manager
-        .enabled(Feature::AllowAudioStreams, None)
-        .await?;
+    feature_manager.enabled(Feature::AllowAudioStreams, None)?;
 
     let audio = audio::Entity::find()
         .filter(audio::Column::Basename.eq(basename))

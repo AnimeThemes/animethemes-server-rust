@@ -52,7 +52,6 @@ impl PlaylistTrackMutation {
 
         feature_manager
             .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
-            .await
             .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
@@ -99,7 +98,6 @@ impl PlaylistTrackMutation {
 
         feature_manager
             .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
-            .await
             .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
@@ -150,7 +148,6 @@ impl PlaylistTrackMutation {
 
         feature_manager
             .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
-            .await
             .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;

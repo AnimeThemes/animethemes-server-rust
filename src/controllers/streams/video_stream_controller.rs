@@ -23,9 +23,7 @@ async fn show(
     Path(basename): Path<String>,
     Query(query): Query<HashMap<String, String>>,
 ) -> Result<Response, AppError> {
-    feature_manager
-        .enabled(Feature::AllowVideoStreams, None)
-        .await?;
+    feature_manager.enabled(Feature::AllowVideoStreams, None)?;
 
     let video = video::Entity::find()
         .filter(video::Column::Basename.eq(basename))

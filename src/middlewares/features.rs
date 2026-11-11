@@ -20,7 +20,11 @@ pub async fn features_middleware(
         .await
         .unwrap_or_default();
 
-    request.extensions_mut().insert(FeatureManager { flags });
+    request.extensions_mut().insert(FeatureManager {
+        flags: flags.clone(),
+    });
+
+    ctx.shared_store.insert(FeatureManager { flags });
 
     next.run(request).await
 }

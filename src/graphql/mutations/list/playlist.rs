@@ -51,7 +51,6 @@ impl PlaylistMutation {
 
         feature_manager
             .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
-            .await
             .extend()?;
 
         PlaylistPolicy::check(Some(user), PolicyAction::Create, None)
@@ -88,7 +87,6 @@ impl PlaylistMutation {
 
         feature_manager
             .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
-            .await
             .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;
@@ -128,7 +126,6 @@ impl PlaylistMutation {
 
         feature_manager
             .enabled(Feature::AllowPlaylistManagement, Some(&user.user))
-            .await
             .extend()?;
 
         let db = ctx.data::<DatabaseConnection>()?;

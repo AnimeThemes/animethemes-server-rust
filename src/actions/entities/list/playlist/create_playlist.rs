@@ -10,7 +10,9 @@ use sea_orm::{
 
 use crate::entities::auth::role::Roles;
 use crate::entities::list::playlist;
+use crate::enums::features::Feature;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
+use crate::features::functions::FeatureManager;
 use crate::middlewares::current_user::CurrentUser;
 use crate::policies::has_any_role;
 use crate::rules::validation_error::ValidationError;
@@ -97,19 +99,25 @@ impl CreatePlaylistAction {
 
         Self::update_search(&ctx.db, &playlist).await?;
 
-        DiscordNotificationWorker::perform_later(
-            ctx,
-            DiscordNotificationWorkerArgs {
-                channel_id: discord::playlist::Playlist::get_discord_channel(),
-                message: serde_json::to_value(
-                    discord::playlist::Playlist::new(playlist.clone(), Some(user.clone()))
-                        .created_message(),
-                )
-                .unwrap(),
-            },
-        )
-        .await
-        .map_err(AppError::internal)?;
+        let feature_manager = ctx.shared_store.get::<FeatureManager>();
+
+        if let Some(feature_manager) = feature_manager
+            && feature_manager.is_enabled(Feature::AllowDiscordNotifications, None, false)
+        {
+            DiscordNotificationWorker::perform_later(
+                ctx,
+                DiscordNotificationWorkerArgs {
+                    channel_id: discord::playlist::Playlist::get_discord_channel(),
+                    message: serde_json::to_value(
+                        discord::playlist::Playlist::new(playlist.clone(), Some(user.clone()))
+                            .created_message(),
+                    )
+                    .unwrap(),
+                },
+            )
+            .await
+            .map_err(AppError::internal)?;
+        }
 
         Ok(playlist)
     }

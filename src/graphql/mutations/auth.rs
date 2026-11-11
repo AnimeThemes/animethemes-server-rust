@@ -78,7 +78,6 @@ impl AuthMutation {
 
         feature_manager
             .enabled(Feature::Registration, None)
-            .await
             .extend()?;
 
         let user = Register::register(
