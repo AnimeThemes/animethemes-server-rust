@@ -86,7 +86,8 @@ impl FavoriteAction {
             .await?;
 
         if let Some(model) = existing {
-            model.delete(&txn).await?;
+            model.clone().delete(&txn).await?;
+            model.reorder_after_delete(&txn).await?;
             txn.commit().await?;
             return Ok(None);
         }
