@@ -15,3 +15,7 @@
    name: allow-video-streams
    scope_type: global
    value: true
+ - id: 5
+   name: allow-discord-notifications
+   scope_type: global
+   value: true    
