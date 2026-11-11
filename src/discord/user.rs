@@ -2,7 +2,7 @@ use std::env;
 
 use loco_rs::Result;
 
-use crate::discord::{add_updated_fields, created_embed, updated_embed};
+use crate::discord::{created_embed, updated_embed};
 use crate::entities::auth::user::{self};
 use crate::middlewares::current_user::CurrentUser;
 
@@ -24,10 +24,9 @@ impl User {
     }
 
     pub fn updated_message(&self, new_user: user::Model) -> Result<serenity::all::CreateMessage> {
-        let mut embed = updated_embed(self.auth_user.clone())
+        let embed = updated_embed::<user::Entity>(self.auth_user.clone(), &self.user, &new_user)
+            .unwrap()
             .description(format!("User '**{}**' has been updated.", self.user.name));
-
-        add_updated_fields::<user::Entity>(&mut embed, &self.user, &new_user)?;
 
         Ok(serenity::all::CreateMessage::new().embed(embed))
     }

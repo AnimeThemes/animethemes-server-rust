@@ -1,3 +1,4 @@
+use loco_rs::Result;
 use sea_orm::{EntityTrait, IdenStatic, Iterable, ModelTrait};
 use serde::Serialize;
 use serde_json::Value;
@@ -9,7 +10,53 @@ pub mod user;
 
 const IGNORED_COLUMNS: &[&str] = &["updated_at", "created_at", "deleted_at"];
 
-pub fn add_updated_fields<E>(
+pub fn created_embed(user: Option<CurrentUser>) -> serenity::all::CreateEmbed {
+    let embed = serenity::all::CreateEmbed::new().color(3066993);
+
+    let embed = if let Some(user) = user {
+        embed.footer(auth_footer(user))
+    } else {
+        embed
+    };
+
+    embed
+}
+
+pub fn updated_embed<E>(
+    user: Option<CurrentUser>,
+    old_model: &E::Model,
+    new_model: &E::Model,
+) -> Result<serenity::all::CreateEmbed>
+where
+    E: EntityTrait,
+    E::Model: Serialize,
+{
+    let mut embed = serenity::all::CreateEmbed::new().color(16776960);
+
+    add_updated_fields::<E>(&mut embed, old_model, new_model)?;
+
+    let embed = if let Some(user) = user {
+        embed.footer(auth_footer(user))
+    } else {
+        embed
+    };
+
+    Ok(embed)
+}
+
+pub fn deleted_embed(user: Option<CurrentUser>) -> serenity::all::CreateEmbed {
+    let embed = serenity::all::CreateEmbed::new().color(15158332);
+
+    let embed = if let Some(user) = user {
+        embed.footer(auth_footer(user))
+    } else {
+        embed
+    };
+
+    embed
+}
+
+fn add_updated_fields<E>(
     embed: &mut serenity::all::CreateEmbed,
     old_model: &E::Model,
     new_model: &E::Model,
@@ -41,30 +88,6 @@ where
     *embed = builder;
 
     Ok(())
-}
-
-pub fn created_embed(user: Option<CurrentUser>) -> serenity::all::CreateEmbed {
-    let embed = serenity::all::CreateEmbed::new().color(3066993);
-
-    let embed = if let Some(user) = user {
-        embed.footer(auth_footer(user))
-    } else {
-        embed
-    };
-
-    embed
-}
-
-pub fn updated_embed(user: Option<CurrentUser>) -> serenity::all::CreateEmbed {
-    let embed = serenity::all::CreateEmbed::new().color(16776960);
-
-    let embed = if let Some(user) = user {
-        embed.footer(auth_footer(user))
-    } else {
-        embed
-    };
-
-    embed
 }
 
 fn auth_footer(user: CurrentUser) -> serenity::all::CreateEmbedFooter {
