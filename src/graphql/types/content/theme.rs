@@ -1,25 +1,19 @@
-use crate::{
-    enums::{LocalizedEnum, content::themetype::ThemeType},
-    graphql::{
-        loaders::content::theme::theme_staffs::ThemeStaffsLoader,
-        types::content::theme_staff::ThemeStaff,
-    },
-};
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::content::theme,
-    graphql::{
-        loaders::content::{
-            anime::theme_entries::ThemeEntriesLoader,
-            theme::{
-                theme_anime::ThemeAnimeLoader, theme_group::ThemeGroupLoader,
-                theme_song::ThemeSongLoader,
-            },
-        },
-        types::content::{anime::Anime, entry::Entry, song::Song, themegroup::ThemeGroup},
-    },
-};
+use crate::entities::content::theme;
+use crate::enums::LocalizedEnum;
+use crate::enums::content::themetype::ThemeType;
+use crate::graphql::loaders::content::anime::theme_entries::ThemeEntriesLoader;
+use crate::graphql::loaders::content::theme::theme_anime::ThemeAnimeLoader;
+use crate::graphql::loaders::content::theme::theme_group::ThemeGroupLoader;
+use crate::graphql::loaders::content::theme::theme_song::ThemeSongLoader;
+use crate::graphql::loaders::content::theme::theme_staffs::ThemeStaffsLoader;
+use crate::graphql::types::content::anime::Anime;
+use crate::graphql::types::content::entry::Entry;
+use crate::graphql::types::content::song::Song;
+use crate::graphql::types::content::theme_staff::ThemeStaff;
+use crate::graphql::types::content::themegroup::ThemeGroup;
 
 /// Represents an OP or ED sequence for an anime.
 ///

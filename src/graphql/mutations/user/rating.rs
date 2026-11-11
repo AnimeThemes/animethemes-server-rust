@@ -1,9 +1,9 @@
-use crate::actions::entities::user::rating::{RateEntryActionParameters, RatingAction};
-use crate::graphql::types::user::rating::Rating;
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
 use loco_rs::app::AppContext;
 
 use crate::AppError;
+use crate::actions::entities::user::rating::{RateEntryActionParameters, RatingAction};
+use crate::graphql::types::user::rating::Rating;
 use crate::middlewares::current_user::CurrentUser;
 
 #[derive(InputObject)]

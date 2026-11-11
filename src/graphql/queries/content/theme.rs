@@ -1,24 +1,20 @@
-use crate::{
-    entities::content::{anime, entry, entry_videos, theme},
-    enums::content::{animeformat::AnimeFormat, themetype::ThemeType},
-    graphql::cursor::CursorSortKey,
-    scopes::without_trashed,
-};
-use async_graphql::{
-    Context, InputObject, Object, Result, ResultExt,
-    connection::{Connection, EmptyFields, OpaqueCursor},
-};
+use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
+use async_graphql::{Context, InputObject, Object, Result, ResultExt};
+use sea_orm::sea_query::Expr;
 use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, JoinType, Order, QueryFilter, QueryOrder,
-    QuerySelect, RelationTrait, sea_query::Expr,
+    QuerySelect, RelationTrait,
 };
 
-use crate::graphql::{
-    cursor::{CursorSort, PaginationCursor, cursor_paginate},
-    enums::sort::{GraphQLSort, content::theme_sort::ThemeSort},
-    inputs::pagination_input::PaginationInput,
-    types::content::theme::Theme,
-};
+use crate::entities::content::{anime, entry, entry_videos, theme};
+use crate::enums::content::animeformat::AnimeFormat;
+use crate::enums::content::themetype::ThemeType;
+use crate::graphql::cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate};
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::content::theme_sort::ThemeSort;
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::types::content::theme::Theme;
+use crate::scopes::without_trashed;
 
 #[derive(InputObject, Default)]
 struct ThemeShuffleInput {

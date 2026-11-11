@@ -1,19 +1,14 @@
-use async_graphql::{
-    Context, InputObject, Object, Result, ResultExt,
-    connection::{Connection, EmptyFields, OpaqueCursor},
-};
+use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
+use async_graphql::{Context, InputObject, Object, Result, ResultExt};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
-use crate::{
-    entities::content::artist,
-    graphql::{
-        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
-        enums::sort::{GraphQLSort, content::artist_sort::ArtistSort},
-        inputs::pagination_input::PaginationInput,
-        types::content::artist::Artist,
-    },
-    scopes::without_trashed,
-};
+use crate::entities::content::artist;
+use crate::graphql::cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate};
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::content::artist_sort::ArtistSort;
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::types::content::artist::Artist;
+use crate::scopes::without_trashed;
 
 #[derive(InputObject, Default)]
 struct ArtistFilterInput {

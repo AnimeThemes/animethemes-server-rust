@@ -1,24 +1,19 @@
-use async_graphql::{
-    Context, InputObject, Object, Result, ResultExt,
-    connection::{Connection, EmptyFields, OpaqueCursor},
-};
+use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
+use async_graphql::{Context, InputObject, Object, Result, ResultExt};
 use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
-use crate::{
-    entities::{
-        auth::role,
-        document::{page, page_roles},
-    },
-    graphql::{
-        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
-        enums::sort::{GraphQLSort, document::page_sort::PageSort},
-        inputs::pagination_input::PaginationInput,
-        types::document::page::Page,
-    },
-    middlewares::current_user::CurrentUser,
-    policies::{Policy, PolicyAction, document::page::PagePolicy},
-    scopes::{document::page::public_pages, without_trashed},
-};
+use crate::entities::auth::role;
+use crate::entities::document::{page, page_roles};
+use crate::graphql::cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate};
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::document::page_sort::PageSort;
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::types::document::page::Page;
+use crate::middlewares::current_user::CurrentUser;
+use crate::policies::document::page::PagePolicy;
+use crate::policies::{Policy, PolicyAction};
+use crate::scopes::document::page::public_pages;
+use crate::scopes::without_trashed;
 
 #[derive(InputObject, Default)]
 struct PageFilterInput {

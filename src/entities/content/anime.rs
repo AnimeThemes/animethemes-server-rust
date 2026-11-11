@@ -1,13 +1,10 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::{
-    entities::{
-        SoftDeleteEntity,
-        content::{series, studio, synonym, theme},
-    },
-    enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason},
-};
+use crate::entities::SoftDeleteEntity;
+use crate::entities::content::{series, studio, synonym, theme};
+use crate::enums::content::animeformat::AnimeFormat;
+use crate::enums::content::animeseason::AnimeSeason;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

@@ -1,8 +1,7 @@
 use loco_rs::Error as LocoError;
 use loco_rs::prelude::*;
 
-use crate::entities::auth::role;
-use crate::entities::auth::user_roles;
+use crate::entities::auth::{role, user_roles};
 
 pub struct AssignRole;
 

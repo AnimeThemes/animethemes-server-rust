@@ -2,16 +2,10 @@ use sea_orm::{DatabaseConnection, LoaderTrait};
 use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
-use crate::{
-    entities::content::{entry, video},
-    typesense::{
-        documents::{
-            HasId,
-            entry_document::{EntryDocument, build_entry_documents},
-        },
-        index_document::BuildDocumentsFuture,
-    },
-};
+use crate::entities::content::{entry, video};
+use crate::typesense::documents::HasId;
+use crate::typesense::documents::entry_document::{EntryDocument, build_entry_documents};
+use crate::typesense::index_document::BuildDocumentsFuture;
 
 pub const QUERY_BY: &str = "filename,tags,entries.theme.song.title,entries.theme.song.title_native,entries.theme.anime.title,entries.theme.anime.title_english,entries.theme.anime.title_native,entries.theme.anime.synonyms,entries.type_sequence_version";
 pub const QUERY_BY_WEIGHTS: &str = "10,8,6,7,5,5,5,4,4";

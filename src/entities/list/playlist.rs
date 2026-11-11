@@ -1,12 +1,12 @@
-use chrono::Utc;
-use sea_orm::{ActiveValue::Set, entity::prelude::*};
-
 use async_trait::async_trait;
+use chrono::Utc;
+use sea_orm::ActiveValue::Set;
+use sea_orm::entity::prelude::*;
 
-use crate::{
-    entities::{HasHashId, auth::user, list::track},
-    enums::list::playlistvisibility::PlaylistVisibility,
-};
+use crate::entities::HasHashId;
+use crate::entities::auth::user;
+use crate::entities::list::track;
+use crate::enums::list::playlistvisibility::PlaylistVisibility;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

@@ -1,10 +1,8 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::{
-    auth::user,
-    content::{entry, video},
-};
+use crate::entities::auth::user;
+use crate::entities::content::{entry, video};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

@@ -1,14 +1,12 @@
 use std::collections::HashMap;
 
-use crate::{
-    entities::user::rating,
-    graphql::{
-        enums::sort::{GraphQLSort, user::rating_sort::RatingSort},
-        loaders::group_by_query,
-    },
-};
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Select};
+
+use crate::entities::user::rating;
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::user::rating_sort::RatingSort;
+use crate::graphql::loaders::group_by_query;
 
 pub struct UserRatingsLoader {
     pub db: DatabaseConnection,

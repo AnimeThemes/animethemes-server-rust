@@ -1,12 +1,7 @@
-use crate::{
-    AppError,
-    entities::auth::{
-        role::{self, Roles},
-        sanction::{self, Sanctions},
-        user_sanctions,
-    },
-};
-
+use crate::AppError;
+use crate::entities::auth::role::{self, Roles};
+use crate::entities::auth::sanction::{self, Sanctions};
+use crate::entities::auth::user_sanctions;
 use crate::middlewares::current_user::CurrentUser;
 
 pub mod document;

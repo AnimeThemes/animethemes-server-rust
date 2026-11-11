@@ -1,15 +1,12 @@
-use crate::{entities::content::entry, graphql::cursor::CursorSortKey, scopes::without_trashed};
-use async_graphql::{
-    Context, InputObject, Object, Result, ResultExt,
-    connection::{Connection, EmptyFields, OpaqueCursor},
-};
+use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
+use async_graphql::{Context, InputObject, Object, Result, ResultExt};
 use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter, QueryOrder};
 
-use crate::graphql::{
-    cursor::{CursorSort, PaginationCursor, cursor_paginate},
-    inputs::pagination_input::PaginationInput,
-    types::content::entry::Entry,
-};
+use crate::entities::content::entry;
+use crate::graphql::cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate};
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::types::content::entry::Entry;
+use crate::scopes::without_trashed;
 
 #[derive(InputObject, Default)]
 pub struct EntryFilterInput {

@@ -1,10 +1,10 @@
 use chrono::Utc;
-use sea_orm::{Condition, entity::prelude::*};
+use sea_orm::Condition;
+use sea_orm::entity::prelude::*;
 
-use crate::{
-    entities::{auth::user, content::entry},
-    traits::sortable::Sortable,
-};
+use crate::entities::auth::user;
+use crate::entities::content::entry;
+use crate::traits::sortable::Sortable;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

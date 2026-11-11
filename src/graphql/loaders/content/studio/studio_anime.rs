@@ -1,6 +1,7 @@
+use std::collections::HashMap;
+
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
-use std::collections::HashMap;
 
 use crate::entities::content::{anime, anime_studios};
 

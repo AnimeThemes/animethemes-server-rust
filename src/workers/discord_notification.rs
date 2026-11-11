@@ -1,4 +1,5 @@
-use loco_rs::{app::AppContext, prelude::*};
+use loco_rs::app::AppContext;
+use loco_rs::prelude::*;
 use serde::{Deserialize, Serialize};
 use serenity::all::{ChannelId, Http};
 

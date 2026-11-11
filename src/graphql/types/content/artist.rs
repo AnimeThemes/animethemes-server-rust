@@ -1,34 +1,30 @@
-use async_graphql::{
-    ComplexObject, Context, Result, SimpleObject,
-    connection::{Connection, Edge, EmptyFields},
-    dataloader::DataLoader,
-};
+use async_graphql::connection::{Connection, Edge, EmptyFields};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::content::{artist, imageable, resourceable},
-    graphql::{
-        loaders::content::{
-            artist::{
-                artist_groups::ArtistGroupsLoader, artist_members::ArtistMembersLoader,
-                artist_membersongstaffs::ArtistMemberSongStaffsLoader,
-                artist_songstaffs::ArtistSongStaffsLoader, artist_synonyms::ArtistSynonymsLoader,
-                artist_themestaffs::ArtistThemeStaffsLoader,
-            },
-            imageable::{ImageableKey, ImageableLoader},
-            resourceable::{ResourceableKey, ResourceableLoader},
-        },
-        types::content::{
-            artist_member::{ArtistMemberConnection, ArtistMemberEdge, ArtistMemberEdgeFields},
-            externalresource::ExternalResource,
-            image::Image,
-            imageable::{ImageableConnection, ImageableEdge, ImageableEdgeFields},
-            resourceable::{ResourceableConnection, ResourceableEdge, ResourceableEdgeFields},
-            song_staff::SongStaff,
-            synonym::Synonym,
-            theme_staff::ThemeStaff,
-        },
-    },
+use crate::entities::content::{artist, imageable, resourceable};
+use crate::graphql::loaders::content::artist::artist_groups::ArtistGroupsLoader;
+use crate::graphql::loaders::content::artist::artist_members::ArtistMembersLoader;
+use crate::graphql::loaders::content::artist::artist_membersongstaffs::ArtistMemberSongStaffsLoader;
+use crate::graphql::loaders::content::artist::artist_songstaffs::ArtistSongStaffsLoader;
+use crate::graphql::loaders::content::artist::artist_synonyms::ArtistSynonymsLoader;
+use crate::graphql::loaders::content::artist::artist_themestaffs::ArtistThemeStaffsLoader;
+use crate::graphql::loaders::content::imageable::{ImageableKey, ImageableLoader};
+use crate::graphql::loaders::content::resourceable::{ResourceableKey, ResourceableLoader};
+use crate::graphql::types::content::artist_member::{
+    ArtistMemberConnection, ArtistMemberEdge, ArtistMemberEdgeFields,
 };
+use crate::graphql::types::content::externalresource::ExternalResource;
+use crate::graphql::types::content::image::Image;
+use crate::graphql::types::content::imageable::{
+    ImageableConnection, ImageableEdge, ImageableEdgeFields,
+};
+use crate::graphql::types::content::resourceable::{
+    ResourceableConnection, ResourceableEdge, ResourceableEdgeFields,
+};
+use crate::graphql::types::content::song_staff::SongStaff;
+use crate::graphql::types::content::synonym::Synonym;
+use crate::graphql::types::content::theme_staff::ThemeStaff;
 
 #[derive(SimpleObject)]
 pub struct ArtistName {

@@ -1,71 +1,63 @@
-use std::{env, time::Duration};
+use std::env;
+use std::time::Duration;
 
-use async_graphql::{EmptySubscription, SchemaBuilder, dataloader::DataLoader};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{EmptySubscription, SchemaBuilder};
 use sea_orm::DatabaseConnection;
 
-use crate::graphql::{
-    loaders::{
-        admin::{
-            featuredtheme_entry::FeaturedEntryLoader, featuredtheme_user::FeaturedThemeUserLoader,
-            featuredtheme_video::FeaturedThemeVideoLoader,
-        },
-        auth::user::{
-            user_favorites::UserFavoritesLoader, user_playlists::UserPlaylistsLoader,
-            user_ratings::UserRatingsLoader, user_roles::UserRolesLoader,
-            user_watchhistory::UserWatchHistoryLoader,
-        },
-        content::{
-            anime::{
-                anime_series::AnimeSeriesLoader, anime_studios::AnimeStudiosLoader,
-                anime_synonyms::AnimeSynonymsLoader, anime_themes::ThemesLoader,
-                theme_entries::ThemeEntriesLoader,
-            },
-            artist::{
-                artist_groups::ArtistGroupsLoader, artist_members::ArtistMembersLoader,
-                artist_membersongstaffs::ArtistMemberSongStaffsLoader,
-                artist_songstaffs::ArtistSongStaffsLoader, artist_synonyms::ArtistSynonymsLoader,
-                artist_themestaffs::ArtistThemeStaffsLoader,
-            },
-            entry::{entry_theme::EntryThemeLoader, entry_videos::EntryVideosLoader},
-            imageable::ImageableLoader,
-            resourceable::ResourceableLoader,
-            series::series_anime::SeriesAnimeLoader,
-            song::{song_staffs::SongStaffsLoader, song_themes::SongThemesLoader},
-            songstaff::{
-                songstaff_artist::SongStaffArtistLoader, songstaff_member::SongStaffMemberLoader,
-                songstaff_song::SongStaffSongLoader,
-            },
-            studio::studio_anime::StudioAnimeLoader,
-            theme::{
-                theme_anime::ThemeAnimeLoader, theme_group::ThemeGroupLoader,
-                theme_song::ThemeSongLoader, theme_staffs::ThemeStaffsLoader,
-            },
-            themestaff::{
-                themestaff_artist::ThemeStaffArtistLoader, themestaff_theme::ThemeStaffThemeLoader,
-            },
-            video::{
-                video_audio::VideoAudioLoader, video_entries::VideoThemeEntriesLoader,
-                video_script::VideoScriptLoader, video_tracks::VideoTracksLoader,
-            },
-        },
-        document::page_page::PagePageLoader,
-        list::playlist::{
-            playlist_tracks::PlaylistTracksLoader,
-            playlist_tracks_count::PlaylistTracksCountLoader, playlist_user::PlaylistUserLoader,
-            track_entry::TrackEntryLoader, track_playlist::TrackPlaylistLoader,
-            track_video::TrackVideoLoader,
-        },
-        user::{
-            favorite::{favorite_entry::FavoriteEntryLoader, favorite_user::FavoriteUserLoader},
-            rating::rating_entry::RatingEntryLoader,
-            watchhistory::{
-                watchhistory_entry::WatchHistoryEntryLoader,
-                watchhistory_video::WatchHistoryVideoLoader,
-            },
-        },
-    },
-    mutation::Mutation,
-};
+use crate::graphql::loaders::admin::featuredtheme_entry::FeaturedEntryLoader;
+use crate::graphql::loaders::admin::featuredtheme_user::FeaturedThemeUserLoader;
+use crate::graphql::loaders::admin::featuredtheme_video::FeaturedThemeVideoLoader;
+use crate::graphql::loaders::auth::user::user_favorites::UserFavoritesLoader;
+use crate::graphql::loaders::auth::user::user_playlists::UserPlaylistsLoader;
+use crate::graphql::loaders::auth::user::user_ratings::UserRatingsLoader;
+use crate::graphql::loaders::auth::user::user_roles::UserRolesLoader;
+use crate::graphql::loaders::auth::user::user_watchhistory::UserWatchHistoryLoader;
+use crate::graphql::loaders::content::anime::anime_series::AnimeSeriesLoader;
+use crate::graphql::loaders::content::anime::anime_studios::AnimeStudiosLoader;
+use crate::graphql::loaders::content::anime::anime_synonyms::AnimeSynonymsLoader;
+use crate::graphql::loaders::content::anime::anime_themes::ThemesLoader;
+use crate::graphql::loaders::content::anime::theme_entries::ThemeEntriesLoader;
+use crate::graphql::loaders::content::artist::artist_groups::ArtistGroupsLoader;
+use crate::graphql::loaders::content::artist::artist_members::ArtistMembersLoader;
+use crate::graphql::loaders::content::artist::artist_membersongstaffs::ArtistMemberSongStaffsLoader;
+use crate::graphql::loaders::content::artist::artist_songstaffs::ArtistSongStaffsLoader;
+use crate::graphql::loaders::content::artist::artist_synonyms::ArtistSynonymsLoader;
+use crate::graphql::loaders::content::artist::artist_themestaffs::ArtistThemeStaffsLoader;
+use crate::graphql::loaders::content::entry::entry_theme::EntryThemeLoader;
+use crate::graphql::loaders::content::entry::entry_videos::EntryVideosLoader;
+use crate::graphql::loaders::content::imageable::ImageableLoader;
+use crate::graphql::loaders::content::resourceable::ResourceableLoader;
+use crate::graphql::loaders::content::series::series_anime::SeriesAnimeLoader;
+use crate::graphql::loaders::content::song::song_staffs::SongStaffsLoader;
+use crate::graphql::loaders::content::song::song_themes::SongThemesLoader;
+use crate::graphql::loaders::content::songstaff::songstaff_artist::SongStaffArtistLoader;
+use crate::graphql::loaders::content::songstaff::songstaff_member::SongStaffMemberLoader;
+use crate::graphql::loaders::content::songstaff::songstaff_song::SongStaffSongLoader;
+use crate::graphql::loaders::content::studio::studio_anime::StudioAnimeLoader;
+use crate::graphql::loaders::content::theme::theme_anime::ThemeAnimeLoader;
+use crate::graphql::loaders::content::theme::theme_group::ThemeGroupLoader;
+use crate::graphql::loaders::content::theme::theme_song::ThemeSongLoader;
+use crate::graphql::loaders::content::theme::theme_staffs::ThemeStaffsLoader;
+use crate::graphql::loaders::content::themestaff::themestaff_artist::ThemeStaffArtistLoader;
+use crate::graphql::loaders::content::themestaff::themestaff_theme::ThemeStaffThemeLoader;
+use crate::graphql::loaders::content::video::video_audio::VideoAudioLoader;
+use crate::graphql::loaders::content::video::video_entries::VideoThemeEntriesLoader;
+use crate::graphql::loaders::content::video::video_script::VideoScriptLoader;
+use crate::graphql::loaders::content::video::video_tracks::VideoTracksLoader;
+use crate::graphql::loaders::document::page_page::PagePageLoader;
+use crate::graphql::loaders::list::playlist::playlist_tracks::PlaylistTracksLoader;
+use crate::graphql::loaders::list::playlist::playlist_tracks_count::PlaylistTracksCountLoader;
+use crate::graphql::loaders::list::playlist::playlist_user::PlaylistUserLoader;
+use crate::graphql::loaders::list::playlist::track_entry::TrackEntryLoader;
+use crate::graphql::loaders::list::playlist::track_playlist::TrackPlaylistLoader;
+use crate::graphql::loaders::list::playlist::track_video::TrackVideoLoader;
+use crate::graphql::loaders::user::favorite::favorite_entry::FavoriteEntryLoader;
+use crate::graphql::loaders::user::favorite::favorite_user::FavoriteUserLoader;
+use crate::graphql::loaders::user::rating::rating_entry::RatingEntryLoader;
+use crate::graphql::loaders::user::watchhistory::watchhistory_entry::WatchHistoryEntryLoader;
+use crate::graphql::loaders::user::watchhistory::watchhistory_video::WatchHistoryVideoLoader;
+use crate::graphql::mutation::Mutation;
 
 fn loader<L>(loader: L) -> DataLoader<L>
 where

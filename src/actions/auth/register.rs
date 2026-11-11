@@ -1,16 +1,16 @@
 use bcrypt::hash;
-use loco_rs::{app::AppContext, validator::ValidateEmail};
+use loco_rs::app::AppContext;
+use loco_rs::validator::ValidateEmail;
+use sea_orm::ActiveValue::Set;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, Condition, DatabaseConnection, EntityTrait,
-    QueryFilter, SelectExt,
+    ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter,
+    SelectExt,
 };
 
-use crate::{
-    AppError,
-    actions::auth::verify_email::VerifyEmail,
-    entities::auth::user::{self},
-    rules::validation_error::ValidationError,
-};
+use crate::AppError;
+use crate::actions::auth::verify_email::VerifyEmail;
+use crate::entities::auth::user::{self};
+use crate::rules::validation_error::ValidationError;
 
 #[derive(Clone)]
 pub struct RegisterParameters {

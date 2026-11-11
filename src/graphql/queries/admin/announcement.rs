@@ -1,10 +1,9 @@
 use async_graphql::{Context, Object, Result};
 use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter};
 
-use crate::{
-    entities::admin::announcement, graphql::types::admin::announcement::Announcement,
-    scopes::admin::announcement::current_announcement,
-};
+use crate::entities::admin::announcement;
+use crate::graphql::types::admin::announcement::Announcement;
+use crate::scopes::admin::announcement::current_announcement;
 
 #[derive(Default)]
 pub struct AnnouncementQuery;

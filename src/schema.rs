@@ -1,16 +1,19 @@
-use async_graphql::{EmptySubscription, Schema, http::GraphiQLSource};
-
+use async_graphql::http::GraphiQLSource;
+use async_graphql::{EmptySubscription, Schema};
 use async_graphql_axum::{GraphQLBatchRequest, GraphQLResponse};
-use axum::{Extension, response::Html};
-use loco_rs::{app::AppContext, prelude::SharedStore};
+use axum::Extension;
+use axum::response::Html;
+use loco_rs::app::AppContext;
+use loco_rs::prelude::SharedStore;
 use tower_sessions::Session;
 
-use crate::{
-    features::functions::FeatureManager,
-    graphql::{loaders::loaders::RegisterLoaders, mutation::Mutation, query::Query},
-    middlewares::{current_user::CurrentUser, rate_limiting::CanBypass},
-    typesense::client::TypesenseClient,
-};
+use crate::features::functions::FeatureManager;
+use crate::graphql::loaders::loaders::RegisterLoaders;
+use crate::graphql::mutation::Mutation;
+use crate::graphql::query::Query;
+use crate::middlewares::current_user::CurrentUser;
+use crate::middlewares::rate_limiting::CanBypass;
+use crate::typesense::client::TypesenseClient;
 
 type AppSchema = Schema<Query, Mutation, EmptySubscription>;
 

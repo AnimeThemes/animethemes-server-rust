@@ -1,31 +1,22 @@
-use crate::enums::{
-    LocalizedEnum,
-    content::{videooverlap::VideoOverlap, videosource::VideoSource},
-};
-use async_graphql::{
-    ComplexObject, Context, Result, SimpleObject,
-    connection::{Connection, Edge, EmptyFields},
-    dataloader::DataLoader,
-};
+use async_graphql::connection::{Connection, Edge, EmptyFields};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::content::video::{self},
-    graphql::{
-        loaders::content::video::{
-            video_audio::VideoAudioLoader, video_entries::VideoThemeEntriesLoader,
-            video_script::VideoScriptLoader, video_tracks::VideoTracksLoader,
-        },
-        types::{
-            content::{
-                audio::Audio,
-                entry::Entry,
-                entry_video::{VideoEntryConnection, VideoEntryEdge, VideoEntryEdgeFields},
-                videoscript::VideoScript,
-            },
-            list::track::PlaylistTrack,
-        },
-    },
+use crate::entities::content::video::{self};
+use crate::enums::LocalizedEnum;
+use crate::enums::content::videooverlap::VideoOverlap;
+use crate::enums::content::videosource::VideoSource;
+use crate::graphql::loaders::content::video::video_audio::VideoAudioLoader;
+use crate::graphql::loaders::content::video::video_entries::VideoThemeEntriesLoader;
+use crate::graphql::loaders::content::video::video_script::VideoScriptLoader;
+use crate::graphql::loaders::content::video::video_tracks::VideoTracksLoader;
+use crate::graphql::types::content::audio::Audio;
+use crate::graphql::types::content::entry::Entry;
+use crate::graphql::types::content::entry_video::{
+    VideoEntryConnection, VideoEntryEdge, VideoEntryEdgeFields,
 };
+use crate::graphql::types::content::videoscript::VideoScript;
+use crate::graphql::types::list::track::PlaylistTrack;
 
 /// Represents a WebM of a theme.
 ///

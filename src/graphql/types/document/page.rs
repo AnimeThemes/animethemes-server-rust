@@ -1,10 +1,10 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 use chrono::{DateTime, Utc};
 
-use crate::{
-    entities::document::page,
-    graphql::{loaders::document::page_page::PagePageLoader, utils::format_datetime},
-};
+use crate::entities::document::page;
+use crate::graphql::loaders::document::page_page::PagePageLoader;
+use crate::graphql::utils::format_datetime;
 
 /// Represents a static markdown page used for guides and other documentation.
 ///

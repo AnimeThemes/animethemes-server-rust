@@ -1,12 +1,13 @@
 use async_graphql::{OutputType, SimpleObject};
 
-use crate::graphql::types::{
-    content::{
-        anime::Anime, artist::Artist, series::Series, song::Song, studio::Studio, theme::Theme,
-        video::Video,
-    },
-    list::playlist::Playlist,
-};
+use crate::graphql::types::content::anime::Anime;
+use crate::graphql::types::content::artist::Artist;
+use crate::graphql::types::content::series::Series;
+use crate::graphql::types::content::song::Song;
+use crate::graphql::types::content::studio::Studio;
+use crate::graphql::types::content::theme::Theme;
+use crate::graphql::types::content::video::Video;
+use crate::graphql::types::list::playlist::Playlist;
 
 pub mod admin;
 pub mod auth;

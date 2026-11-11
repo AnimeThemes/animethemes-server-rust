@@ -1,14 +1,14 @@
 use std::env;
 
-use loco_rs::{app::AppContext, environment::Environment};
-use tower_sessions::{
-    Expiry, SessionManagerLayer,
-    cookie::{SameSite, time::Duration},
-};
-use tower_sessions_redis_store::{
-    RedisStore,
-    fred::{clients::Pool, interfaces::ClientLike, types::config::Config},
-};
+use loco_rs::app::AppContext;
+use loco_rs::environment::Environment;
+use tower_sessions::cookie::SameSite;
+use tower_sessions::cookie::time::Duration;
+use tower_sessions::{Expiry, SessionManagerLayer};
+use tower_sessions_redis_store::RedisStore;
+use tower_sessions_redis_store::fred::clients::Pool;
+use tower_sessions_redis_store::fred::interfaces::ClientLike;
+use tower_sessions_redis_store::fred::types::config::Config;
 
 pub async fn create_session_layer(ctx: &AppContext) -> SessionManagerLayer<RedisStore<Pool>> {
     let domain = env::var("SESSION_DOMAIN").expect("SESSION_DOMAIN is required in .env");

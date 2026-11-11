@@ -1,40 +1,32 @@
 use std::vec;
 
-use crate::{
-    entities::{
-        content::{anime, artist, series, song, studio, theme, video},
-        list::playlist,
-    },
-    graphql::{
-        enums::search_sort::{
-            SearchAnimeSort, SearchArtistSort, SearchPlaylistSort, SearchSeriesSort, SearchSort,
-            SearchStudioSort, SearchThemeSort,
-        },
-        inputs::pagination_input::PaginationInput,
-        types::{OffsetPageInfo, OffsetPagination},
-    },
-    scopes::list::playlist::public_playlists,
-    typesense::{
-        client::TypesenseClient,
-        search::{
-            search_anime, search_artists, search_playlists, search_series, search_songs,
-            search_studios, search_themes, search_videos,
-        },
-    },
-};
-use crate::{
-    enums::content::{animeformat::AnimeFormat, animeseason::AnimeSeason, themetype::ThemeType},
-    typesense::search::OffsetPageInfo as OffsetPageInfoTypesense,
-};
 use async_graphql::{Context, InputObject, Object, ObjectType, Result, ResultExt};
 use sea_orm::{ActiveEnum, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter};
 
-use crate::graphql::types::{
-    content::{
-        anime::Anime, artist::Artist, series::Series, song::Song, studio::Studio, theme::Theme,
-        video::Video,
-    },
-    list::playlist::Playlist,
+use crate::entities::content::{anime, artist, series, song, studio, theme, video};
+use crate::entities::list::playlist;
+use crate::enums::content::animeformat::AnimeFormat;
+use crate::enums::content::animeseason::AnimeSeason;
+use crate::enums::content::themetype::ThemeType;
+use crate::graphql::enums::search_sort::{
+    SearchAnimeSort, SearchArtistSort, SearchPlaylistSort, SearchSeriesSort, SearchSort,
+    SearchStudioSort, SearchThemeSort,
+};
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::types::content::anime::Anime;
+use crate::graphql::types::content::artist::Artist;
+use crate::graphql::types::content::series::Series;
+use crate::graphql::types::content::song::Song;
+use crate::graphql::types::content::studio::Studio;
+use crate::graphql::types::content::theme::Theme;
+use crate::graphql::types::content::video::Video;
+use crate::graphql::types::list::playlist::Playlist;
+use crate::graphql::types::{OffsetPageInfo, OffsetPagination};
+use crate::scopes::list::playlist::public_playlists;
+use crate::typesense::client::TypesenseClient;
+use crate::typesense::search::{
+    OffsetPageInfo as OffsetPageInfoTypesense, search_anime, search_artists, search_playlists,
+    search_series, search_songs, search_studios, search_themes, search_videos,
 };
 
 pub struct Search {

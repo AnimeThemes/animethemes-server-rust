@@ -1,9 +1,9 @@
-use crate::entities::content::entry;
-use async_graphql::dataloader::Loader;
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use std::collections::HashMap;
 
-use crate::entities::content::entry_videos;
+use async_graphql::dataloader::Loader;
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+
+use crate::entities::content::{entry, entry_videos};
 
 pub struct VideoThemeEntriesLoader {
     pub db: DatabaseConnection,

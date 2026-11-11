@@ -1,17 +1,10 @@
 use std::str::FromStr;
 
-use crate::{
-    entities::{
-        auth::role::{self, Roles},
-        document::{page, page_roles},
-    },
-    enums::document::pageroletype::PageRoleType,
-};
-
-use crate::{
-    middlewares::current_user::CurrentUser,
-    policies::{Policy, PolicyAction, PolicyResponse, has_any_role},
-};
+use crate::entities::auth::role::{self, Roles};
+use crate::entities::document::{page, page_roles};
+use crate::enums::document::pageroletype::PageRoleType;
+use crate::middlewares::current_user::CurrentUser;
+use crate::policies::{Policy, PolicyAction, PolicyResponse, has_any_role};
 
 pub struct PagePolicy;
 

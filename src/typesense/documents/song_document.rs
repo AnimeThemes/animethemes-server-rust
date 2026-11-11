@@ -2,10 +2,9 @@ use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
-use crate::{
-    entities::content::song,
-    typesense::{documents::HasId, index_document::BuildDocumentsFuture},
-};
+use crate::entities::content::song;
+use crate::typesense::documents::HasId;
+use crate::typesense::index_document::BuildDocumentsFuture;
 
 pub const QUERY_BY: &str = "title,title_native";
 pub const QUERY_BY_WEIGHTS: &str = "10,8";

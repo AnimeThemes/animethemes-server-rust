@@ -1,8 +1,6 @@
-use std::{
-    env,
-    sync::{Arc, OnceLock},
-    time::Duration,
-};
+use std::env;
+use std::sync::{Arc, OnceLock};
+use std::time::Duration;
 
 use typesense::{Client, ExponentialBackoff};
 

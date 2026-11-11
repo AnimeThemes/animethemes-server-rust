@@ -1,32 +1,23 @@
 use anyhow::Result;
 use async_graphql::Error;
-use sea_orm::{
-    ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, Select,
-    sea_query::{CaseStatement, SimpleExpr},
-};
-use typesense::{models::SearchParameters, prelude::Document};
+use sea_orm::sea_query::{CaseStatement, SimpleExpr};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, Select};
+use typesense::models::SearchParameters;
+use typesense::prelude::Document;
 
-use crate::{
-    entities::{
-        content::{anime, artist, series, song, studio, theme, video},
-        list::playlist,
-    },
-    scopes::list::playlist::public_playlists,
-    typesense::{
-        client::TypesenseClient,
-        documents::{
-            HasId,
-            anime_document::{self, AnimeDocument},
-            artist_document::{self, ArtistDocument},
-            playlist_document::{self, PlaylistDocument},
-            series_document::{self, SeriesDocument},
-            song_document::{self, SongDocument},
-            studio_document::{self, StudioDocument},
-            theme_document::{self, ThemeDocument},
-            video_document::{self, VideoDocument},
-        },
-    },
-};
+use crate::entities::content::{anime, artist, series, song, studio, theme, video};
+use crate::entities::list::playlist;
+use crate::scopes::list::playlist::public_playlists;
+use crate::typesense::client::TypesenseClient;
+use crate::typesense::documents::HasId;
+use crate::typesense::documents::anime_document::{self, AnimeDocument};
+use crate::typesense::documents::artist_document::{self, ArtistDocument};
+use crate::typesense::documents::playlist_document::{self, PlaylistDocument};
+use crate::typesense::documents::series_document::{self, SeriesDocument};
+use crate::typesense::documents::song_document::{self, SongDocument};
+use crate::typesense::documents::studio_document::{self, StudioDocument};
+use crate::typesense::documents::theme_document::{self, ThemeDocument};
+use crate::typesense::documents::video_document::{self, VideoDocument};
 
 pub async fn search_anime(
     db: &DatabaseConnection,

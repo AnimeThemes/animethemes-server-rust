@@ -5,11 +5,10 @@ use hmac::{Hmac, KeyInit, Mac};
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
-use crate::{
-    AppError,
-    entities::auth::user::{self},
-    mail::{mailer::Mail, messages::Messages},
-};
+use crate::AppError;
+use crate::entities::auth::user::{self};
+use crate::mail::mailer::Mail;
+use crate::mail::messages::Messages;
 
 pub struct VerifyEmail;
 

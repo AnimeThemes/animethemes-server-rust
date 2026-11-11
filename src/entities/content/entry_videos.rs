@@ -1,7 +1,5 @@
-use sea_orm::{
-    entity::prelude::*,
-    sqlx::types::chrono::{self, Utc},
-};
+use sea_orm::entity::prelude::*;
+use sea_orm::sqlx::types::chrono::{self, Utc};
 
 use crate::entities::content::{entry, video};
 

@@ -1,25 +1,26 @@
-use crate::{
-    AppError,
-    actions::auth::{
-        forgot_password::ForgotPassword,
-        login::{LoginAction, LoginActionParameters},
-        register::{Register, RegisterParameters},
-        reset_password::{ResetPassword, ResetPasswordParams},
-        update_user_information::{UpdateUserInformation, UpdateUserInformationParameters},
-        update_user_password::{UpdateUserPassword, UpdateUserPasswordParameters},
-        verify_email::VerifyEmail,
-    },
-    entities::auth::user,
-    enums::features::Feature,
-    features::functions::FeatureManager,
-    graphql::is_development,
-};
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
 use loco_rs::app::AppContext;
 use sea_orm::EntityTrait;
 use tower_sessions::Session;
 
-use crate::{graphql::types::auth::me::Me, middlewares::current_user::CurrentUser};
+use crate::AppError;
+use crate::actions::auth::forgot_password::ForgotPassword;
+use crate::actions::auth::login::{LoginAction, LoginActionParameters};
+use crate::actions::auth::register::{Register, RegisterParameters};
+use crate::actions::auth::reset_password::{ResetPassword, ResetPasswordParams};
+use crate::actions::auth::update_user_information::{
+    UpdateUserInformation, UpdateUserInformationParameters,
+};
+use crate::actions::auth::update_user_password::{
+    UpdateUserPassword, UpdateUserPasswordParameters,
+};
+use crate::actions::auth::verify_email::VerifyEmail;
+use crate::entities::auth::user;
+use crate::enums::features::Feature;
+use crate::features::functions::FeatureManager;
+use crate::graphql::is_development;
+use crate::graphql::types::auth::me::Me;
+use crate::middlewares::current_user::CurrentUser;
 
 #[derive(InputObject)]
 pub struct RegisterInput {

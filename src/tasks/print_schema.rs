@@ -1,7 +1,8 @@
 use async_graphql::{EmptySubscription, Schema};
 use loco_rs::prelude::*;
 
-use crate::graphql::{mutation::Mutation, query::Query};
+use crate::graphql::mutation::Mutation;
+use crate::graphql::query::Query;
 
 pub struct PrintSchema;
 

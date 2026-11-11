@@ -1,21 +1,17 @@
 use std::collections::BTreeMap;
 
-use crate::{
-    entities::content::anime,
-    enums::{LocalizedEnum, content::animeseason::AnimeSeason},
-    graphql::{cursor::PaginationCursor, enums::sort::content::anime_sort::AnimeSort},
-};
-use async_graphql::{
-    ComplexObject, Context, Object, Result, ResultExt, SimpleObject,
-    connection::{Connection, EmptyFields, OpaqueCursor},
-};
+use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
+use async_graphql::{ComplexObject, Context, Object, Result, ResultExt, SimpleObject};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
 
-use crate::graphql::{
-    inputs::pagination_input::PaginationInput,
-    queries::content::anime::{AnimeFilterInput, AnimeQuery},
-    types::content::anime::Anime,
-};
+use crate::entities::content::anime;
+use crate::enums::LocalizedEnum;
+use crate::enums::content::animeseason::AnimeSeason;
+use crate::graphql::cursor::PaginationCursor;
+use crate::graphql::enums::sort::content::anime_sort::AnimeSort;
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::queries::content::anime::{AnimeFilterInput, AnimeQuery};
+use crate::graphql::types::content::anime::Anime;
 
 /// The anime year response type, grouped by season
 #[derive(SimpleObject)]

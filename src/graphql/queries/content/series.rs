@@ -1,19 +1,14 @@
-use async_graphql::{
-    Context, InputObject, Object, Result, ResultExt,
-    connection::{Connection, EmptyFields, OpaqueCursor},
-};
+use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
+use async_graphql::{Context, InputObject, Object, Result, ResultExt};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
-use crate::{
-    entities::content::series,
-    graphql::{
-        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
-        enums::sort::{GraphQLSort, content::series_sort::SeriesSort},
-        inputs::pagination_input::PaginationInput,
-        types::content::series::Series,
-    },
-    scopes::without_trashed,
-};
+use crate::entities::content::series;
+use crate::graphql::cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate};
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::content::series_sort::SeriesSort;
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::types::content::series::Series;
+use crate::scopes::without_trashed;
 
 #[derive(InputObject, Default)]
 struct SeriesFilterInput {

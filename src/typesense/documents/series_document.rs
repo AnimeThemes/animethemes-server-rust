@@ -2,16 +2,10 @@ use sea_orm::{DatabaseConnection, LoaderTrait};
 use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
-use crate::{
-    entities::content::{anime, series},
-    typesense::{
-        documents::{
-            HasId,
-            anime_document::{AnimeDocument, build_anime_documents},
-        },
-        index_document::BuildDocumentsFuture,
-    },
-};
+use crate::entities::content::{anime, series};
+use crate::typesense::documents::HasId;
+use crate::typesense::documents::anime_document::{AnimeDocument, build_anime_documents};
+use crate::typesense::index_document::BuildDocumentsFuture;
 
 pub const QUERY_BY: &str = "title,anime.title_english,anime.title_native,anime.synonyms";
 pub const QUERY_BY_WEIGHTS: &str = "10,8,8,6";

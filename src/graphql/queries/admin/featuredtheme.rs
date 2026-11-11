@@ -1,11 +1,9 @@
 use async_graphql::{Context, Object, Result};
 use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter};
 
-use crate::{
-    entities::admin::featuredtheme,
-    graphql::types::admin::currentfeaturedtheme::CurrentFeaturedTheme,
-    scopes::admin::featuredtheme::current_featured_theme,
-};
+use crate::entities::admin::featuredtheme;
+use crate::graphql::types::admin::currentfeaturedtheme::CurrentFeaturedTheme;
+use crate::scopes::admin::featuredtheme::current_featured_theme;
 
 #[derive(Default)]
 pub struct FeaturedThemeQuery;

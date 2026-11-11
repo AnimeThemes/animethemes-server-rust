@@ -1,7 +1,7 @@
 use animethemes_server_rust::app::App;
-use loco_rs::{task, testing::prelude::*};
-
 use loco_rs::boot::run_task;
+use loco_rs::task;
+use loco_rs::testing::prelude::*;
 use serial_test::serial;
 
 #[tokio::test]

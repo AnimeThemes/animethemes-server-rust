@@ -1,19 +1,17 @@
 use std::env;
 
-use axum::{
-    extract::{Path, Query},
-    response::Redirect,
-};
+use axum::extract::{Path, Query};
+use axum::response::Redirect;
 use chrono::Utc;
 use loco_rs::prelude::*;
 use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 use serde::Deserialize;
 
-use crate::{
-    AppError,
-    actions::auth::{roles::RoleAction, verify_email::VerifyEmail},
-    entities::auth::{role::Roles, user},
-};
+use crate::AppError;
+use crate::actions::auth::roles::RoleAction;
+use crate::actions::auth::verify_email::VerifyEmail;
+use crate::entities::auth::role::Roles;
+use crate::entities::auth::user;
 
 #[derive(Debug, Deserialize)]
 pub struct VerifyEmailQuery {

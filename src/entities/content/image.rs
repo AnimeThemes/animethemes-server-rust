@@ -3,7 +3,8 @@ use std::env;
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::{entities::SoftDeleteEntity, enums::content::imagefacet::ImageFacet};
+use crate::entities::SoftDeleteEntity;
+use crate::enums::content::imagefacet::ImageFacet;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

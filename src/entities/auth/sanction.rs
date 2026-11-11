@@ -1,4 +1,5 @@
-use std::{fmt, str::FromStr};
+use std::fmt;
+use std::str::FromStr;
 
 use chrono::Utc;
 use sea_orm::entity::prelude::*;

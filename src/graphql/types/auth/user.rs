@@ -1,13 +1,12 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::auth::user,
-    graphql::{
-        enums::sort::list::playlist_sort::PlaylistSort,
-        loaders::auth::user::user_playlists::{UserPlaylistsLoader, UserPlaylistsLoaderKey},
-        types::list::playlist::Playlist,
-    },
+use crate::entities::auth::user;
+use crate::graphql::enums::sort::list::playlist_sort::PlaylistSort;
+use crate::graphql::loaders::auth::user::user_playlists::{
+    UserPlaylistsLoader, UserPlaylistsLoaderKey,
 };
+use crate::graphql::types::list::playlist::Playlist;
 
 /// Represents an Themes account.
 #[derive(SimpleObject)]

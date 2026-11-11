@@ -1,6 +1,7 @@
 use std::path::Path;
 
-use loco_rs::{Error, Result, app::AppContext};
+use loco_rs::app::AppContext;
+use loco_rs::{Error, Result};
 use sea_orm::{ActiveValue, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
 
 use crate::entities::auth::sanction;

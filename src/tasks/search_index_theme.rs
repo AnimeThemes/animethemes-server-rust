@@ -1,17 +1,14 @@
+use std::error::Error as StdError;
+
 use loco_rs::prelude::*;
 use sea_orm::{EntityTrait, QueryFilter};
-use std::error::Error as StdError;
 use typesense::prelude::Document;
 
-use crate::{
-    entities::content::theme,
-    scopes::without_trashed,
-    typesense::{
-        client::TypesenseClient,
-        documents::theme_document::{ThemeDocument, build_theme_documents},
-        index_document,
-    },
-};
+use crate::entities::content::theme;
+use crate::scopes::without_trashed;
+use crate::typesense::client::TypesenseClient;
+use crate::typesense::documents::theme_document::{ThemeDocument, build_theme_documents};
+use crate::typesense::index_document;
 
 pub struct SearchIndexTheme;
 

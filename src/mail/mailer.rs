@@ -1,7 +1,7 @@
 use std::env;
 
-use lettre::{AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor, message::Mailbox};
-
+use lettre::message::Mailbox;
+use lettre::{AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor};
 use reqwest::multipart::{Form, Part};
 
 use crate::AppError;

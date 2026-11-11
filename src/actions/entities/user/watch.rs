@@ -1,13 +1,14 @@
-use crate::AppError;
-use crate::entities::content::entry_videos;
-use crate::entities::user::watchhistory;
-use crate::rules::validation_error::ValidationError;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt,
     TransactionTrait,
 };
+
+use crate::AppError;
+use crate::entities::content::entry_videos;
+use crate::entities::user::watchhistory;
+use crate::rules::validation_error::ValidationError;
 
 pub struct MarkAsWatchedActionParameters {
     pub entry_id: u64,

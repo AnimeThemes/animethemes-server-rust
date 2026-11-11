@@ -1,44 +1,36 @@
-use migration::Migrator;
-use reqwest::header::USER_AGENT;
 use std::env;
 use std::path::Path;
 
 use async_trait::async_trait;
-use axum::{
-    Router as AxumRouter,
-    http::{
-        HeaderValue, Method,
-        header::{AUTHORIZATION, CONTENT_TYPE},
-    },
-    middleware::{self},
-    routing::{get, post},
-};
-use loco_rs::{
-    Result,
-    app::{AppContext, Hooks, Initializer},
-    bgworker::{BackgroundWorker, Queue},
-    boot::{BootResult, StartMode, create_app},
-    config::Config,
-    controller::AppRoutes,
-    environment::Environment,
-    prelude::Routes,
-    task::Tasks,
-};
+use axum::Router as AxumRouter;
+use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
+use axum::http::{HeaderValue, Method};
+use axum::middleware::{self};
+use axum::routing::{get, post};
+use loco_rs::Result;
+use loco_rs::app::{AppContext, Hooks, Initializer};
+use loco_rs::bgworker::{BackgroundWorker, Queue};
+use loco_rs::boot::{BootResult, StartMode, create_app};
+use loco_rs::config::Config;
+use loco_rs::controller::AppRoutes;
+use loco_rs::environment::Environment;
+use loco_rs::prelude::Routes;
+use loco_rs::task::Tasks;
+use migration::Migrator;
+use reqwest::header::USER_AGENT;
 use tower_http::cors::{AllowCredentials, AllowOrigin, CorsLayer};
 use url::Url;
 
-use crate::{
-    caches::hostname_cache::HostnameCache,
-    middlewares::{self, rate_limiting::GraphqlRateLimitState},
-    schema::{self, graphiql, graphql_handler},
-    seeds,
-    session::create_session_layer,
-    typesense::client::{create_typesense_client, init_typesense},
-    workers,
-};
+use crate::caches::hostname_cache::HostnameCache;
+use crate::middlewares::rate_limiting::GraphqlRateLimitState;
+use crate::middlewares::{self};
+use crate::schema::{self, graphiql, graphql_handler};
+use crate::session::create_session_layer;
+use crate::storage::create_storage;
+use crate::typesense::client::{create_typesense_client, init_typesense};
 #[allow(unused_imports)]
 use crate::{controllers, tasks};
-use crate::{settings, storage::create_storage};
+use crate::{seeds, settings, workers};
 
 pub struct App;
 #[async_trait]

@@ -1,16 +1,9 @@
-use crate::{
-    entities::{
-        auth::{role::Roles, sanction::Sanctions},
-        list::playlist,
-    },
-    enums::list::playlistvisibility::PlaylistVisibility,
-    policies::get_sanction,
-};
-
-use crate::{
-    middlewares::current_user::CurrentUser,
-    policies::{Policy, PolicyAction, PolicyResponse, has_any_role},
-};
+use crate::entities::auth::role::Roles;
+use crate::entities::auth::sanction::Sanctions;
+use crate::entities::list::playlist;
+use crate::enums::list::playlistvisibility::PlaylistVisibility;
+use crate::middlewares::current_user::CurrentUser;
+use crate::policies::{Policy, PolicyAction, PolicyResponse, get_sanction, has_any_role};
 
 pub struct PlaylistTrackPolicy;
 

@@ -1,16 +1,12 @@
-use crate::{
-    entities::auth::{role, sanction, user, user_sanctions},
-    scopes::auth::user_sanctions::current_sanctions,
-};
-use axum::{
-    extract::{Request, State},
-    middleware::Next,
-    response::Response,
-};
+use axum::extract::{Request, State};
+use axum::middleware::Next;
+use axum::response::Response;
 use loco_rs::app::AppContext;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
-
 use tower_sessions::Session;
+
+use crate::entities::auth::{role, sanction, user, user_sanctions};
+use crate::scopes::auth::user_sanctions::current_sanctions;
 
 #[derive(Clone)]
 pub struct CurrentUser {

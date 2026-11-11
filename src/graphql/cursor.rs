@@ -1,7 +1,5 @@
-use async_graphql::{
-    Context, OutputType, Result,
-    connection::{Connection, Edge, EmptyFields, OpaqueCursor, query},
-};
+use async_graphql::connection::{Connection, Edge, EmptyFields, OpaqueCursor, query};
+use async_graphql::{Context, OutputType, Result};
 use axum::Error;
 use sea_orm::{
     ColumnTrait, Condition, DatabaseConnection, EntityTrait, ExprTrait, ModelTrait, Order,

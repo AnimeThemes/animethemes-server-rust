@@ -1,7 +1,8 @@
-use crate::enums::{LocalizedEnum, content::imagefacet::ImageFacet};
 use async_graphql::SimpleObject;
 
 use crate::entities::content::image::{self};
+use crate::enums::LocalizedEnum;
+use crate::enums::content::imagefacet::ImageFacet;
 
 /// Represents a visual component for another resource such as an anime or artist.
 ///

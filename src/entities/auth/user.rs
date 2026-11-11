@@ -1,9 +1,11 @@
 use async_trait::async_trait;
 use chrono::Utc;
-use sea_orm::{ActiveValue::Set, entity::prelude::*};
+use sea_orm::ActiveValue::Set;
+use sea_orm::entity::prelude::*;
 use sha2::{Digest, Sha256};
 
-use crate::entities::{auth::role, list::playlist};
+use crate::entities::auth::role;
+use crate::entities::list::playlist;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

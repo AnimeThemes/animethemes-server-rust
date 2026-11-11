@@ -1,26 +1,22 @@
-use async_graphql::{
-    ComplexObject, Context, Result, SimpleObject,
-    connection::{Connection, Edge, EmptyFields},
-    dataloader::DataLoader,
-};
+use async_graphql::connection::{Connection, Edge, EmptyFields};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::content::{imageable, resourceable, studio},
-    graphql::{
-        loaders::content::{
-            imageable::{ImageableKey, ImageableLoader},
-            resourceable::{ResourceableKey, ResourceableLoader},
-            studio::studio_anime::StudioAnimeLoader,
-        },
-        types::content::{
-            anime::Anime,
-            externalresource::ExternalResource,
-            image::Image,
-            imageable::{ImageableConnection, ImageableEdge, ImageableEdgeFields},
-            resourceable::{ResourceableConnection, ResourceableEdge, ResourceableEdgeFields},
-            studio_anime::{StudioAnimeConnection, StudioAnimeEdge, StudioAnimeEdgeFields},
-        },
-    },
+use crate::entities::content::{imageable, resourceable, studio};
+use crate::graphql::loaders::content::imageable::{ImageableKey, ImageableLoader};
+use crate::graphql::loaders::content::resourceable::{ResourceableKey, ResourceableLoader};
+use crate::graphql::loaders::content::studio::studio_anime::StudioAnimeLoader;
+use crate::graphql::types::content::anime::Anime;
+use crate::graphql::types::content::externalresource::ExternalResource;
+use crate::graphql::types::content::image::Image;
+use crate::graphql::types::content::imageable::{
+    ImageableConnection, ImageableEdge, ImageableEdgeFields,
+};
+use crate::graphql::types::content::resourceable::{
+    ResourceableConnection, ResourceableEdge, ResourceableEdgeFields,
+};
+use crate::graphql::types::content::studio_anime::{
+    StudioAnimeConnection, StudioAnimeEdge, StudioAnimeEdgeFields,
 };
 
 /// Represents a company that produces anime.

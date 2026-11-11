@@ -3,13 +3,9 @@ use sea_orm::{
 };
 use sea_query::Expr;
 
-use crate::{
-    entities::{
-        auth::role,
-        document::{page, page_roles},
-    },
-    enums::document::pageroletype::PageRoleType,
-};
+use crate::entities::auth::role;
+use crate::entities::document::{page, page_roles};
+use crate::enums::document::pageroletype::PageRoleType;
 
 pub fn public_pages(user_roles: &Vec<role::Model>) -> Condition {
     let user_role_ids: Vec<u64> = user_roles.iter().map(|role| role.id).collect();

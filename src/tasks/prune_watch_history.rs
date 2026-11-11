@@ -1,5 +1,4 @@
-use chrono::Duration;
-use chrono::Utc;
+use chrono::{Duration, Utc};
 use loco_rs::Error as LocoError;
 use loco_rs::prelude::*;
 

@@ -1,14 +1,11 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::content::theme_staff,
-    graphql::{
-        loaders::content::themestaff::{
-            themestaff_artist::ThemeStaffArtistLoader, themestaff_theme::ThemeStaffThemeLoader,
-        },
-        types::content::{artist::Artist, theme::Theme},
-    },
-};
+use crate::entities::content::theme_staff;
+use crate::graphql::loaders::content::themestaff::themestaff_artist::ThemeStaffArtistLoader;
+use crate::graphql::loaders::content::themestaff::themestaff_theme::ThemeStaffThemeLoader;
+use crate::graphql::types::content::artist::Artist;
+use crate::graphql::types::content::theme::Theme;
 
 /// Represents the link between a theme and an artist.
 #[derive(SimpleObject)]

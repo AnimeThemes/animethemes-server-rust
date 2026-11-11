@@ -1,17 +1,17 @@
+use async_graphql::{Context, Error, InputObject, Object, OneofObject, Result, ResultExt};
+use loco_rs::app::AppContext;
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+
+use crate::AppError;
 use crate::actions::entities::user::favorite::{
     self as FavoriteActions, FavoriteAction, ToggleFavoriteActionParameters,
     UpdateFavoriteActionParameters,
 };
 use crate::entities::user::favorite;
 use crate::graphql::types::user::favorite::Favorite;
+use crate::middlewares::current_user::CurrentUser;
 use crate::policies::user::favorite::FavoritePolicy;
 use crate::policies::{Policy, PolicyAction};
-use async_graphql::{Context, Error, InputObject, Object, OneofObject, Result, ResultExt};
-use loco_rs::app::AppContext;
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
-
-use crate::AppError;
-use crate::middlewares::current_user::CurrentUser;
 
 #[derive(OneofObject)]
 enum FavoriteableType {

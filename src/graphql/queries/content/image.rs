@@ -1,22 +1,15 @@
-use crate::{
-    entities::content::image, enums::content::imagefacet::ImageFacet,
-    graphql::cursor::CursorSortKey,
-};
-use async_graphql::{
-    Context, InputObject, Object, Result, ResultExt,
-    connection::{Connection, EmptyFields, OpaqueCursor},
-};
+use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
+use async_graphql::{Context, InputObject, Object, Result, ResultExt};
 use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter};
 
-use crate::{
-    graphql::{
-        cursor::{CursorSort, PaginationCursor, cursor_paginate},
-        enums::sort::{GraphQLSort, content::image_sort::ImageSort},
-        inputs::pagination_input::PaginationInput,
-        types::content::image::Image,
-    },
-    scopes::without_trashed,
-};
+use crate::entities::content::image;
+use crate::enums::content::imagefacet::ImageFacet;
+use crate::graphql::cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate};
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::content::image_sort::ImageSort;
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::types::content::image::Image;
+use crate::scopes::without_trashed;
 
 #[derive(InputObject, Default)]
 struct ImageFilterInput {

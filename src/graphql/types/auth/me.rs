@@ -1,38 +1,31 @@
-use async_graphql::{
-    ComplexObject, Context, InputObject, Result, SimpleObject,
-    connection::{Connection, EmptyFields, OpaqueCursor},
-    dataloader::DataLoader,
-};
+use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, InputObject, Result, SimpleObject};
 use chrono::{DateTime, Utc};
 use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter};
 
-use crate::{
-    entities::{auth::user, list::playlist, user::watchhistory},
-    graphql::{
-        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
-        enums::sort::{
-            GraphQLSort,
-            list::playlist_sort::PlaylistSort,
-            user::{
-                favorite_sort::FavoriteSort, rating_sort::RatingSort,
-                watchhistory_sort::WatchHistorySort,
-            },
-        },
-        inputs::pagination_input::PaginationInput,
-        loaders::auth::user::{
-            user_favorites::{
-                UserFavoritesLoader, UserFavoritesLoaderKey, UserFavoritesLoaderQuery,
-            },
-            user_ratings::{UserRatingsLoader, UserRatingsLoaderKey, UserRatingsLoaderQuery},
-            user_roles::UserRolesLoader,
-        },
-        types::{
-            auth::role::Role,
-            list::playlist::Playlist,
-            user::{favorite::Favorite, rating::Rating, watchhistory::WatchHistory},
-        },
-    },
+use crate::entities::auth::user;
+use crate::entities::list::playlist;
+use crate::entities::user::watchhistory;
+use crate::graphql::cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate};
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::list::playlist_sort::PlaylistSort;
+use crate::graphql::enums::sort::user::favorite_sort::FavoriteSort;
+use crate::graphql::enums::sort::user::rating_sort::RatingSort;
+use crate::graphql::enums::sort::user::watchhistory_sort::WatchHistorySort;
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::loaders::auth::user::user_favorites::{
+    UserFavoritesLoader, UserFavoritesLoaderKey, UserFavoritesLoaderQuery,
 };
+use crate::graphql::loaders::auth::user::user_ratings::{
+    UserRatingsLoader, UserRatingsLoaderKey, UserRatingsLoaderQuery,
+};
+use crate::graphql::loaders::auth::user::user_roles::UserRolesLoader;
+use crate::graphql::types::auth::role::Role;
+use crate::graphql::types::list::playlist::Playlist;
+use crate::graphql::types::user::favorite::Favorite;
+use crate::graphql::types::user::rating::Rating;
+use crate::graphql::types::user::watchhistory::WatchHistory;
 
 #[derive(InputObject, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct UserFavoritesFilterInput {

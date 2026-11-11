@@ -1,10 +1,8 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::{
-    SoftDeleteEntity,
-    content::{artist, song},
-};
+use crate::entities::SoftDeleteEntity;
+use crate::entities::content::{artist, song};
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

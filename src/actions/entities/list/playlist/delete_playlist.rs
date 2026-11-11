@@ -1,12 +1,11 @@
 use loco_rs::app::AppContext;
 use sea_orm::ModelTrait;
 
-use crate::{
-    AppError,
-    entities::list::playlist,
-    enums::list::playlistvisibility::PlaylistVisibility,
-    typesense::{client::typesense, documents::playlist_document::PlaylistDocument},
-};
+use crate::AppError;
+use crate::entities::list::playlist;
+use crate::enums::list::playlistvisibility::PlaylistVisibility;
+use crate::typesense::client::typesense;
+use crate::typesense::documents::playlist_document::PlaylistDocument;
 
 pub struct DeletePlaylistAction;
 

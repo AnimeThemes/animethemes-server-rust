@@ -1,24 +1,20 @@
 use std::env;
 
 use loco_rs::app::AppContext;
+use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, PaginatorTrait,
     QueryFilter, QueryOrder, QuerySelect, SelectExt, TransactionTrait,
 };
 
-use crate::{
-    AppError,
-    entities::{
-        auth::role::Roles,
-        content::entry_videos,
-        list::{playlist, track},
-    },
-    middlewares::current_user::CurrentUser,
-    policies::has_any_role,
-    rules::validation_error::ValidationError,
-    traits::sortable::Sortable,
-};
-use sea_orm::ActiveValue::Set;
+use crate::AppError;
+use crate::entities::auth::role::Roles;
+use crate::entities::content::entry_videos;
+use crate::entities::list::{playlist, track};
+use crate::middlewares::current_user::CurrentUser;
+use crate::policies::has_any_role;
+use crate::rules::validation_error::ValidationError;
+use crate::traits::sortable::Sortable;
 
 pub struct InsertTrackActionParameters {
     pub entry_id: u64,

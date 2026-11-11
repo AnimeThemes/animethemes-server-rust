@@ -1,17 +1,15 @@
 use bcrypt::hash;
 use loco_rs::app::AppContext;
+use sea_orm::ActiveValue::Set;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait,
-    QueryFilter,
+    ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter,
 };
 use sha2::{Digest, Sha256};
 
-use crate::{
-    AppError,
-    actions::auth::register::Register,
-    entities::auth::{password_reset_tokens, user},
-    rules::validation_error::ValidationError,
-};
+use crate::AppError;
+use crate::actions::auth::register::Register;
+use crate::entities::auth::{password_reset_tokens, user};
+use crate::rules::validation_error::ValidationError;
 
 pub struct ResetPasswordParams {
     pub email: String,

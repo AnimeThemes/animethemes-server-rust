@@ -1,4 +1,5 @@
-use sea_orm::{ColumnTrait, Condition, sea_query::IntoCondition};
+use sea_orm::sea_query::IntoCondition;
+use sea_orm::{ColumnTrait, Condition};
 
 use crate::entities::SoftDeleteEntity;
 

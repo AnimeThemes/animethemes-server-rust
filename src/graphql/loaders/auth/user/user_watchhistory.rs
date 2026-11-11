@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
-use crate::entities::user::watchhistory;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+
+use crate::entities::user::watchhistory;
 
 pub struct UserWatchHistoryLoader {
     pub db: DatabaseConnection,

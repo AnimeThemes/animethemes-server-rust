@@ -1,10 +1,9 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::{
-    entities::{auth::role, document::page},
-    enums::document::pageroletype::PageRoleType,
-};
+use crate::entities::auth::role;
+use crate::entities::document::page;
+use crate::enums::document::pageroletype::PageRoleType;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

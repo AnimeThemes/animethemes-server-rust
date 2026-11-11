@@ -1,9 +1,7 @@
 use loco_rs::app::AppContext;
 
-use crate::{
-    AppError,
-    entities::auth::user::{self},
-};
+use crate::AppError;
+use crate::entities::auth::user::{self};
 
 #[derive(Clone)]
 pub struct LoginActionParameters {

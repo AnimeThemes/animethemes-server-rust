@@ -1,41 +1,36 @@
-use crate::{
-    entities::content::{imageable, resourceable},
-    enums::{
-        LocalizedEnum,
-        content::{animeformat::AnimeFormat, animeseason::AnimeSeason},
-    },
-};
-use async_graphql::{
-    ComplexObject, Context, Result, SimpleObject,
-    connection::{Connection, Edge, EmptyFields},
-    dataloader::DataLoader,
-};
+use async_graphql::connection::{Connection, Edge, EmptyFields};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::content::anime::{self},
-    graphql::{
-        loaders::content::{
-            anime::{
-                anime_series::AnimeSeriesLoader, anime_studios::AnimeStudiosLoader,
-                anime_synonyms::AnimeSynonymsLoader, anime_themes::ThemesLoader,
-            },
-            imageable::{ImageableKey, ImageableLoader},
-            resourceable::{ResourceableKey, ResourceableLoader},
-        },
-        types::content::{
-            anime_series::{AnimeSeriesConnection, AnimeSeriesEdge, AnimeSeriesEdgeFields},
-            anime_studios::{AnimeStudioConnection, AnimeStudioEdge, AnimeStudioEdgeFields},
-            externalresource::ExternalResource,
-            image::Image,
-            imageable::{ImageableConnection, ImageableEdge, ImageableEdgeFields},
-            resourceable::{ResourceableConnection, ResourceableEdge, ResourceableEdgeFields},
-            series::Series,
-            studio::Studio,
-            synonym::Synonym,
-            theme::Theme,
-        },
-    },
+use crate::entities::content::anime::{self};
+use crate::entities::content::{imageable, resourceable};
+use crate::enums::LocalizedEnum;
+use crate::enums::content::animeformat::AnimeFormat;
+use crate::enums::content::animeseason::AnimeSeason;
+use crate::graphql::loaders::content::anime::anime_series::AnimeSeriesLoader;
+use crate::graphql::loaders::content::anime::anime_studios::AnimeStudiosLoader;
+use crate::graphql::loaders::content::anime::anime_synonyms::AnimeSynonymsLoader;
+use crate::graphql::loaders::content::anime::anime_themes::ThemesLoader;
+use crate::graphql::loaders::content::imageable::{ImageableKey, ImageableLoader};
+use crate::graphql::loaders::content::resourceable::{ResourceableKey, ResourceableLoader};
+use crate::graphql::types::content::anime_series::{
+    AnimeSeriesConnection, AnimeSeriesEdge, AnimeSeriesEdgeFields,
 };
+use crate::graphql::types::content::anime_studios::{
+    AnimeStudioConnection, AnimeStudioEdge, AnimeStudioEdgeFields,
+};
+use crate::graphql::types::content::externalresource::ExternalResource;
+use crate::graphql::types::content::image::Image;
+use crate::graphql::types::content::imageable::{
+    ImageableConnection, ImageableEdge, ImageableEdgeFields,
+};
+use crate::graphql::types::content::resourceable::{
+    ResourceableConnection, ResourceableEdge, ResourceableEdgeFields,
+};
+use crate::graphql::types::content::series::Series;
+use crate::graphql::types::content::studio::Studio;
+use crate::graphql::types::content::synonym::Synonym;
+use crate::graphql::types::content::theme::Theme;
 
 #[derive(SimpleObject)]
 pub struct AnimeTitle {

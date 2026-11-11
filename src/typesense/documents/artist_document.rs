@@ -4,10 +4,9 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, LoaderTrait, QueryFi
 use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
-use crate::{
-    entities::content::{artist, song_staff, synonym},
-    typesense::{documents::HasId, index_document::BuildDocumentsFuture},
-};
+use crate::entities::content::{artist, song_staff, synonym};
+use crate::typesense::documents::HasId;
+use crate::typesense::index_document::BuildDocumentsFuture;
 
 pub const QUERY_BY: &str = "name,name_native,synonyms,as,search_text";
 pub const QUERY_BY_WEIGHTS: &str = "10,8,6,3,1";

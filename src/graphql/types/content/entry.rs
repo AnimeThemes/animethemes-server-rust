@@ -1,22 +1,15 @@
-use async_graphql::{
-    ComplexObject, Context, Result, SimpleObject,
-    connection::{Connection, Edge, EmptyFields},
-    dataloader::DataLoader,
-};
+use async_graphql::connection::{Connection, Edge, EmptyFields};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::content::entry,
-    graphql::{
-        loaders::content::entry::{entry_theme::EntryThemeLoader, entry_videos::EntryVideosLoader},
-        types::content::{
-            video::Video,
-            {
-                entry_video::{EntryVideoConnection, EntryVideoEdge, EntryVideoEdgeFields},
-                theme::Theme,
-            },
-        },
-    },
+use crate::entities::content::entry;
+use crate::graphql::loaders::content::entry::entry_theme::EntryThemeLoader;
+use crate::graphql::loaders::content::entry::entry_videos::EntryVideosLoader;
+use crate::graphql::types::content::entry_video::{
+    EntryVideoConnection, EntryVideoEdge, EntryVideoEdgeFields,
 };
+use crate::graphql::types::content::theme::Theme;
+use crate::graphql::types::content::video::Video;
 
 /// Represents a version of a theme.
 ///

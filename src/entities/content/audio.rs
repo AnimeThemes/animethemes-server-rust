@@ -3,7 +3,8 @@ use std::env;
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::{SoftDeleteEntity, content::video};
+use crate::entities::SoftDeleteEntity;
+use crate::entities::content::video;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

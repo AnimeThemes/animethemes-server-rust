@@ -1,15 +1,12 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::content::song_staff,
-    graphql::{
-        loaders::content::songstaff::{
-            songstaff_artist::SongStaffArtistLoader, songstaff_member::SongStaffMemberLoader,
-            songstaff_song::SongStaffSongLoader,
-        },
-        types::content::{artist::Artist, song::Song},
-    },
-};
+use crate::entities::content::song_staff;
+use crate::graphql::loaders::content::songstaff::songstaff_artist::SongStaffArtistLoader;
+use crate::graphql::loaders::content::songstaff::songstaff_member::SongStaffMemberLoader;
+use crate::graphql::loaders::content::songstaff::songstaff_song::SongStaffSongLoader;
+use crate::graphql::types::content::artist::Artist;
+use crate::graphql::types::content::song::Song;
 
 /// Represents the link between a song and an artist or group.
 #[derive(SimpleObject)]

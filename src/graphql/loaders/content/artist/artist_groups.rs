@@ -1,9 +1,11 @@
-use crate::entities::content::{artist, artist_members};
+use std::collections::HashMap;
+
 use async_graphql::dataloader::Loader;
 use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QuerySelect, RelationTrait,
 };
-use std::collections::HashMap;
+
+use crate::entities::content::{artist, artist_members};
 
 pub struct ArtistGroupsLoader {
     pub db: DatabaseConnection,

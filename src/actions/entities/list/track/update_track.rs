@@ -1,16 +1,15 @@
 use loco_rs::app::AppContext;
+use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt,
     TransactionTrait,
 };
 
-use crate::{
-    AppError,
-    entities::{content::entry_videos, list::track},
-    rules::validation_error::ValidationError,
-    traits::sortable::Sortable,
-};
-use sea_orm::ActiveValue::Set;
+use crate::AppError;
+use crate::entities::content::entry_videos;
+use crate::entities::list::track;
+use crate::rules::validation_error::ValidationError;
+use crate::traits::sortable::Sortable;
 
 pub struct UpdateTrackActionParameters {
     pub entry_id: Option<u64>,

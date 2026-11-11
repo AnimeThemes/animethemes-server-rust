@@ -3,7 +3,8 @@ use std::collections::HashMap;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
-use crate::{entities::content::theme, scopes::without_trashed};
+use crate::entities::content::theme;
+use crate::scopes::without_trashed;
 
 pub struct ThemesLoader {
     pub db: DatabaseConnection,

@@ -1,7 +1,8 @@
-use crate::enums::{LocalizedEnum, content::resourcesite::ResourceSite};
 use async_graphql::SimpleObject;
 
 use crate::entities::content::externalresource::{self};
+use crate::enums::LocalizedEnum;
+use crate::enums::content::resourcesite::ResourceSite;
 
 /// Represents a site with supplementary information for another resource such as an anime or artist.
 ///

@@ -1,20 +1,13 @@
-use std::{path::Path, time::Duration};
+use std::path::Path;
+use std::time::Duration;
 
-use axum::{
-    body::Body,
-    http::{
-        Response as HttpResponse,
-        header::{ACCEPT_RANGES, CONTENT_DISPOSITION, CONTENT_TYPE},
-    },
-    response::Response,
-};
-
-use loco_rs::{
-    app::AppContext,
-    prelude::{Error, Result},
-    storage::strategies::single::SingleStrategy,
-};
-
+use axum::body::Body;
+use axum::http::Response as HttpResponse;
+use axum::http::header::{ACCEPT_RANGES, CONTENT_DISPOSITION, CONTENT_TYPE};
+use axum::response::Response;
+use loco_rs::app::AppContext;
+use loco_rs::prelude::{Error, Result};
+use loco_rs::storage::strategies::single::SingleStrategy;
 use percent_encoding::{NON_ALPHANUMERIC, utf8_percent_encode};
 use url::Url;
 

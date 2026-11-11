@@ -1,9 +1,10 @@
-use crate::{
-    AppError, entities::user::rating,
-    graphql::loaders::user::rating::rating_entry::RatingEntryLoader,
-    graphql::types::content::entry::Entry,
-};
-use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject};
+
+use crate::AppError;
+use crate::entities::user::rating;
+use crate::graphql::loaders::user::rating::rating_entry::RatingEntryLoader;
+use crate::graphql::types::content::entry::Entry;
 
 /// Represents the rating of the authenticated user.
 #[derive(SimpleObject)]

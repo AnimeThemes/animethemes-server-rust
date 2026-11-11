@@ -1,25 +1,25 @@
 use std::env;
 
 use anyhow::Context;
-use loco_rs::{app::AppContext, prelude::BackgroundWorker};
+use loco_rs::app::AppContext;
+use loco_rs::prelude::BackgroundWorker;
+use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
 };
 
-use crate::{
-    AppError, discord,
-    entities::{auth::role::Roles, list::playlist},
-    enums::list::playlistvisibility::PlaylistVisibility,
-    middlewares::current_user::CurrentUser,
-    policies::has_any_role,
-    rules::validation_error::ValidationError,
-    typesense::{
-        client::typesense,
-        documents::playlist_document::{PlaylistDocument, build_playlist_documents},
-    },
-    workers::discord_notification::{DiscordNotificationWorker, DiscordNotificationWorkerArgs},
+use crate::entities::auth::role::Roles;
+use crate::entities::list::playlist;
+use crate::enums::list::playlistvisibility::PlaylistVisibility;
+use crate::middlewares::current_user::CurrentUser;
+use crate::policies::has_any_role;
+use crate::rules::validation_error::ValidationError;
+use crate::typesense::client::typesense;
+use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
+use crate::workers::discord_notification::{
+    DiscordNotificationWorker, DiscordNotificationWorkerArgs,
 };
-use sea_orm::ActiveValue::Set;
+use crate::{AppError, discord};
 
 pub struct CreatePlaylistActionParameters {
     pub name: String,

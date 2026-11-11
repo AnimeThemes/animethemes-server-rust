@@ -1,23 +1,22 @@
-use crate::{
-    AppError,
-    actions::entities::list::track::{
-        delete_track::DeleteTrackAction,
-        insert_track::{InsertTrackAction, InsertTrackActionParameters},
-        update_track::{UpdateTrackAction, UpdateTrackActionParameters},
-    },
-    entities::list::{playlist, track},
-    enums::features::Feature,
-    features::functions::FeatureManager,
-};
 use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
 use loco_rs::app::AppContext;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
-use crate::{
-    graphql::types::list::track::PlaylistTrack,
-    middlewares::current_user::CurrentUser,
-    policies::{Policy, PolicyAction, list::track::PlaylistTrackPolicy},
+use crate::AppError;
+use crate::actions::entities::list::track::delete_track::DeleteTrackAction;
+use crate::actions::entities::list::track::insert_track::{
+    InsertTrackAction, InsertTrackActionParameters,
 };
+use crate::actions::entities::list::track::update_track::{
+    UpdateTrackAction, UpdateTrackActionParameters,
+};
+use crate::entities::list::{playlist, track};
+use crate::enums::features::Feature;
+use crate::features::functions::FeatureManager;
+use crate::graphql::types::list::track::PlaylistTrack;
+use crate::middlewares::current_user::CurrentUser;
+use crate::policies::list::track::PlaylistTrackPolicy;
+use crate::policies::{Policy, PolicyAction};
 
 #[derive(InputObject)]
 struct CreatePlaylistTrackInput {

@@ -1,22 +1,22 @@
 use async_graphql::{Context, MergedObject, Object, Result};
 
-use crate::{
-    graphql::{
-        queries::{
-            admin::{announcement::AnnouncementQuery, featuredtheme::FeaturedThemeQuery},
-            content::{
-                anime::AnimeQuery, animeyear::AnimeYearQuery, artist::ArtistQuery,
-                entry::EntryQuery, image::ImageQuery, series::SeriesQuery, studio::StudioQuery,
-                theme::ThemeQuery, video::VideoQuery,
-            },
-            document::page::PageQuery,
-            list::playlist::PlaylistQuery,
-            search::SearchQuery,
-        },
-        types::auth::{me::Me, permissions::Permissions},
-    },
-    middlewares::current_user::CurrentUser,
-};
+use crate::graphql::queries::admin::announcement::AnnouncementQuery;
+use crate::graphql::queries::admin::featuredtheme::FeaturedThemeQuery;
+use crate::graphql::queries::content::anime::AnimeQuery;
+use crate::graphql::queries::content::animeyear::AnimeYearQuery;
+use crate::graphql::queries::content::artist::ArtistQuery;
+use crate::graphql::queries::content::entry::EntryQuery;
+use crate::graphql::queries::content::image::ImageQuery;
+use crate::graphql::queries::content::series::SeriesQuery;
+use crate::graphql::queries::content::studio::StudioQuery;
+use crate::graphql::queries::content::theme::ThemeQuery;
+use crate::graphql::queries::content::video::VideoQuery;
+use crate::graphql::queries::document::page::PageQuery;
+use crate::graphql::queries::list::playlist::PlaylistQuery;
+use crate::graphql::queries::search::SearchQuery;
+use crate::graphql::types::auth::me::Me;
+use crate::graphql::types::auth::permissions::Permissions;
+use crate::middlewares::current_user::CurrentUser;
 
 #[derive(MergedObject, Default)]
 pub struct Query(

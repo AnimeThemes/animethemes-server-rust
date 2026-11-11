@@ -1,4 +1,5 @@
-use loco_rs::{Error, Result, app::AppContext};
+use loco_rs::app::AppContext;
+use loco_rs::{Error, Result};
 use serde::{Deserialize, Deserializer};
 
 use crate::storage::StorageConfig;

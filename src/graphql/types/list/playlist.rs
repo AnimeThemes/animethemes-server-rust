@@ -1,30 +1,22 @@
-use crate::{
-    AppError,
-    enums::{LocalizedEnum, list::playlistvisibility::PlaylistVisibility},
-    graphql::loaders::list::playlist::playlist_tracks::PlaylistTracksLoaderQuery,
-    middlewares::current_user::CurrentUser,
-    policies::{
-        Policy, PolicyAction,
-        list::{playlist::PlaylistPolicy, track::PlaylistTrackPolicy},
-    },
-};
-use async_graphql::{
-    ComplexObject, Context, Error, InputObject, Object, Result, SimpleObject,
-    dataloader::DataLoader,
-};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Error, InputObject, Object, Result, SimpleObject};
 
-use crate::{
-    entities::list::playlist::{self},
-    graphql::{
-        enums::sort::list::track_sort::PlaylistTrackSort,
-        loaders::list::playlist::{
-            playlist_tracks::{PlaylistTracksLoader, PlaylistTracksLoaderKey},
-            playlist_tracks_count::PlaylistTracksCountLoader,
-            playlist_user::PlaylistUserLoader,
-        },
-        types::{auth::user::User, list::track::PlaylistTrack},
-    },
+use crate::AppError;
+use crate::entities::list::playlist::{self};
+use crate::enums::LocalizedEnum;
+use crate::enums::list::playlistvisibility::PlaylistVisibility;
+use crate::graphql::enums::sort::list::track_sort::PlaylistTrackSort;
+use crate::graphql::loaders::list::playlist::playlist_tracks::{
+    PlaylistTracksLoader, PlaylistTracksLoaderKey, PlaylistTracksLoaderQuery,
 };
+use crate::graphql::loaders::list::playlist::playlist_tracks_count::PlaylistTracksCountLoader;
+use crate::graphql::loaders::list::playlist::playlist_user::PlaylistUserLoader;
+use crate::graphql::types::auth::user::User;
+use crate::graphql::types::list::track::PlaylistTrack;
+use crate::middlewares::current_user::CurrentUser;
+use crate::policies::list::playlist::PlaylistPolicy;
+use crate::policies::list::track::PlaylistTrackPolicy;
+use crate::policies::{Policy, PolicyAction};
 
 #[derive(InputObject, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PlaylistTracksFilterInput {

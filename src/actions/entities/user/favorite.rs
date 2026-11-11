@@ -1,14 +1,15 @@
-use crate::AppError;
-use crate::entities::content::entry;
-use crate::entities::user::favorite;
-use crate::rules::validation_error::ValidationError;
-use crate::traits::sortable::Sortable;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter,
     QueryOrder, QuerySelect, SelectExt, TransactionTrait,
 };
+
+use crate::AppError;
+use crate::entities::content::entry;
+use crate::entities::user::favorite;
+use crate::rules::validation_error::ValidationError;
+use crate::traits::sortable::Sortable;
 
 #[derive(Copy, Clone)]
 pub enum FavoriteableType {

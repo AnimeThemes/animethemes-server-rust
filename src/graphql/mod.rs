@@ -1,5 +1,6 @@
 use async_graphql::Context;
-use loco_rs::{app::AppContext, environment::Environment};
+use loco_rs::app::AppContext;
+use loco_rs::environment::Environment;
 
 pub mod cursor;
 pub mod enums;

@@ -1,15 +1,13 @@
 use std::collections::HashMap;
 
-use crate::{
-    entities::user::favorite,
-    graphql::{
-        enums::sort::{GraphQLSort, user::favorite_sort::FavoriteSort},
-        loaders::group_by_query,
-        types::auth::me::UserFavoritesFilterInput,
-    },
-};
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter, Select};
+
+use crate::entities::user::favorite;
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::user::favorite_sort::FavoriteSort;
+use crate::graphql::loaders::group_by_query;
+use crate::graphql::types::auth::me::UserFavoritesFilterInput;
 
 pub struct UserFavoritesLoader {
     pub db: DatabaseConnection,

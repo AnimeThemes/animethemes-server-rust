@@ -1,22 +1,18 @@
-use async_graphql::{
-    Context, Error, InputObject, Object, Result, ResultExt,
-    connection::{Connection, EmptyFields, OpaqueCursor},
-};
+use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
+use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
 use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, Order, QueryFilter};
 
-use crate::{
-    AppError,
-    entities::list::{playlist, track},
-    graphql::{
-        cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate},
-        enums::sort::{GraphQLSort, list::playlist_sort::PlaylistSort},
-        inputs::pagination_input::PaginationInput,
-        types::list::playlist::Playlist,
-    },
-    middlewares::current_user::CurrentUser,
-    policies::{Policy, PolicyAction, list::playlist::PlaylistPolicy},
-    scopes::list::playlist::public_playlists,
-};
+use crate::AppError;
+use crate::entities::list::{playlist, track};
+use crate::graphql::cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate};
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::list::playlist_sort::PlaylistSort;
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::types::list::playlist::Playlist;
+use crate::middlewares::current_user::CurrentUser;
+use crate::policies::list::playlist::PlaylistPolicy;
+use crate::policies::{Policy, PolicyAction};
+use crate::scopes::list::playlist::public_playlists;
 
 #[derive(InputObject, Default)]
 struct PlaylistFilterInput {

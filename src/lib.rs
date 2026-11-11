@@ -1,7 +1,5 @@
-use axum::{
-    http::StatusCode,
-    response::{IntoResponse, Response},
-};
+use axum::http::StatusCode;
+use axum::response::{IntoResponse, Response};
 use loco_rs::Error as LocoError;
 
 use crate::rules::validation_error::ValidationError;

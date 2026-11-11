@@ -1,14 +1,13 @@
-use std::{future::Future, pin::Pin};
+use std::future::Future;
+use std::pin::Pin;
 
 use anyhow::{Context, Result};
-use sea_orm::{
-    DatabaseConnection, EntityTrait, PaginatorTrait, Select, sea_query::value::prelude::serde_json,
-};
-use serde::{Serialize, de::DeserializeOwned};
-use typesense::{
-    models::{ImportDocumentsParameters, IndexAction},
-    prelude::Document as TypesenseDocument,
-};
+use sea_orm::sea_query::value::prelude::serde_json;
+use sea_orm::{DatabaseConnection, EntityTrait, PaginatorTrait, Select};
+use serde::Serialize;
+use serde::de::DeserializeOwned;
+use typesense::models::{ImportDocumentsParameters, IndexAction};
+use typesense::prelude::Document as TypesenseDocument;
 
 use crate::typesense::client::TypesenseClient;
 

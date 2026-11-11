@@ -3,16 +3,11 @@ use std::env;
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::{
-    entities::{
-        SoftDeleteEntity,
-        content::{audio, entry, videoscript},
-    },
-    enums::{
-        LocalizedEnum,
-        content::{videooverlap::VideoOverlap, videosource::VideoSource},
-    },
-};
+use crate::entities::SoftDeleteEntity;
+use crate::entities::content::{audio, entry, videoscript};
+use crate::enums::LocalizedEnum;
+use crate::enums::content::videooverlap::VideoOverlap;
+use crate::enums::content::videosource::VideoSource;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

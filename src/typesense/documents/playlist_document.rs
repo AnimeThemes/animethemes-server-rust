@@ -2,10 +2,9 @@ use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
-use crate::{
-    entities::list::playlist,
-    typesense::{documents::HasId, index_document::BuildDocumentsFuture},
-};
+use crate::entities::list::playlist;
+use crate::typesense::documents::HasId;
+use crate::typesense::index_document::BuildDocumentsFuture;
 
 pub const QUERY_BY: &str = "name";
 pub const QUERY_BY_WEIGHTS: &str = "10";

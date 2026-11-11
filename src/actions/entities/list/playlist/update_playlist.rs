@@ -1,18 +1,14 @@
 use anyhow::{Context, Result};
 use loco_rs::app::AppContext;
+use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, DatabaseConnection};
 
-use crate::{
-    AppError,
-    entities::list::playlist,
-    enums::list::playlistvisibility::PlaylistVisibility,
-    rules::validation_error::ValidationError,
-    typesense::{
-        client::typesense,
-        documents::playlist_document::{PlaylistDocument, build_playlist_documents},
-    },
-};
-use sea_orm::ActiveValue::Set;
+use crate::AppError;
+use crate::entities::list::playlist;
+use crate::enums::list::playlistvisibility::PlaylistVisibility;
+use crate::rules::validation_error::ValidationError;
+use crate::typesense::client::typesense;
+use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
 
 pub struct UpdatePlaylistActionParameters {
     pub name: Option<String>,

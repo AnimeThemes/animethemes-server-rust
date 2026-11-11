@@ -1,14 +1,10 @@
 use std::collections::BTreeMap;
 
-use loco_rs::{
-    Error, Result,
-    app::AppContext,
-    storage::{
-        self, Storage,
-        drivers::{self, StoreDriver},
-        strategies::single::SingleStrategy,
-    },
-};
+use loco_rs::app::AppContext;
+use loco_rs::storage::drivers::{self, StoreDriver};
+use loco_rs::storage::strategies::single::SingleStrategy;
+use loco_rs::storage::{self, Storage};
+use loco_rs::{Error, Result};
 use serde::Deserialize;
 
 use crate::settings::{Settings, null_as_empty};

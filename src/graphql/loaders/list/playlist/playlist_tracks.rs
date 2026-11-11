@@ -3,14 +3,11 @@ use std::collections::HashMap;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter, Select};
 
-use crate::{
-    entities::list::track,
-    graphql::{
-        enums::sort::{GraphQLSort, list::track_sort::PlaylistTrackSort},
-        loaders::group_by_query,
-        types::list::playlist::PlaylistTracksFilterInput,
-    },
-};
+use crate::entities::list::track;
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::list::track_sort::PlaylistTrackSort;
+use crate::graphql::loaders::group_by_query;
+use crate::graphql::types::list::playlist::PlaylistTracksFilterInput;
 
 pub struct PlaylistTracksLoader {
     pub db: DatabaseConnection,

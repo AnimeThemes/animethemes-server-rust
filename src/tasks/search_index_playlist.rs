@@ -1,16 +1,13 @@
+use std::error::Error as StdError;
+
 use loco_rs::prelude::*;
 use sea_orm::EntityTrait;
-use std::error::Error as StdError;
 use typesense::prelude::Document;
 
-use crate::{
-    entities::list::playlist,
-    typesense::{
-        client::TypesenseClient,
-        documents::playlist_document::{PlaylistDocument, build_playlist_documents},
-        index_document,
-    },
-};
+use crate::entities::list::playlist;
+use crate::typesense::client::TypesenseClient;
+use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
+use crate::typesense::index_document;
 
 pub struct SearchIndexPlaylist;
 

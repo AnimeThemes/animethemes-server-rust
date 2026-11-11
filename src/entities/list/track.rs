@@ -1,16 +1,13 @@
-use chrono::Utc;
-use sea_orm::{ActiveValue::Set, Condition, entity::prelude::*};
-
 use async_trait::async_trait;
+use chrono::Utc;
+use sea_orm::ActiveValue::Set;
+use sea_orm::Condition;
+use sea_orm::entity::prelude::*;
 
-use crate::{
-    entities::{
-        HasHashId,
-        content::{entry, video},
-        list::playlist,
-    },
-    traits::sortable::Sortable,
-};
+use crate::entities::HasHashId;
+use crate::entities::content::{entry, video};
+use crate::entities::list::playlist;
+use crate::traits::sortable::Sortable;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

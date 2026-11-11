@@ -1,4 +1,5 @@
-use std::{collections::HashMap, hash::Hash};
+use std::collections::HashMap;
+use std::hash::Hash;
 
 pub mod admin;
 pub mod auth;

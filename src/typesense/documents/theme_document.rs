@@ -2,18 +2,12 @@ use sea_orm::{ActiveEnum, DatabaseConnection, LoaderTrait};
 use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
-use crate::{
-    entities::content::{anime, song, theme},
-    enums::LocalizedEnum,
-    typesense::{
-        documents::{
-            HasId,
-            anime_document::{AnimeDocument, build_anime_documents},
-            song_document::SongDocument,
-        },
-        index_document::BuildDocumentsFuture,
-    },
-};
+use crate::entities::content::{anime, song, theme};
+use crate::enums::LocalizedEnum;
+use crate::typesense::documents::HasId;
+use crate::typesense::documents::anime_document::{AnimeDocument, build_anime_documents};
+use crate::typesense::documents::song_document::SongDocument;
+use crate::typesense::index_document::BuildDocumentsFuture;
 
 pub const QUERY_BY: &str = "song.title,song.title_native,anime.title,type_sequence,anime.title_english,anime.title_native,anime.synonyms";
 pub const QUERY_BY_WEIGHTS: &str = "10,8,6,6,5,5,4";

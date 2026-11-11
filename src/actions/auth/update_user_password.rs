@@ -1,8 +1,11 @@
 use bcrypt::{hash, verify};
 use loco_rs::app::AppContext;
-use sea_orm::{ActiveModelTrait, ActiveValue::Set};
+use sea_orm::ActiveModelTrait;
+use sea_orm::ActiveValue::Set;
 
-use crate::{AppError, entities::auth::user, rules::validation_error::ValidationError};
+use crate::AppError;
+use crate::entities::auth::user;
+use crate::rules::validation_error::ValidationError;
 
 #[derive(Clone)]
 pub struct UpdateUserPasswordParameters {

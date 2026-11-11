@@ -1,18 +1,12 @@
-use async_graphql::{
-    ComplexObject, Context, Result, SimpleObject,
-    connection::{Connection, Edge, EmptyFields},
-    dataloader::DataLoader,
-};
+use async_graphql::connection::{Connection, Edge, EmptyFields};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::content::series,
-    graphql::{
-        loaders::content::series::series_anime::SeriesAnimeLoader,
-        types::content::{
-            anime::Anime,
-            anime_series::{SeriesAnimeConnection, SeriesAnimeEdge, SeriesAnimeEdgeFields},
-        },
-    },
+use crate::entities::content::series;
+use crate::graphql::loaders::content::series::series_anime::SeriesAnimeLoader;
+use crate::graphql::types::content::anime::Anime;
+use crate::graphql::types::content::anime_series::{
+    SeriesAnimeConnection, SeriesAnimeEdge, SeriesAnimeEdgeFields,
 };
 
 #[derive(SimpleObject)]

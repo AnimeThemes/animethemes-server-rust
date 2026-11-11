@@ -1,7 +1,8 @@
+use sea_orm::sea_query::Expr;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, Condition, ConnectionTrait, DbErr, EntityTrait, ExprTrait,
     IntoActiveModel, ModelTrait, QueryFilter, QueryOrder, QuerySelect, TransactionSession,
-    TransactionTrait, sea_query::Expr,
+    TransactionTrait,
 };
 
 pub trait Sortable:

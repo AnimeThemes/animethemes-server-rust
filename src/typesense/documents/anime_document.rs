@@ -2,10 +2,9 @@ use sea_orm::{ActiveEnum, ColumnTrait, DatabaseConnection, EntityTrait, LoaderTr
 use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
-use crate::{
-    entities::content::{anime, synonym},
-    typesense::{documents::HasId, index_document::BuildDocumentsFuture},
-};
+use crate::entities::content::{anime, synonym};
+use crate::typesense::documents::HasId;
+use crate::typesense::index_document::BuildDocumentsFuture;
 
 pub const QUERY_BY: &str = "title,title_english,title_native,synonyms";
 pub const QUERY_BY_WEIGHTS: &str = "8,6,6,5";

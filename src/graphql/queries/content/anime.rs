@@ -1,30 +1,21 @@
-use crate::{
-    AppError,
-    entities::content::{externalresource, resourceable},
-    enums::content::{
-        animeformat::AnimeFormat, animeseason::AnimeSeason, resourcesite::ResourceSite,
-    },
-    graphql::cursor::CursorSortKey,
-    rules::validation_error::ValidationError,
-};
-use async_graphql::{
-    Context, InputObject, Object, Result, ResultExt,
-    connection::{Connection, EmptyFields, OpaqueCursor},
-};
+use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
+use async_graphql::{Context, InputObject, Object, Result, ResultExt};
 use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, JoinType, Order, QueryFilter, QuerySelect,
 };
 
-use crate::{
-    entities::content::anime,
-    graphql::{
-        cursor::{CursorSort, PaginationCursor, cursor_paginate},
-        enums::sort::{GraphQLSort, content::anime_sort::AnimeSort},
-        inputs::pagination_input::PaginationInput,
-        types::content::anime::Anime,
-    },
-    scopes::without_trashed,
-};
+use crate::AppError;
+use crate::entities::content::{anime, externalresource, resourceable};
+use crate::enums::content::animeformat::AnimeFormat;
+use crate::enums::content::animeseason::AnimeSeason;
+use crate::enums::content::resourcesite::ResourceSite;
+use crate::graphql::cursor::{CursorSort, CursorSortKey, PaginationCursor, cursor_paginate};
+use crate::graphql::enums::sort::GraphQLSort;
+use crate::graphql::enums::sort::content::anime_sort::AnimeSort;
+use crate::graphql::inputs::pagination_input::PaginationInput;
+use crate::graphql::types::content::anime::Anime;
+use crate::rules::validation_error::ValidationError;
+use crate::scopes::without_trashed;
 
 #[derive(InputObject, Default)]
 pub struct AnimeFilterInput {

@@ -1,17 +1,14 @@
+use std::error::Error as StdError;
+
 use loco_rs::prelude::*;
 use sea_orm::{EntityTrait, QueryFilter};
-use std::error::Error as StdError;
 use typesense::prelude::Document;
 
-use crate::{
-    entities::content::anime,
-    scopes::without_trashed,
-    typesense::{
-        client::TypesenseClient,
-        documents::anime_document::{AnimeDocument, build_anime_documents},
-        index_document,
-    },
-};
+use crate::entities::content::anime;
+use crate::scopes::without_trashed;
+use crate::typesense::client::TypesenseClient;
+use crate::typesense::documents::anime_document::{AnimeDocument, build_anime_documents};
+use crate::typesense::index_document;
 
 pub struct SearchIndexAnime;
 

@@ -1,11 +1,12 @@
-use crate::AppError;
-use crate::entities::content::entry;
-use crate::entities::user::rating;
-use crate::rules::validation_error::ValidationError;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt};
 use sea_query::OnConflict;
+
+use crate::AppError;
+use crate::entities::content::entry;
+use crate::entities::user::rating;
+use crate::rules::validation_error::ValidationError;
 
 pub struct RateEntryActionParameters {
     pub entry_id: u64,

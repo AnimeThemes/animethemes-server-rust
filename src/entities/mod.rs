@@ -1,4 +1,5 @@
-use std::{env, sync::OnceLock};
+use std::env;
+use std::sync::OnceLock;
 
 use hash_ids::HashIds;
 use sea_orm::EntityTrait;

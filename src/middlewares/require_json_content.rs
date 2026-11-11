@@ -1,6 +1,8 @@
-use axum::{extract::Request, middleware::Next, response::Response};
-
-use reqwest::{StatusCode, header::CONTENT_TYPE};
+use axum::extract::Request;
+use axum::middleware::Next;
+use axum::response::Response;
+use reqwest::StatusCode;
+use reqwest::header::CONTENT_TYPE;
 
 pub async fn require_json_content_middleware(
     request: Request,

@@ -2,8 +2,7 @@ use loco_rs::Error as LocoError;
 use loco_rs::prelude::*;
 
 use crate::AppError;
-use crate::actions::auth::register::Register;
-use crate::actions::auth::register::RegisterParameters;
+use crate::actions::auth::register::{Register, RegisterParameters};
 
 pub struct CreateUser;
 

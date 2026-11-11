@@ -1,19 +1,14 @@
-use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject};
 
-use crate::{
-    AppError,
-    entities::list::track,
-    graphql::{
-        loaders::list::playlist::{
-            track_entry::TrackEntryLoader, track_playlist::TrackPlaylistLoader,
-            track_video::TrackVideoLoader,
-        },
-        types::{
-            content::{entry::Entry, video::Video},
-            list::playlist::Playlist,
-        },
-    },
-};
+use crate::AppError;
+use crate::entities::list::track;
+use crate::graphql::loaders::list::playlist::track_entry::TrackEntryLoader;
+use crate::graphql::loaders::list::playlist::track_playlist::TrackPlaylistLoader;
+use crate::graphql::loaders::list::playlist::track_video::TrackVideoLoader;
+use crate::graphql::types::content::entry::Entry;
+use crate::graphql::types::content::video::Video;
+use crate::graphql::types::list::playlist::Playlist;
 
 /// Represents an entry in a playlist.
 ///

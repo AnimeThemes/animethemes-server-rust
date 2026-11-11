@@ -1,13 +1,9 @@
 use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
-use crate::{
-    entities::{
-        SoftDeleteEntity,
-        content::{anime, entry, song, themegroup},
-    },
-    enums::content::themetype::ThemeType,
-};
+use crate::entities::SoftDeleteEntity;
+use crate::entities::content::{anime, entry, song, themegroup};
+use crate::enums::content::themetype::ThemeType;
 
 #[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]

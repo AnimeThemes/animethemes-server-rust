@@ -1,23 +1,21 @@
-use std::{collections::HashMap, env};
+use std::collections::HashMap;
+use std::env;
 
-use axum::{
-    Extension,
-    extract::{Path, Query, State},
-    middleware::{self},
-    response::Response,
-};
-use loco_rs::{app::AppContext, prelude::Routes};
+use axum::Extension;
+use axum::extract::{Path, Query, State};
+use axum::middleware::{self};
+use axum::response::Response;
+use loco_rs::app::AppContext;
+use loco_rs::prelude::Routes;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 
-use crate::{
-    AppError,
-    actions::stream::nginx_stream::{Disposition, NginxStream, Streamable},
-    controllers::streams::media_host_only,
-    entities::content::audio,
-    enums::features::Feature,
-    features::functions::FeatureManager,
-    scopes::without_trashed,
-};
+use crate::AppError;
+use crate::actions::stream::nginx_stream::{Disposition, NginxStream, Streamable};
+use crate::controllers::streams::media_host_only;
+use crate::entities::content::audio;
+use crate::enums::features::Feature;
+use crate::features::functions::FeatureManager;
+use crate::scopes::without_trashed;
 
 async fn show(
     State(ctx): State<AppContext>,

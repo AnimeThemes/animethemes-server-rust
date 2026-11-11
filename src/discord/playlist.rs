@@ -1,8 +1,8 @@
 use std::env;
 
-use crate::{
-    discord::created_embed, entities::list::playlist, middlewares::current_user::CurrentUser,
-};
+use crate::discord::created_embed;
+use crate::entities::list::playlist;
+use crate::middlewares::current_user::CurrentUser;
 
 pub struct Playlist {
     playlist: playlist::Model,

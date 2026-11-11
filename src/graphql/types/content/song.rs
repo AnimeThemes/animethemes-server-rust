@@ -1,24 +1,17 @@
-use async_graphql::{
-    ComplexObject, Context, Result, SimpleObject,
-    connection::{Connection, Edge, EmptyFields},
-    dataloader::DataLoader,
-};
+use async_graphql::connection::{Connection, Edge, EmptyFields};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::{
-    entities::content::{resourceable, song},
-    graphql::{
-        loaders::content::{
-            resourceable::{ResourceableKey, ResourceableLoader},
-            song::{song_staffs::SongStaffsLoader, song_themes::SongThemesLoader},
-        },
-        types::content::{
-            externalresource::ExternalResource,
-            resourceable::{ResourceableConnection, ResourceableEdge, ResourceableEdgeFields},
-            song_staff::SongStaff,
-            theme::Theme,
-        },
-    },
+use crate::entities::content::{resourceable, song};
+use crate::graphql::loaders::content::resourceable::{ResourceableKey, ResourceableLoader};
+use crate::graphql::loaders::content::song::song_staffs::SongStaffsLoader;
+use crate::graphql::loaders::content::song::song_themes::SongThemesLoader;
+use crate::graphql::types::content::externalresource::ExternalResource;
+use crate::graphql::types::content::resourceable::{
+    ResourceableConnection, ResourceableEdge, ResourceableEdgeFields,
 };
+use crate::graphql::types::content::song_staff::SongStaff;
+use crate::graphql::types::content::theme::Theme;
 
 #[derive(SimpleObject)]
 pub struct SongTitle {

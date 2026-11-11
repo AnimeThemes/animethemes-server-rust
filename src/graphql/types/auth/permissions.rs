@@ -1,11 +1,10 @@
 use async_graphql::{Context, Object, SimpleObject};
 
-use crate::{
-    AppError,
-    entities::auth::role::Roles,
-    middlewares::current_user::CurrentUser,
-    policies::{Policy, PolicyAction, has_any_role, list::playlist::PlaylistPolicy},
-};
+use crate::AppError;
+use crate::entities::auth::role::Roles;
+use crate::middlewares::current_user::CurrentUser;
+use crate::policies::list::playlist::PlaylistPolicy;
+use crate::policies::{Policy, PolicyAction, has_any_role};
 
 #[derive(SimpleObject)]
 pub struct PermissionsResult {

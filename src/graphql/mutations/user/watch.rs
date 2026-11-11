@@ -1,8 +1,8 @@
-use crate::AppError;
-use crate::actions::entities::user::watch::{MarkAsWatchedAction, MarkAsWatchedActionParameters};
 use async_graphql::{Context, Error, Object, Result, ResultExt};
 use loco_rs::app::AppContext;
 
+use crate::AppError;
+use crate::actions::entities::user::watch::{MarkAsWatchedAction, MarkAsWatchedActionParameters};
 use crate::graphql::types::user::watchhistory::WatchHistory;
 use crate::middlewares::current_user::CurrentUser;
 

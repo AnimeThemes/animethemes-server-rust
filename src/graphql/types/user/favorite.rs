@@ -1,17 +1,11 @@
-use crate::{
-    AppError,
-    entities::user::favorite,
-    graphql::{
-        loaders::user::favorite::{
-            favorite_entry::FavoriteEntryLoader, favorite_user::FavoriteUserLoader,
-        },
-        types::auth::user::User,
-    },
-};
-use async_graphql::{
-    ComplexObject, Context, Error, Result, SimpleObject, Union, dataloader::DataLoader,
-};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject, Union};
 
+use crate::AppError;
+use crate::entities::user::favorite;
+use crate::graphql::loaders::user::favorite::favorite_entry::FavoriteEntryLoader;
+use crate::graphql::loaders::user::favorite::favorite_user::FavoriteUserLoader;
+use crate::graphql::types::auth::user::User;
 use crate::graphql::types::content::entry::Entry;
 
 #[derive(Union)]

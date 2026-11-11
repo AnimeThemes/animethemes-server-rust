@@ -1,5 +1,6 @@
-use crate::entities::auth::role;
 use async_graphql::SimpleObject;
+
+use crate::entities::auth::role;
 
 /// Represents an assignable label for users that provides a configured group of permissions.
 #[derive(SimpleObject)]

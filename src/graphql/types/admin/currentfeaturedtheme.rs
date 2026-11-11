@@ -1,21 +1,16 @@
-use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject, dataloader::DataLoader};
+use async_graphql::dataloader::DataLoader;
+use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject};
 use chrono::{DateTime, Utc};
 
-use crate::{
-    AppError,
-    entities::admin::featuredtheme,
-    graphql::{
-        loaders::admin::{
-            featuredtheme_entry::FeaturedEntryLoader, featuredtheme_user::FeaturedThemeUserLoader,
-            featuredtheme_video::FeaturedThemeVideoLoader,
-        },
-        types::{
-            auth::user::User,
-            content::{entry::Entry, video::Video},
-        },
-        utils::format_option_datetime,
-    },
-};
+use crate::AppError;
+use crate::entities::admin::featuredtheme;
+use crate::graphql::loaders::admin::featuredtheme_entry::FeaturedEntryLoader;
+use crate::graphql::loaders::admin::featuredtheme_user::FeaturedThemeUserLoader;
+use crate::graphql::loaders::admin::featuredtheme_video::FeaturedThemeVideoLoader;
+use crate::graphql::types::auth::user::User;
+use crate::graphql::types::content::entry::Entry;
+use crate::graphql::types::content::video::Video;
+use crate::graphql::utils::format_option_datetime;
 
 /// Represents the current featured theme on the homepage of the site.
 #[derive(SimpleObject)]

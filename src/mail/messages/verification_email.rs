@@ -1,7 +1,9 @@
-use lettre::{Message, message::MultiPart};
+use lettre::Message;
+use lettre::message::MultiPart;
 use minijinja::{Environment, context};
 
-use crate::mail::{mailer::Mail, messages::Messages};
+use crate::mail::mailer::Mail;
+use crate::mail::messages::Messages;
 
 impl Messages {
     pub fn verification_email(name: &str, email: &str, verification_url: &str) -> Message {

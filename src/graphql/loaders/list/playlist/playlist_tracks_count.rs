@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
-use crate::entities::list::track;
 use async_graphql::dataloader::Loader;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QuerySelect};
+
+use crate::entities::list::track;
 
 pub struct PlaylistTracksCountLoader {
     pub db: DatabaseConnection,

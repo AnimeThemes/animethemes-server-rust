@@ -1,7 +1,5 @@
-use async_graphql::{
-    Object, OutputType,
-    connection::{ConnectionNameType, EdgeNameType},
-};
+use async_graphql::connection::{ConnectionNameType, EdgeNameType};
+use async_graphql::{Object, OutputType};
 use chrono::{DateTime, Utc};
 
 use crate::graphql::utils::format_datetime;

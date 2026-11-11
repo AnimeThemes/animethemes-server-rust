@@ -1,26 +1,20 @@
-use std::{
-    collections::HashSet,
-    env,
-    net::{IpAddr, SocketAddr},
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::collections::HashSet;
+use std::env;
+use std::net::{IpAddr, SocketAddr};
+use std::time::{SystemTime, UNIX_EPOCH};
 
-use axum::{
-    extract::{ConnectInfo, Request, State},
-    http::HeaderValue,
-    middleware::Next,
-    response::{IntoResponse, Response},
-};
+use axum::extract::{ConnectInfo, Request, State};
+use axum::http::HeaderValue;
+use axum::middleware::Next;
+use axum::response::{IntoResponse, Response};
+use redis::Script;
+use redis::aio::{ConnectionManager, ConnectionManagerConfig};
 
-use redis::{
-    Script,
-    aio::{ConnectionManager, ConnectionManagerConfig},
-};
-
-use crate::{
-    AppError, caches::hostname_cache::HostnameCache, entities::auth::role::Roles,
-    middlewares::current_user::CurrentUser, policies::has_any_role,
-};
+use crate::AppError;
+use crate::caches::hostname_cache::HostnameCache;
+use crate::entities::auth::role::Roles;
+use crate::middlewares::current_user::CurrentUser;
+use crate::policies::has_any_role;
 
 // Atomically:
 // - verify if the request can pass

@@ -1,13 +1,12 @@
 use std::collections::HashMap;
 
-use crate::{
-    entities::list::{playlist, track},
-    enums::list::playlistvisibility::PlaylistVisibility,
-};
 use async_graphql::dataloader::Loader;
 use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QuerySelect, RelationTrait,
 };
+
+use crate::entities::list::{playlist, track};
+use crate::enums::list::playlistvisibility::PlaylistVisibility;
 
 pub struct VideoTracksLoader {
     pub db: DatabaseConnection,

@@ -1,13 +1,10 @@
 use loco_rs::app::AppContext;
-use sea_orm::{ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::ActiveValue::Set;
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
 
-use crate::{
-    AppError,
-    entities::auth::{
-        role::{self, Roles},
-        user, user_roles,
-    },
-};
+use crate::AppError;
+use crate::entities::auth::role::{self, Roles};
+use crate::entities::auth::{user, user_roles};
 
 pub struct RoleAction;
 

@@ -1,17 +1,14 @@
+use std::error::Error as StdError;
+
 use loco_rs::prelude::*;
 use sea_orm::{EntityTrait, QueryFilter};
-use std::error::Error as StdError;
 use typesense::prelude::Document;
 
-use crate::{
-    entities::content::video,
-    scopes::without_trashed,
-    typesense::{
-        client::TypesenseClient,
-        documents::video_document::{VideoDocument, build_video_documents},
-        index_document,
-    },
-};
+use crate::entities::content::video;
+use crate::scopes::without_trashed;
+use crate::typesense::client::TypesenseClient;
+use crate::typesense::documents::video_document::{VideoDocument, build_video_documents};
+use crate::typesense::index_document;
 
 pub struct SearchIndexVideo;
 

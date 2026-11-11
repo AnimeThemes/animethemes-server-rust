@@ -1,9 +1,8 @@
-use axum::{
-    extract::{Request, State},
-    middleware::Next,
-    response::{IntoResponse, Response},
-};
-use reqwest::{StatusCode, header::HOST};
+use axum::extract::{Request, State};
+use axum::middleware::Next;
+use axum::response::{IntoResponse, Response};
+use reqwest::StatusCode;
+use reqwest::header::HOST;
 
 pub mod audio_stream_controller;
 pub mod video_stream_controller;

@@ -1,8 +1,7 @@
-use crate::{
-    AppError,
-    entities::{admin::feature, auth::user},
-    enums::features::Feature,
-};
+use crate::AppError;
+use crate::entities::admin::feature;
+use crate::entities::auth::user;
+use crate::enums::features::Feature;
 
 #[derive(Clone)]
 pub struct FeatureManager {

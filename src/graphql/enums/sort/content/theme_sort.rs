@@ -1,8 +1,10 @@
-use crate::{entities::content::theme, graphql::cursor::CursorSortKey};
 use async_graphql::Enum;
-use sea_orm::{EntityTrait, Order, QueryOrder, Select, sea_query::Expr};
+use sea_orm::sea_query::Expr;
+use sea_orm::{EntityTrait, Order, QueryOrder, Select};
 
-use crate::graphql::{cursor::CursorSort, enums::sort::GraphQLSort};
+use crate::entities::content::theme;
+use crate::graphql::cursor::{CursorSort, CursorSortKey};
+use crate::graphql::enums::sort::GraphQLSort;
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq)]
 pub enum ThemeSort {
