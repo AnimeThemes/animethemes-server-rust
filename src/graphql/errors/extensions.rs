@@ -11,17 +11,22 @@ impl ErrorExtensions for AppError {
     fn extend(&self) -> Error {
         match self {
             AppError::Validation(errors) => {
-                Error::new("Validation").extend_with(|_, extensions| {
+                let mut validation: BTreeMap<String, Vec<String>> = BTreeMap::new();
+
+                for error in errors.into_iter().map(ValidationError::to_camel_case) {
+                    validation
+                        .entry(error.field.clone())
+                        .or_default()
+                        .extend(error.messages.clone());
+                }
+
+                let message = format!(
+                    "Validation failed for {}",
+                    validation.keys().cloned().collect::<Vec<_>>().join(", ")
+                );
+
+                Error::new(message).extend_with(|_, extensions| {
                     extensions.set("code", 422);
-
-                    let mut validation: BTreeMap<String, Vec<String>> = BTreeMap::new();
-
-                    for error in errors.into_iter().map(ValidationError::to_camel_case) {
-                        validation
-                            .entry(error.field.clone())
-                            .or_default()
-                            .extend(error.messages.clone());
-                    }
 
                     if let Ok(value) = async_graphql::to_value(validation) {
                         extensions.set("validation", value);
