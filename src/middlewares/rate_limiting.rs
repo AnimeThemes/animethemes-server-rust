@@ -161,19 +161,20 @@ pub async fn rate_limiting_middleware(
         return Ok(next.run(request).await);
     }
 
-    // Get the client IP
+    // Get the client IP directly from the container
     let peer_ip = request
+        .extensions()
+        .get::<ConnectInfo<SocketAddr>>()
+        .map(|ConnectInfo(peer)| peer.ip())
+        .ok_or_else(|| AppError::Internal(anyhow::anyhow!("Couldn't get client IP")))?;
+
+    // Get the client IP from the Nginx proxy
+    let peer_nginx_ip = request
         .headers()
         .get("x-real-ip")
         .and_then(|value| value.to_str().ok())
         .and_then(|value| value.parse::<IpAddr>().ok())
-        .or_else(|| {
-            request
-                .extensions()
-                .get::<ConnectInfo<SocketAddr>>()
-                .map(|ConnectInfo(peer)| peer.ip())
-        })
-        .ok_or_else(|| AppError::Internal(anyhow::anyhow!("Couldn't get client IP")))?;
+        .unwrap_or(peer_ip);
 
     let can_bypass = {
         let hostname_cache = request
@@ -181,7 +182,9 @@ pub async fn rate_limiting_middleware(
             .get::<HostnameCache>()
             .ok_or_else(|| AppError::Internal(anyhow::anyhow!("Hostname cache not initialized")))?;
 
-        hostname_cache.is_allowed(peer_ip) || state.local_ips.contains(&peer_ip)
+        hostname_cache.is_allowed(peer_nginx_ip)
+            || hostname_cache.is_allowed(peer_ip)
+            || state.local_ips.contains(&peer_ip)
     };
 
     request.extensions_mut().insert(CanBypass(can_bypass));
