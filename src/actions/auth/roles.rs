@@ -37,6 +37,7 @@ impl RoleAction {
         user_roles::ActiveModel {
             user_id: Set(user.id),
             role_id: Set(role_id),
+            model_type: Set("App\\Models\\Auth\\User".to_string()),
             ..Default::default()
         }
         .insert(&ctx.db)

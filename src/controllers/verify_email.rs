@@ -45,15 +45,17 @@ pub async fn verify_email(
         &query.signature,
     )?;
 
-    if user.email_verified_at.is_none() {
+    let verified_user = if user.email_verified_at.is_none() {
         let mut active_user: user::ActiveModel = user.into();
 
         active_user.email_verified_at = Set(Some(Utc::now()));
 
-        let user = active_user.update(&ctx.db).await?;
+        active_user.update(&ctx.db).await?
+    } else {
+        user.clone()
+    };
 
-        RoleAction::assign_role(&ctx, &user, Roles::Verified).await?;
-    }
+    RoleAction::assign_role(&ctx, &verified_user, Roles::Verified).await?;
 
     let redirect = env::var("CLIENT_PROFILE_URL")
         .unwrap_or_else(|_| "https://animethemes.moe/profile".to_string());

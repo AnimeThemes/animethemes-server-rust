@@ -6,6 +6,7 @@ use sea_orm::{
     SelectExt,
 };
 
+use crate::actions::auth::is_alpha_dash;
 use crate::actions::auth::verify_email::VerifyEmail;
 use crate::entities::auth::user;
 use crate::enums::features::Feature;
@@ -39,6 +40,10 @@ impl UpdateUserInformation {
         if let Some(name) = params.name.as_deref() {
             if !(1usize..=35).contains(&name.chars().count()) {
                 name_errors.push("The name must be between 1 and 35 characters.");
+            }
+
+            if !is_alpha_dash(&name) {
+                name_errors.push("The name must be alphanumeric with dashes or underscores.");
             }
         }
 

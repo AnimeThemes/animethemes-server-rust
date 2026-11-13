@@ -11,6 +11,9 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub user_id: u64,
 
+    // For the PHP project compatibility.
+    pub model_type: String,
+
     #[sea_orm(belongs_to, from = "user_id", to = "id")]
     pub user: BelongsTo<user::Entity>,
 
