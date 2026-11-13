@@ -8,8 +8,7 @@ pub mod update_user_password;
 pub mod verify_email;
 
 pub fn is_alpha_dash(value: &str) -> bool {
-    !value.is_empty()
-        && value
-            .chars()
-            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    regex::Regex::new(r"^[\p{L}\p{M}\p{N}_-]+$")
+        .unwrap()
+        .is_match(value)
 }
