@@ -19,6 +19,6 @@ impl Loader<u64> for VideoScriptLoader {
             .all(&self.db)
             .await?;
 
-        Ok(models.into_iter().map(|model| (model.id, model)).collect())
+        Ok(models.into_iter().map(|model| (model.video_id, model)).collect())
     }
 }
