@@ -29,7 +29,7 @@ impl Model {
     pub fn link(&self) -> String {
         let script_url = env::var("SCRIPT_URL").expect("SCRIPT_URL must be set in .env");
 
-        format!("{}/{}", script_url, self.path)
+        format!("{}/{}", script_url, self.id)
     }
 }
 
