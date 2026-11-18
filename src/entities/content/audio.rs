@@ -1,13 +1,13 @@
 use std::env;
 
 use chrono::Utc;
+use macros::SoftDeleteEntity;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::SoftDeleteEntity;
 use crate::entities::content::video;
 
 #[sea_orm::model]
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, SoftDeleteEntity, DeriveEntityModel)]
 #[sea_orm(table_name = "audios")]
 pub struct Model {
     #[sea_orm(primary_key, column_name = "audio_id")]
@@ -33,12 +33,6 @@ impl Model {
         let audio_url = env::var("AUDIO_URL").expect("AUDIO_URL must be set in .env");
 
         format!("{}/{}", audio_url, self.basename)
-    }
-}
-
-impl SoftDeleteEntity for Entity {
-    fn deleted_at_column() -> Self::Column {
-        Column::DeletedAt
     }
 }
 

@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    ".",
+    ".", "macros",
     "migration"
 ]
 
@@ -17,6 +17,7 @@ default-run = "animethemes-server-rust"
 loco-rs = { version = "1.2" }
 
 [dependencies]
+macros = { path = "macros" }
 loco-rs = { workspace = true , features = ["cli", "worker_redis", "cache_redis", "cache_inmem", "storage_aws_s3"] }
 migration = { path = "migration" }
 serde = { version = "1", features = ["derive"] }

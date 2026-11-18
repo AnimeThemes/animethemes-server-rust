@@ -105,6 +105,7 @@ dependencies = [
  "insta",
  "lettre",
  "loco-rs",
+ "macros",
  "migration",
  "minijinja",
  "percent-encoding",
@@ -3686,6 +3687,15 @@ dependencies = [
  "nix",
  "serde",
  "winapi",
+]
+
+[[package]]
+name = "macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
 ]
 
 [[package]]

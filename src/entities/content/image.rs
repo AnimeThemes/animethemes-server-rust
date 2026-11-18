@@ -1,13 +1,13 @@
 use std::env;
 
 use chrono::Utc;
+use macros::SoftDeleteEntity;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::SoftDeleteEntity;
 use crate::enums::content::imagefacet::ImageFacet;
 
 #[sea_orm::model]
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, SoftDeleteEntity, DeriveEntityModel)]
 #[sea_orm(table_name = "images")]
 pub struct Model {
     #[sea_orm(primary_key, column_name = "image_id")]
@@ -27,12 +27,6 @@ impl Model {
         let image_url = env::var("IMAGE_URL").expect("IMAGE_URL must be set in .env");
 
         format!("{}/{}", image_url, self.path)
-    }
-}
-
-impl SoftDeleteEntity for Entity {
-    fn deleted_at_column() -> Self::Column {
-        Column::DeletedAt
     }
 }
 

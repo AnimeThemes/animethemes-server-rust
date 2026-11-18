@@ -1,12 +1,12 @@
 use chrono::Utc;
+use macros::SoftDeleteEntity;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::SoftDeleteEntity;
 use crate::entities::content::{anime, entry, song, themegroup};
 use crate::enums::content::themetype::ThemeType;
 
 #[sea_orm::model]
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, SoftDeleteEntity, DeriveEntityModel)]
 #[sea_orm(table_name = "themes")]
 pub struct Model {
     #[sea_orm(primary_key, column_name = "theme_id")]
@@ -35,12 +35,6 @@ pub struct Model {
 
     #[sea_orm(has_many)]
     pub entries: HasMany<entry::Entity>,
-}
-
-impl SoftDeleteEntity for Entity {
-    fn deleted_at_column() -> Self::Column {
-        Column::DeletedAt
-    }
 }
 
 impl ActiveModelBehavior for ActiveModel {}

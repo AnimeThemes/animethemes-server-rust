@@ -1,16 +1,16 @@
 use std::env;
 
 use chrono::Utc;
+use macros::SoftDeleteEntity;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::SoftDeleteEntity;
 use crate::entities::content::{audio, entry, videoscript};
 use crate::enums::LocalizedEnum;
 use crate::enums::content::videooverlap::VideoOverlap;
 use crate::enums::content::videosource::VideoSource;
 
 #[sea_orm::model]
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, SoftDeleteEntity, DeriveEntityModel)]
 #[sea_orm(table_name = "videos")]
 pub struct Model {
     #[sea_orm(primary_key, column_name = "video_id")]
@@ -78,12 +78,6 @@ impl Model {
         }
 
         tags.join("")
-    }
-}
-
-impl SoftDeleteEntity for Entity {
-    fn deleted_at_column() -> Self::Column {
-        Column::DeletedAt
     }
 }
 

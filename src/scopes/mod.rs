@@ -1,7 +1,7 @@
 use sea_orm::sea_query::IntoCondition;
 use sea_orm::{ColumnTrait, Condition};
 
-use crate::entities::SoftDeleteEntity;
+use crate::traits::soft_delete::SoftDeleteEntity;
 
 pub mod admin;
 pub mod auth;

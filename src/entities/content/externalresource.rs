@@ -1,11 +1,11 @@
 use chrono::Utc;
+use macros::SoftDeleteEntity;
 use sea_orm::entity::prelude::*;
 
-use crate::entities::SoftDeleteEntity;
 use crate::enums::content::resourcesite::ResourceSite;
 
 #[sea_orm::model]
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, SoftDeleteEntity, DeriveEntityModel)]
 #[sea_orm(table_name = "resources")]
 pub struct Model {
     #[sea_orm(primary_key, column_name = "resource_id")]
@@ -19,12 +19,6 @@ pub struct Model {
     pub updated_at: chrono::DateTime<Utc>,
     #[sea_orm(column_type = "Timestamp")]
     pub deleted_at: Option<chrono::DateTime<Utc>>,
-}
-
-impl SoftDeleteEntity for Entity {
-    fn deleted_at_column() -> Self::Column {
-        Column::DeletedAt
-    }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
