@@ -60,7 +60,9 @@ impl PlaylistPolicy {
     }
 
     fn view(user: Option<&CurrentUser>, playlist: &playlist::Model) -> PolicyResponse {
-        if playlist.visibility == PlaylistVisibility::Public {
+        if playlist.visibility == PlaylistVisibility::Public
+            || playlist.visibility == PlaylistVisibility::Unlisted
+        {
             return PolicyResponse::Allow;
         }
 

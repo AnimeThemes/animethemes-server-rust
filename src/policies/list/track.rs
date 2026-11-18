@@ -59,7 +59,9 @@ impl Policy<&playlist::Model> for PlaylistTrackPolicy {
 
 impl PlaylistTrackPolicy {
     fn view_any(user: Option<&CurrentUser>, playlist: &playlist::Model) -> PolicyResponse {
-        if playlist.visibility == PlaylistVisibility::Public {
+        if playlist.visibility == PlaylistVisibility::Public
+            || playlist.visibility == PlaylistVisibility::Unlisted
+        {
             return PolicyResponse::Allow;
         }
 
@@ -73,7 +75,9 @@ impl PlaylistTrackPolicy {
     }
 
     fn view(user: Option<&CurrentUser>, playlist: &playlist::Model) -> PolicyResponse {
-        if playlist.visibility == PlaylistVisibility::Public {
+        if playlist.visibility == PlaylistVisibility::Public
+            || playlist.visibility == PlaylistVisibility::Unlisted
+        {
             return PolicyResponse::Allow;
         }
 
