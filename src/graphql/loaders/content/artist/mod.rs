@@ -1,4 +1,5 @@
 pub mod artist_groups;
+pub mod artist_images;
 pub mod artist_members;
 pub mod artist_membersongstaffs;
 pub mod artist_resources;
