@@ -1,4 +1,4 @@
-use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
+use async_graphql::{Context, Error, Object, Result, ResultExt};
 use loco_rs::app::AppContext;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
@@ -18,20 +18,6 @@ use crate::middlewares::current_user::CurrentUser;
 use crate::policies::list::track::PlaylistTrackPolicy;
 use crate::policies::{Policy, PolicyAction};
 
-#[derive(InputObject)]
-struct CreatePlaylistTrackInput {
-    entry_id: u64,
-    video_id: u64,
-    position: Option<i32>,
-}
-
-#[derive(InputObject)]
-struct UpdatePlaylistTrackInput {
-    entry_id: Option<u64>,
-    video_id: Option<u64>,
-    position: Option<i32>,
-}
-
 #[derive(Default)]
 pub struct PlaylistTrackMutation;
 
@@ -41,7 +27,7 @@ impl PlaylistTrackMutation {
         &self,
         ctx: &Context<'_>,
         playlist: String,
-        input: CreatePlaylistTrackInput,
+        input: InsertTrackActionParameters,
     ) -> Result<PlaylistTrack> {
         let user = ctx
             .data::<CurrentUser>()
@@ -66,18 +52,10 @@ impl PlaylistTrackMutation {
             .authorize()
             .extend()?;
 
-        let track = InsertTrackAction::insert(
-            ctx.data_unchecked::<AppContext>(),
-            playlist,
-            InsertTrackActionParameters {
-                entry_id: input.entry_id,
-                video_id: input.video_id,
-                position: input.position,
-            },
-            user,
-        )
-        .await
-        .extend()?;
+        let track =
+            InsertTrackAction::insert(ctx.data_unchecked::<AppContext>(), playlist, input, user)
+                .await
+                .extend()?;
 
         Ok(track.into())
     }
@@ -87,7 +65,7 @@ impl PlaylistTrackMutation {
         ctx: &Context<'_>,
         id: String,
         playlist: String,
-        input: UpdatePlaylistTrackInput,
+        input: UpdateTrackActionParameters,
     ) -> Result<PlaylistTrack> {
         let user = ctx
             .data::<CurrentUser>()
@@ -118,17 +96,9 @@ impl PlaylistTrackMutation {
             .await?
             .ok_or_else(|| Error::from(AppError::NotFound))?;
 
-        let track = UpdateTrackAction::update(
-            ctx.data_unchecked::<AppContext>(),
-            track,
-            UpdateTrackActionParameters {
-                entry_id: input.entry_id,
-                video_id: input.video_id,
-                position: input.position,
-            },
-        )
-        .await
-        .extend()?;
+        let track = UpdateTrackAction::update(ctx.data_unchecked::<AppContext>(), track, input)
+            .await
+            .extend()?;
 
         Ok(track.into())
     }

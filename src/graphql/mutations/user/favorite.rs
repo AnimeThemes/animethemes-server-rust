@@ -1,4 +1,4 @@
-use async_graphql::{Context, Error, InputObject, Object, OneofObject, Result, ResultExt};
+use async_graphql::{Context, Error, Object, OneofObject, Result, ResultExt};
 use loco_rs::app::AppContext;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
@@ -24,11 +24,6 @@ impl Into<FavoriteActions::FavoriteableType> for FavoriteableType {
             FavoriteableType::Entry(id) => FavoriteActions::FavoriteableType::Entry(id),
         }
     }
-}
-
-#[derive(InputObject)]
-struct UpdateFavoriteInput {
-    position: Option<i32>,
 }
 
 #[derive(Default)]
@@ -67,7 +62,7 @@ impl FavoriteMutation {
         &self,
         ctx: &Context<'_>,
         id: u64,
-        input: UpdateFavoriteInput,
+        input: UpdateFavoriteActionParameters,
     ) -> Result<Favorite> {
         let user = ctx
             .data::<CurrentUser>()
@@ -86,15 +81,10 @@ impl FavoriteMutation {
             .authorize()
             .extend()?;
 
-        let model = FavoriteAction::update_favorite(
-            ctx.data_unchecked::<AppContext>(),
-            favorite,
-            UpdateFavoriteActionParameters {
-                position: input.position,
-            },
-        )
-        .await
-        .extend()?;
+        let model =
+            FavoriteAction::update_favorite(ctx.data_unchecked::<AppContext>(), favorite, input)
+                .await
+                .extend()?;
 
         Ok(model.into())
     }

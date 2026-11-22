@@ -1,6 +1,7 @@
 use std::env;
 
 use anyhow::Context;
+use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::BackgroundWorker;
 use sea_orm::ActiveValue::Set;
@@ -23,10 +24,13 @@ use crate::workers::discord_notification::{
 };
 use crate::{AppError, discord};
 
+#[derive(InputObject)]
+#[graphql(name = "CreatePlaylistInput")]
 pub struct CreatePlaylistActionParameters {
     pub name: String,
     pub visibility: PlaylistVisibility,
     pub description: Option<String>,
+    #[graphql(skip)]
     pub user_id: u64,
 }
 

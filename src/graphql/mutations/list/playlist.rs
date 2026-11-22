@@ -1,4 +1,4 @@
-use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
+use async_graphql::{Context, Error, Object, Result, ResultExt};
 use loco_rs::app::AppContext;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
@@ -12,26 +12,11 @@ use crate::actions::entities::list::playlist::update_playlist::{
 };
 use crate::entities::list::playlist;
 use crate::enums::features::Feature;
-use crate::enums::list::playlistvisibility::PlaylistVisibility;
 use crate::features::functions::FeatureManager;
 use crate::graphql::types::list::playlist::Playlist;
 use crate::middlewares::current_user::CurrentUser;
 use crate::policies::list::playlist::PlaylistPolicy;
 use crate::policies::{Policy, PolicyAction};
-
-#[derive(InputObject)]
-struct CreatePlaylistInput {
-    name: String,
-    description: Option<String>,
-    visibility: PlaylistVisibility,
-}
-
-#[derive(InputObject)]
-struct UpdatePlaylistInput {
-    name: Option<String>,
-    description: Option<String>,
-    visibility: Option<PlaylistVisibility>,
-}
 
 #[derive(Default)]
 pub struct PlaylistMutation;
@@ -41,7 +26,7 @@ impl PlaylistMutation {
     async fn create_playlist(
         &self,
         ctx: &Context<'_>,
-        input: CreatePlaylistInput,
+        input: CreatePlaylistActionParameters,
     ) -> Result<Playlist> {
         let user = ctx
             .data::<CurrentUser>()
@@ -60,10 +45,8 @@ impl PlaylistMutation {
         let playlist = CreatePlaylistAction::create(
             ctx.data_unchecked::<AppContext>(),
             CreatePlaylistActionParameters {
-                name: input.name,
-                description: input.description,
-                visibility: input.visibility,
                 user_id: user.user.clone().id,
+                ..input
             },
             user,
         )
@@ -77,7 +60,7 @@ impl PlaylistMutation {
         &self,
         ctx: &Context<'_>,
         id: String,
-        input: UpdatePlaylistInput,
+        input: UpdatePlaylistActionParameters,
     ) -> Result<Playlist> {
         let user = ctx
             .data::<CurrentUser>()
@@ -101,17 +84,10 @@ impl PlaylistMutation {
             .authorize()
             .extend()?;
 
-        let playlist = UpdatePlaylistAction::update(
-            ctx.data_unchecked::<AppContext>(),
-            playlist,
-            UpdatePlaylistActionParameters {
-                name: input.name,
-                description: input.description,
-                visibility: input.visibility,
-            },
-        )
-        .await
-        .extend()?;
+        let playlist =
+            UpdatePlaylistAction::update(ctx.data_unchecked::<AppContext>(), playlist, input)
+                .await
+                .extend()?;
 
         Ok(playlist.into())
     }

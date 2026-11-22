@@ -1,3 +1,4 @@
+use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::BackgroundWorker;
 use loco_rs::validator::ValidateEmail;
@@ -18,7 +19,8 @@ use crate::workers::discord_notification::{
 };
 use crate::{AppError, discord};
 
-#[derive(Clone)]
+#[derive(InputObject, Clone)]
+#[graphql(name = "UpdateUserInformationInput")]
 pub struct UpdateUserInformationParameters {
     pub name: Option<String>,
     pub email: Option<String>,

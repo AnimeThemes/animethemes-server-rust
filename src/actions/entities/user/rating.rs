@@ -1,3 +1,4 @@
+use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt};
@@ -8,9 +9,14 @@ use crate::entities::content::entry;
 use crate::entities::user::rating;
 use crate::rules::validation_error::ValidationError;
 
+#[derive(InputObject)]
+#[graphql(name = "RateEntryInput")]
 pub struct RateEntryActionParameters {
+    #[graphql(skip)]
     pub entry_id: u64,
+    #[graphql(skip)]
     pub user_id: u64,
+    /// The score to rate the entry with.
     pub score: Option<f32>,
 }
 

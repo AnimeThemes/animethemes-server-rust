@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, DatabaseConnection};
@@ -10,6 +11,8 @@ use crate::rules::validation_error::ValidationError;
 use crate::typesense::client::typesense;
 use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
 
+#[derive(InputObject)]
+#[graphql(name = "UpdatePlaylistInput")]
 pub struct UpdatePlaylistActionParameters {
     pub name: Option<String>,
     pub visibility: Option<PlaylistVisibility>,

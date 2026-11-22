@@ -1,5 +1,6 @@
 use std::env;
 
+use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
@@ -16,6 +17,8 @@ use crate::policies::has_any_role;
 use crate::rules::validation_error::ValidationError;
 use crate::traits::sortable::Sortable;
 
+#[derive(InputObject)]
+#[graphql(name = "CreatePlaylistTrackInput")]
 pub struct InsertTrackActionParameters {
     pub entry_id: u64,
     pub video_id: u64,

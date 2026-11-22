@@ -4,6 +4,7 @@ use crate::entities::auth::sanction::{self, Sanctions};
 use crate::entities::auth::user_sanctions;
 use crate::middlewares::current_user::CurrentUser;
 
+pub mod content;
 pub mod document;
 pub mod list;
 pub mod user;

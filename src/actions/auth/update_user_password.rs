@@ -1,3 +1,4 @@
+use async_graphql::InputObject;
 use bcrypt::{hash, verify};
 use loco_rs::app::AppContext;
 use sea_orm::ActiveModelTrait;
@@ -7,10 +8,14 @@ use crate::AppError;
 use crate::entities::auth::user;
 use crate::rules::validation_error::ValidationError;
 
-#[derive(Clone)]
+#[derive(InputObject, Clone)]
+#[graphql(name = "UpdatePasswordInput")]
 pub struct UpdateUserPasswordParameters {
+    #[graphql(secret)]
     pub current_password: String,
+    #[graphql(secret)]
     pub new_password: String,
+    #[graphql(secret)]
     pub new_password_confirmation: String,
 }
 

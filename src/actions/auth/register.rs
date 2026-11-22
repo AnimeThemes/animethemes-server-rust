@@ -1,3 +1,4 @@
+use async_graphql::InputObject;
 use bcrypt::hash;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::BackgroundWorker;
@@ -19,11 +20,14 @@ use crate::workers::discord_notification::{
 };
 use crate::{AppError, discord};
 
-#[derive(Clone)]
+#[derive(InputObject, Clone)]
+#[graphql(name = "RegisterInput")]
 pub struct RegisterParameters {
     pub name: String,
     pub email: String,
+    #[graphql(secret)]
     pub password: String,
+    #[graphql(secret)]
     pub password_confirmation: String,
     pub terms: bool,
 }

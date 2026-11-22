@@ -1,3 +1,4 @@
+use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
@@ -29,6 +30,8 @@ pub struct ToggleFavoriteActionParameters {
     pub user_id: u64,
 }
 
+#[derive(InputObject)]
+#[graphql(name = "UpdateFavoriteInput")]
 pub struct UpdateFavoriteActionParameters {
     pub position: Option<i32>,
 }

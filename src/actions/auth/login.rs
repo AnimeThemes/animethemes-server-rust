@@ -1,11 +1,14 @@
+use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 
 use crate::AppError;
 use crate::entities::auth::user::{self};
 
-#[derive(Clone)]
+#[derive(InputObject, Clone)]
+#[graphql(name = "LoginInput")]
 pub struct LoginActionParameters {
     pub email: String,
+    #[graphql(secret)]
     pub password: String,
 }
 

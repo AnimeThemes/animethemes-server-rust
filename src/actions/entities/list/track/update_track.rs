@@ -1,3 +1,4 @@
+use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
@@ -11,6 +12,8 @@ use crate::entities::list::track;
 use crate::rules::validation_error::ValidationError;
 use crate::traits::sortable::Sortable;
 
+#[derive(InputObject)]
+#[graphql(name = "UpdatePlaylistTrackInput")]
 pub struct UpdateTrackActionParameters {
     pub entry_id: Option<u64>,
     pub video_id: Option<u64>,

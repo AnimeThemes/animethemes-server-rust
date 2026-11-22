@@ -1,3 +1,4 @@
+use async_graphql::InputObject;
 use bcrypt::hash;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
@@ -11,10 +12,15 @@ use crate::actions::auth::register::Register;
 use crate::entities::auth::{password_reset_tokens, user};
 use crate::rules::validation_error::ValidationError;
 
+#[derive(InputObject)]
+#[graphql(name = "ResetPasswordInput")]
 pub struct ResetPasswordParams {
     pub email: String,
+    #[graphql(secret)]
     pub password: String,
+    #[graphql(secret)]
     pub password_confirmation: String,
+    #[graphql(secret)]
     pub token: String,
 }
 

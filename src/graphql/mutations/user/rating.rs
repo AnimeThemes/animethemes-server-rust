@@ -1,16 +1,10 @@
-use async_graphql::{Context, Error, InputObject, Object, Result, ResultExt};
+use async_graphql::{Context, Error, Object, Result, ResultExt};
 use loco_rs::app::AppContext;
 
 use crate::AppError;
 use crate::actions::entities::user::rating::{RateEntryActionParameters, RatingAction};
 use crate::graphql::types::user::rating::Rating;
 use crate::middlewares::current_user::CurrentUser;
-
-#[derive(InputObject)]
-struct RateEntryInput {
-    /// The score to rate the entry with.
-    pub score: Option<f32>,
-}
 
 #[derive(Default)]
 pub struct RatingMutation;
@@ -22,7 +16,7 @@ impl RatingMutation {
         &self,
         ctx: &Context<'_>,
         entry_id: u64,
-        input: RateEntryInput,
+        input: RateEntryActionParameters,
     ) -> Result<Option<Rating>> {
         let user = ctx
             .data::<CurrentUser>()
