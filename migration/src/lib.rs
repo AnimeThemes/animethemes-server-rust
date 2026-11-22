@@ -37,6 +37,7 @@ mod m20260903_143133_create_favorites_table;
 mod m20260904_225415_create_ratings_table;
 mod m20260926_230104_create_theme_staff_table;
 mod m20261109_230214_add_position_to_favorites_table;
+mod m20261122_144654_modify_resources_schema;
 
 pub struct Migrator;
 
@@ -81,6 +82,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260904_225415_create_ratings_table::Migration),
             Box::new(m20260926_230104_create_theme_staff_table::Migration),
             Box::new(m20261109_230214_add_position_to_favorites_table::Migration),
+            Box::new(m20261122_144654_modify_resources_schema::Migration),
         ]
     }
 }

@@ -2,16 +2,16 @@ use async_graphql::connection::{Connection, Edge, EmptyFields};
 use async_graphql::dataloader::DataLoader;
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::entities::content::{imageable, resourceable, studio};
+use crate::entities::content::{imageable, studio};
 use crate::graphql::loaders::content::imageable::{ImageableKey, ImageableLoader};
-use crate::graphql::loaders::content::resourceable::{ResourceableKey, ResourceableLoader};
 use crate::graphql::loaders::content::studio::studio_anime::StudioAnimeLoader;
+use crate::graphql::loaders::content::studio::studio_resources::StudioResourcesLoader;
 use crate::graphql::types::content::anime::Anime;
-use crate::graphql::types::content::externalresource::ExternalResource;
 use crate::graphql::types::content::image::Image;
 use crate::graphql::types::content::imageable::{
     ImageableConnection, ImageableEdge, ImageableEdgeFields,
 };
+use crate::graphql::types::content::resource::ExternalResource;
 use crate::graphql::types::content::resourceable::{
     ResourceableConnection, ResourceableEdge, ResourceableEdgeFields,
 };
@@ -113,6 +113,7 @@ impl Studio {
         Ok(connection)
     }
 
+    #[graphql(deprecation = "Use resourcesV2 instead")]
     async fn resources(
         &self,
         ctx: &Context<'_>,
@@ -126,31 +127,33 @@ impl Studio {
             ResourceableEdge,
         >,
     > {
-        let loader = ctx.data_unchecked::<DataLoader<ResourceableLoader>>();
+        let loader = ctx.data_unchecked::<DataLoader<StudioResourcesLoader>>();
 
-        let rows = loader
-            .load_one(ResourceableKey {
-                id: self.id,
-                resourceable_type: resourceable::ResourceableType::Studio,
-            })
-            .await?
-            .unwrap_or_default();
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
 
         let mut connection = Connection::with_additional_fields(false, false, EmptyFields);
 
-        for (pivot, resource) in rows {
+        for model in models {
             connection.edges.push(Edge::with_additional_fields(
-                resource.id,
-                resource.into(),
+                model.id,
+                model.clone().into(),
                 ResourceableEdgeFields {
-                    r#as: pivot.r#as,
-                    created_at: pivot.created_at,
-                    updated_at: pivot.updated_at,
+                    r#as: model.r#as,
+                    created_at: model.created_at,
+                    updated_at: model.updated_at,
                 },
             ));
         }
 
         Ok(connection)
+    }
+
+    async fn resources_v2(&self, ctx: &Context<'_>) -> Result<Vec<ExternalResource>> {
+        let loader = ctx.data_unchecked::<DataLoader<StudioResourcesLoader>>();
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(ExternalResource::from).collect())
     }
 }
 

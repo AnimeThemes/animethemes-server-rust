@@ -2,11 +2,11 @@ use async_graphql::connection::{Connection, Edge, EmptyFields};
 use async_graphql::dataloader::DataLoader;
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::entities::content::{resourceable, song};
-use crate::graphql::loaders::content::resourceable::{ResourceableKey, ResourceableLoader};
+use crate::entities::content::song;
+use crate::graphql::loaders::content::song::song_resources::SongResourcesLoader;
 use crate::graphql::loaders::content::song::song_staffs::SongStaffsLoader;
 use crate::graphql::loaders::content::song::song_themes::SongThemesLoader;
-use crate::graphql::types::content::externalresource::ExternalResource;
+use crate::graphql::types::content::resource::ExternalResource;
 use crate::graphql::types::content::resourceable::{
     ResourceableConnection, ResourceableEdge, ResourceableEdgeFields,
 };
@@ -60,6 +60,7 @@ impl Song {
         Ok(models.into_iter().map(SongStaff::from).collect())
     }
 
+    #[graphql(deprecation = "Use resourcesV2 instead")]
     async fn resources(
         &self,
         ctx: &Context<'_>,
@@ -73,31 +74,33 @@ impl Song {
             ResourceableEdge,
         >,
     > {
-        let loader = ctx.data_unchecked::<DataLoader<ResourceableLoader>>();
+        let loader = ctx.data_unchecked::<DataLoader<SongResourcesLoader>>();
 
-        let rows = loader
-            .load_one(ResourceableKey {
-                id: self.id,
-                resourceable_type: resourceable::ResourceableType::Song,
-            })
-            .await?
-            .unwrap_or_default();
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
 
         let mut connection = Connection::with_additional_fields(false, false, EmptyFields);
 
-        for (pivot, resource) in rows {
+        for model in models {
             connection.edges.push(Edge::with_additional_fields(
-                resource.id,
-                resource.into(),
+                model.id,
+                model.clone().into(),
                 ResourceableEdgeFields {
-                    r#as: pivot.r#as,
-                    created_at: pivot.created_at,
-                    updated_at: pivot.updated_at,
+                    r#as: model.r#as,
+                    created_at: model.created_at,
+                    updated_at: model.updated_at,
                 },
             ));
         }
 
         Ok(connection)
+    }
+
+    async fn resources_v2(&self, ctx: &Context<'_>) -> Result<Vec<ExternalResource>> {
+        let loader = ctx.data_unchecked::<DataLoader<SongResourcesLoader>>();
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(ExternalResource::from).collect())
     }
 }
 

@@ -1,3 +1,4 @@
+pub mod anime_resources;
 pub mod anime_series;
 pub mod anime_studios;
 pub mod anime_synonyms;

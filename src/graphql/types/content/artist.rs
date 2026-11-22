@@ -2,23 +2,23 @@ use async_graphql::connection::{Connection, Edge, EmptyFields};
 use async_graphql::dataloader::DataLoader;
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::entities::content::{artist, imageable, resourceable};
+use crate::entities::content::{artist, imageable};
 use crate::graphql::loaders::content::artist::artist_groups::ArtistGroupsLoader;
 use crate::graphql::loaders::content::artist::artist_members::ArtistMembersLoader;
 use crate::graphql::loaders::content::artist::artist_membersongstaffs::ArtistMemberSongStaffsLoader;
+use crate::graphql::loaders::content::artist::artist_resources::ArtistResourcesLoader;
 use crate::graphql::loaders::content::artist::artist_songstaffs::ArtistSongStaffsLoader;
 use crate::graphql::loaders::content::artist::artist_synonyms::ArtistSynonymsLoader;
 use crate::graphql::loaders::content::artist::artist_themestaffs::ArtistThemeStaffsLoader;
 use crate::graphql::loaders::content::imageable::{ImageableKey, ImageableLoader};
-use crate::graphql::loaders::content::resourceable::{ResourceableKey, ResourceableLoader};
 use crate::graphql::types::content::artist_member::{
     ArtistMemberConnection, ArtistMemberEdge, ArtistMemberEdgeFields,
 };
-use crate::graphql::types::content::externalresource::ExternalResource;
 use crate::graphql::types::content::image::Image;
 use crate::graphql::types::content::imageable::{
     ImageableConnection, ImageableEdge, ImageableEdgeFields,
 };
+use crate::graphql::types::content::resource::ExternalResource;
 use crate::graphql::types::content::resourceable::{
     ResourceableConnection, ResourceableEdge, ResourceableEdgeFields,
 };
@@ -212,6 +212,7 @@ impl Artist {
         Ok(connection)
     }
 
+    #[graphql(deprecation = "Use resourcesV2 instead")]
     async fn resources(
         &self,
         ctx: &Context<'_>,
@@ -225,31 +226,33 @@ impl Artist {
             ResourceableEdge,
         >,
     > {
-        let loader = ctx.data_unchecked::<DataLoader<ResourceableLoader>>();
+        let loader = ctx.data_unchecked::<DataLoader<ArtistResourcesLoader>>();
 
-        let rows = loader
-            .load_one(ResourceableKey {
-                id: self.id,
-                resourceable_type: resourceable::ResourceableType::Artist,
-            })
-            .await?
-            .unwrap_or_default();
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
 
         let mut connection = Connection::with_additional_fields(false, false, EmptyFields);
 
-        for (pivot, resource) in rows {
+        for model in models {
             connection.edges.push(Edge::with_additional_fields(
-                resource.id,
-                resource.into(),
+                model.id,
+                model.clone().into(),
                 ResourceableEdgeFields {
-                    r#as: pivot.r#as,
-                    created_at: pivot.created_at,
-                    updated_at: pivot.updated_at,
+                    r#as: model.r#as,
+                    created_at: model.created_at,
+                    updated_at: model.updated_at,
                 },
             ));
         }
 
         Ok(connection)
+    }
+
+    async fn resources_v2(&self, ctx: &Context<'_>) -> Result<Vec<ExternalResource>> {
+        let loader = ctx.data_unchecked::<DataLoader<ArtistResourcesLoader>>();
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(ExternalResource::from).collect())
     }
 }
 

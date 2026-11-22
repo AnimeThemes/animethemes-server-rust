@@ -5,7 +5,7 @@ use sea_orm::{
 };
 
 use crate::AppError;
-use crate::entities::content::{anime, externalresource, resourceable};
+use crate::entities::content::{anime, resource};
 use crate::enums::content::animeformat::AnimeFormat;
 use crate::enums::content::animeseason::AnimeSeason;
 use crate::enums::content::resourcesite::ResourceSite;
@@ -143,32 +143,23 @@ impl AnimeQuery {
 
         let mut query = anime::Entity::find()
             .filter(without_trashed::<anime::Entity>())
-            .join_rev(
-                JoinType::InnerJoin,
-                resourceable::Entity::belongs_to(anime::Entity)
-                    .from(resourceable::Column::ResourceableId)
-                    .to(anime::Column::Id)
-                    .into(),
-            )
             .join(
                 JoinType::InnerJoin,
-                resourceable::Entity::belongs_to(externalresource::Entity)
-                    .from(resourceable::Column::ResourceId)
-                    .to(externalresource::Column::Id)
+                anime::Entity::belongs_to(resource::Entity)
+                    .from(anime::Column::Id)
+                    .to(resource::Column::ResourceableId)
                     .into(),
             )
-            .filter(
-                resourceable::Column::ResourceableType.eq(resourceable::ResourceableType::Anime),
-            )
-            .filter(externalresource::Column::Site.eq(site))
+            .filter(resource::Column::ResourceableType.eq(resource::ResourceableType::Anime))
+            .filter(resource::Column::Site.eq(site))
             .distinct();
 
         if let Some(ids) = id {
-            query = query.filter(externalresource::Column::ExternalId.is_in(ids));
+            query = query.filter(resource::Column::ExternalId.is_in(ids));
         }
 
         if let Some(link) = link {
-            query = query.filter(externalresource::Column::Link.eq(link));
+            query = query.filter(resource::Column::Link.eq(link));
         }
 
         let db = ctx.data::<DatabaseConnection>()?;
