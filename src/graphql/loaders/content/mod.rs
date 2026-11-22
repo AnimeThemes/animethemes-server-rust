@@ -2,7 +2,6 @@ pub mod anime;
 pub mod artist;
 pub mod entry;
 pub mod imageable;
-pub mod resourceable;
 pub mod series;
 pub mod song;
 pub mod songstaff;
