@@ -13,6 +13,7 @@ use crate::graphql::loaders::auth::user::user_playlists::UserPlaylistsLoader;
 use crate::graphql::loaders::auth::user::user_ratings::UserRatingsLoader;
 use crate::graphql::loaders::auth::user::user_roles::UserRolesLoader;
 use crate::graphql::loaders::auth::user::user_watchhistory::UserWatchHistoryLoader;
+use crate::graphql::loaders::content::anime::anime_images::AnimeImagesLoader;
 use crate::graphql::loaders::content::anime::anime_resources::AnimeResourcesLoader;
 use crate::graphql::loaders::content::anime::anime_series::AnimeSeriesLoader;
 use crate::graphql::loaders::content::anime::anime_studios::AnimeStudiosLoader;
@@ -20,6 +21,7 @@ use crate::graphql::loaders::content::anime::anime_synonyms::AnimeSynonymsLoader
 use crate::graphql::loaders::content::anime::anime_themes::ThemesLoader;
 use crate::graphql::loaders::content::anime::theme_entries::ThemeEntriesLoader;
 use crate::graphql::loaders::content::artist::artist_groups::ArtistGroupsLoader;
+use crate::graphql::loaders::content::artist::artist_images::ArtistImagesLoader;
 use crate::graphql::loaders::content::artist::artist_members::ArtistMembersLoader;
 use crate::graphql::loaders::content::artist::artist_membersongstaffs::ArtistMemberSongStaffsLoader;
 use crate::graphql::loaders::content::artist::artist_resources::ArtistResourcesLoader;
@@ -28,7 +30,6 @@ use crate::graphql::loaders::content::artist::artist_synonyms::ArtistSynonymsLoa
 use crate::graphql::loaders::content::artist::artist_themestaffs::ArtistThemeStaffsLoader;
 use crate::graphql::loaders::content::entry::entry_theme::EntryThemeLoader;
 use crate::graphql::loaders::content::entry::entry_videos::EntryVideosLoader;
-use crate::graphql::loaders::content::imageable::ImageableLoader;
 use crate::graphql::loaders::content::series::series_anime::SeriesAnimeLoader;
 use crate::graphql::loaders::content::song::song_resources::SongResourcesLoader;
 use crate::graphql::loaders::content::song::song_staffs::SongStaffsLoader;
@@ -37,6 +38,7 @@ use crate::graphql::loaders::content::songstaff::songstaff_artist::SongStaffArti
 use crate::graphql::loaders::content::songstaff::songstaff_member::SongStaffMemberLoader;
 use crate::graphql::loaders::content::songstaff::songstaff_song::SongStaffSongLoader;
 use crate::graphql::loaders::content::studio::studio_anime::StudioAnimeLoader;
+use crate::graphql::loaders::content::studio::studio_images::StudioImagesLoader;
 use crate::graphql::loaders::content::studio::studio_resources::StudioResourcesLoader;
 use crate::graphql::loaders::content::theme::theme_anime::ThemeAnimeLoader;
 use crate::graphql::loaders::content::theme::theme_group::ThemeGroupLoader;
@@ -102,10 +104,12 @@ impl<Query> RegisterLoaders for SchemaBuilder<Query, Mutation, EmptySubscription
             .data(loader(EntryThemeLoader { db: db.clone() }))
             .data(loader(EntryVideosLoader { db: db.clone() }))
             .data(loader(AnimeResourcesLoader { db: db.clone() }))
+            .data(loader(AnimeImagesLoader { db: db.clone() }))
             .data(loader(AnimeSeriesLoader { db: db.clone() }))
             .data(loader(AnimeStudiosLoader { db: db.clone() }))
             .data(loader(ArtistSynonymsLoader { db: db.clone() }))
             .data(loader(ArtistResourcesLoader { db: db.clone() }))
+            .data(loader(ArtistImagesLoader { db: db.clone() }))
             .data(loader(ArtistGroupsLoader { db: db.clone() }))
             .data(loader(ArtistMembersLoader { db: db.clone() }))
             .data(loader(ArtistSongStaffsLoader { db: db.clone() }))
@@ -117,6 +121,7 @@ impl<Query> RegisterLoaders for SchemaBuilder<Query, Mutation, EmptySubscription
             .data(loader(SongStaffsLoader { db: db.clone() }))
             .data(loader(StudioAnimeLoader { db: db.clone() }))
             .data(loader(StudioResourcesLoader { db: db.clone() }))
+            .data(loader(StudioImagesLoader { db: db.clone() }))
             .data(loader(SongStaffArtistLoader { db: db.clone() }))
             .data(loader(SongStaffMemberLoader { db: db.clone() }))
             .data(loader(SongStaffSongLoader { db: db.clone() }))
@@ -127,7 +132,6 @@ impl<Query> RegisterLoaders for SchemaBuilder<Query, Mutation, EmptySubscription
             .data(loader(VideoAudioLoader { db: db.clone() }))
             .data(loader(VideoScriptLoader { db: db.clone() }))
             .data(loader(VideoTracksLoader { db: db.clone() }))
-            .data(loader(ImageableLoader { db: db.clone() }))
             .data(loader(PlaylistUserLoader { db: db.clone() }))
             .data(loader(PlaylistTracksLoader { db: db.clone() }))
             .data(loader(PlaylistTracksCountLoader { db: db.clone() }))

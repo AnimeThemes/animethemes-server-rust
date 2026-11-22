@@ -2,15 +2,15 @@ use async_graphql::connection::{Connection, Edge, EmptyFields};
 use async_graphql::dataloader::DataLoader;
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
-use crate::entities::content::{artist, imageable};
+use crate::entities::content::artist;
 use crate::graphql::loaders::content::artist::artist_groups::ArtistGroupsLoader;
+use crate::graphql::loaders::content::artist::artist_images::ArtistImagesLoader;
 use crate::graphql::loaders::content::artist::artist_members::ArtistMembersLoader;
 use crate::graphql::loaders::content::artist::artist_membersongstaffs::ArtistMemberSongStaffsLoader;
 use crate::graphql::loaders::content::artist::artist_resources::ArtistResourcesLoader;
 use crate::graphql::loaders::content::artist::artist_songstaffs::ArtistSongStaffsLoader;
 use crate::graphql::loaders::content::artist::artist_synonyms::ArtistSynonymsLoader;
 use crate::graphql::loaders::content::artist::artist_themestaffs::ArtistThemeStaffsLoader;
-use crate::graphql::loaders::content::imageable::{ImageableKey, ImageableLoader};
 use crate::graphql::types::content::artist_member::{
     ArtistMemberConnection, ArtistMemberEdge, ArtistMemberEdgeFields,
 };
@@ -172,6 +172,7 @@ impl Artist {
         Ok(models.into_iter().map(ThemeStaff::from).collect())
     }
 
+    #[graphql(deprecation = "Use imagesV2 instead")]
     async fn images(
         &self,
         ctx: &Context<'_>,
@@ -185,31 +186,33 @@ impl Artist {
             ImageableEdge,
         >,
     > {
-        let loader = ctx.data_unchecked::<DataLoader<ImageableLoader>>();
+        let loader = ctx.data_unchecked::<DataLoader<ArtistImagesLoader>>();
 
-        let rows = loader
-            .load_one(ImageableKey {
-                id: self.id,
-                imageable_type: imageable::ImageableType::Artist,
-            })
-            .await?
-            .unwrap_or_default();
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
 
         let mut connection = Connection::with_additional_fields(false, false, EmptyFields);
 
-        for (pivot, image) in rows {
+        for model in models {
             connection.edges.push(Edge::with_additional_fields(
-                image.id,
-                image.into(),
+                model.id,
+                model.clone().into(),
                 ImageableEdgeFields {
-                    depth: pivot.depth,
-                    created_at: pivot.created_at,
-                    updated_at: pivot.updated_at,
+                    depth: model.depth,
+                    created_at: model.created_at,
+                    updated_at: model.updated_at,
                 },
             ));
         }
 
         Ok(connection)
+    }
+
+    async fn images_v2(&self, ctx: &Context<'_>) -> Result<Vec<Image>> {
+        let loader = ctx.data_unchecked::<DataLoader<ArtistImagesLoader>>();
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(Image::from).collect())
     }
 
     #[graphql(deprecation = "Use resourcesV2 instead")]

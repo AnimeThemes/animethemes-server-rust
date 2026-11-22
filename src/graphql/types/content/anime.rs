@@ -3,16 +3,15 @@ use async_graphql::dataloader::DataLoader;
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
 
 use crate::entities::content::anime::{self};
-use crate::entities::content::imageable;
 use crate::enums::LocalizedEnum;
 use crate::enums::content::animeformat::AnimeFormat;
 use crate::enums::content::animeseason::AnimeSeason;
+use crate::graphql::loaders::content::anime::anime_images::AnimeImagesLoader;
 use crate::graphql::loaders::content::anime::anime_resources::AnimeResourcesLoader;
 use crate::graphql::loaders::content::anime::anime_series::AnimeSeriesLoader;
 use crate::graphql::loaders::content::anime::anime_studios::AnimeStudiosLoader;
 use crate::graphql::loaders::content::anime::anime_synonyms::AnimeSynonymsLoader;
 use crate::graphql::loaders::content::anime::anime_themes::ThemesLoader;
-use crate::graphql::loaders::content::imageable::{ImageableKey, ImageableLoader};
 use crate::graphql::types::content::anime_series::{
     AnimeSeriesConnection, AnimeSeriesEdge, AnimeSeriesEdgeFields,
 };
@@ -98,6 +97,7 @@ impl Anime {
         Ok(models.into_iter().map(Theme::from).collect())
     }
 
+    #[graphql(deprecation = "Use imagesV2 instead")]
     async fn images(
         &self,
         ctx: &Context<'_>,
@@ -111,31 +111,33 @@ impl Anime {
             ImageableEdge,
         >,
     > {
-        let loader = ctx.data_unchecked::<DataLoader<ImageableLoader>>();
+        let loader = ctx.data_unchecked::<DataLoader<AnimeImagesLoader>>();
 
-        let rows = loader
-            .load_one(ImageableKey {
-                id: self.id,
-                imageable_type: imageable::ImageableType::Anime,
-            })
-            .await?
-            .unwrap_or_default();
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
 
         let mut connection = Connection::with_additional_fields(false, false, EmptyFields);
 
-        for (pivot, image) in rows {
+        for model in models {
             connection.edges.push(Edge::with_additional_fields(
-                image.id,
-                image.into(),
+                model.id,
+                model.clone().into(),
                 ImageableEdgeFields {
-                    depth: pivot.depth,
-                    created_at: pivot.created_at,
-                    updated_at: pivot.updated_at,
+                    depth: model.depth,
+                    created_at: model.created_at,
+                    updated_at: model.updated_at,
                 },
             ));
         }
 
         Ok(connection)
+    }
+
+    async fn images_v2(&self, ctx: &Context<'_>) -> Result<Vec<Image>> {
+        let loader = ctx.data_unchecked::<DataLoader<AnimeImagesLoader>>();
+
+        let models = loader.load_one(self.id).await?.unwrap_or_default();
+
+        Ok(models.into_iter().map(Image::from).collect())
     }
 
     #[graphql(deprecation = "Use resourcesV2 instead")]

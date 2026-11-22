@@ -1,4 +1,4 @@
-use sea_orm_migration::{prelude::*};
+use sea_orm_migration::prelude::*;
 
 pub struct Migration;
 
@@ -16,8 +16,8 @@ impl MigrationTrait for Migration {
                 .alter_table(
                     Table::alter()
                         .table("resources")
-                        .add_column(ColumnDef::new("resourceable_type").string().null())
-                        .add_column(ColumnDef::new("resourceable_id").big_unsigned().null())
+                        .add_column(ColumnDef::new("resourceable_type").string().not_null())
+                        .add_column(ColumnDef::new("resourceable_id").big_unsigned().not_null())
                         .add_column(ColumnDef::new("as").string().null())
                         .to_owned(),
                 )

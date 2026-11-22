@@ -7,7 +7,6 @@ pub mod audio;
 pub mod entry;
 pub mod entry_videos;
 pub mod image;
-pub mod imageable;
 pub mod resource;
 pub mod series;
 pub mod song;
