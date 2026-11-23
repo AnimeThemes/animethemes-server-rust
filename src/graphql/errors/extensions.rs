@@ -2,23 +2,27 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use async_graphql::{Error, ErrorExtensions};
+use convert_case::{Case, Casing};
 use loco_rs::environment::{Environment, resolve_from_env};
 
 use crate::AppError;
-use crate::rules::validation_error::ValidationError;
 
 impl ErrorExtensions for AppError {
     fn extend(&self) -> Error {
         match self {
             AppError::Validation(errors) => {
-                let mut validation: BTreeMap<String, Vec<String>> = BTreeMap::new();
+                let validation: BTreeMap<String, Vec<String>> = errors
+                    .field_errors()
+                    .into_iter()
+                    .map(|(field, errors)| {
+                        let messages = errors
+                            .iter()
+                            .map(|e| e.message.as_deref().unwrap_or(&e.code).to_string())
+                            .collect();
 
-                for error in errors.into_iter().map(ValidationError::to_camel_case) {
-                    validation
-                        .entry(error.field.clone())
-                        .or_default()
-                        .extend(error.messages.clone());
-                }
+                        (field.to_case(Case::Camel), messages)
+                    })
+                    .collect();
 
                 let message = format!(
                     "Validation failed for {}",
@@ -27,10 +31,7 @@ impl ErrorExtensions for AppError {
 
                 Error::new(message).extend_with(|_, extensions| {
                     extensions.set("code", 422);
-
-                    if let Ok(value) = async_graphql::to_value(validation) {
-                        extensions.set("validation", value);
-                    }
+                    extensions.set("validation", async_graphql::to_value(validation).unwrap());
                 })
             }
             AppError::Unauthenticated | AppError::Unauthorized => Error::new(self.to_string())

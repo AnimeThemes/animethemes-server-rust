@@ -3,6 +3,7 @@ use async_graphql::{Context, InputObject, Object, Result, ResultExt};
 use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, JoinType, Order, QueryFilter, QuerySelect,
 };
+use validator::{ValidationError, ValidationErrors};
 
 use crate::AppError;
 use crate::entities::content::{anime, resource};
@@ -14,7 +15,6 @@ use crate::graphql::enums::sort::GraphQLSort;
 use crate::graphql::enums::sort::content::anime_sort::AnimeSort;
 use crate::graphql::inputs::pagination_input::PaginationInput;
 use crate::graphql::types::content::anime::Anime;
-use crate::rules::validation_error::ValidationError;
 use crate::scopes::without_trashed;
 
 #[derive(InputObject, Default)]
@@ -113,28 +113,25 @@ impl AnimeQuery {
         id: Option<Vec<u64>>,
         link: Option<String>,
     ) -> Result<Vec<Anime>> {
-        let mut errors = Vec::new();
-
-        let mut id_errors = Vec::new();
+        let mut errors = ValidationErrors::new();
 
         let has_id = id.as_ref().is_some_and(|ids| !ids.is_empty());
         let has_link = link.as_ref().is_some_and(|link| !link.trim().is_empty());
 
         if !has_id && !has_link {
-            id_errors.push("Either 'id' or 'link' must be provided");
+            let error = ValidationError::new("required")
+                .with_message("Either 'id' or 'link' must be provided".into());
 
-            errors.push(ValidationError::new(
-                "link",
-                vec!["Either 'id' or 'link' must be provided"],
-            ));
+            errors.add("id", error.clone());
+            errors.add("link", error);
         }
 
         if id.as_ref().is_some_and(|ids| ids.len() > 100) {
-            id_errors.push("'Id' must contain at most 100 entries");
-        }
-
-        if !id_errors.is_empty() {
-            errors.push(ValidationError::new("id", id_errors));
+            errors.add(
+                "id",
+                ValidationError::new("max_length")
+                    .with_message("'Id' must contain at most 100 entries".into()),
+            );
         }
 
         if !errors.is_empty() {

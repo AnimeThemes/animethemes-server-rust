@@ -5,11 +5,11 @@ use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait, QueryFilter,
     QueryOrder, QuerySelect, SelectExt, TransactionTrait,
 };
+use validator::{Validate, ValidationError, ValidationErrors};
 
 use crate::AppError;
 use crate::entities::content::entry;
 use crate::entities::user::favorite;
-use crate::rules::validation_error::ValidationError;
 use crate::traits::sortable::Sortable;
 
 #[derive(Copy, Clone)]
@@ -30,9 +30,10 @@ pub struct ToggleFavoriteActionParameters {
     pub user_id: u64,
 }
 
-#[derive(InputObject)]
+#[derive(InputObject, Validate)]
 #[graphql(name = "UpdateFavoriteInput")]
 pub struct UpdateFavoriteActionParameters {
+    #[validate(range(min = 1, message = "The position must be greater than 0."))]
     pub position: Option<i32>,
 }
 
@@ -43,9 +44,7 @@ impl FavoriteAction {
         db: &DatabaseConnection,
         params: &ToggleFavoriteActionParameters,
     ) -> Result<(), AppError> {
-        let mut errors = Vec::new();
-
-        let favoriteable_exists = match &params.favoriteable {
+        let exists = match &params.favoriteable {
             FavoriteableType::Entry(id) => {
                 entry::Entity::find()
                     .filter(entry::Column::Id.eq(*id))
@@ -54,14 +53,15 @@ impl FavoriteAction {
             }
         };
 
-        if !favoriteable_exists {
-            errors.push(ValidationError::new(
-                "favorite",
-                vec!["Favoriteable does not exist."],
-            ));
-        }
+        if !exists {
+            let mut errors = ValidationErrors::new();
 
-        if !errors.is_empty() {
+            errors.add(
+                "favorite",
+                ValidationError::new("not_found")
+                    .with_message("Favoriteable does not exist.".into()),
+            );
+
             return Err(AppError::Validation(errors));
         }
 
@@ -127,34 +127,14 @@ impl FavoriteAction {
         Ok(Some(model))
     }
 
-    async fn validate_update(params: &UpdateFavoriteActionParameters) -> Result<(), AppError> {
-        let mut errors = Vec::new();
-
-        let mut position_errors = Vec::new();
-
-        if let Some(position) = params.position {
-            if position < 1 {
-                position_errors.push("The position must be greater than 0.");
-            }
-        }
-
-        if !position_errors.is_empty() {
-            errors.push(ValidationError::new("position", position_errors));
-        }
-
-        if !errors.is_empty() {
-            return Err(AppError::Validation(errors));
-        }
-
-        Ok(())
-    }
-
     pub async fn update_favorite(
         ctx: &AppContext,
         mut favorite: favorite::Model,
         params: UpdateFavoriteActionParameters,
     ) -> Result<favorite::Model, AppError> {
-        Self::validate_update(&params).await?;
+        if let Err(errors) = params.validate() {
+            return Err(AppError::Validation(errors));
+        }
 
         let txn = ctx.db.begin().await?;
 

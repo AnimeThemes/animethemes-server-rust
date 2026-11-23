@@ -3,19 +3,21 @@ use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt};
 use sea_query::OnConflict;
+use validator::{ValidationError, ValidationErrors};
 
 use crate::AppError;
 use crate::entities::content::entry;
 use crate::entities::user::rating;
-use crate::rules::validation_error::ValidationError;
 
 #[derive(InputObject)]
 #[graphql(name = "RateEntryInput")]
 pub struct RateEntryActionParameters {
     #[graphql(skip)]
     pub entry_id: u64,
+
     #[graphql(skip)]
     pub user_id: u64,
+
     /// The score to rate the entry with.
     pub score: Option<f32>,
 }
@@ -27,21 +29,18 @@ impl RatingAction {
         db: &DatabaseConnection,
         params: &RateEntryActionParameters,
     ) -> Result<(), AppError> {
-        let mut errors = Vec::new();
-
-        let entry_exists = entry::Entity::find()
-            .filter(entry::Column::Id.eq(params.entry_id))
+        let exists = entry::Entity::find_by_id(params.entry_id)
             .exists(db)
             .await?;
 
-        if !entry_exists {
-            errors.push(ValidationError::new(
-                "entry_id",
-                vec!["The entry does not exist."],
-            ));
-        }
+        if !exists {
+            let mut errors = ValidationErrors::new();
 
-        if !errors.is_empty() {
+            errors.add(
+                "entry_id",
+                ValidationError::new("not_found").with_message("The entry does not exist.".into()),
+            );
+
             return Err(AppError::Validation(errors));
         }
 

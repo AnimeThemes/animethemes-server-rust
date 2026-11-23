@@ -6,20 +6,48 @@ use sea_orm::{
     ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter,
 };
 use sha2::{Digest, Sha256};
+use validator::Validate;
 
 use crate::AppError;
-use crate::actions::auth::register::Register;
 use crate::entities::auth::{password_reset_tokens, user};
-use crate::rules::validation_error::ValidationError;
+use crate::rules::*;
 
-#[derive(InputObject)]
+#[derive(InputObject, Validate)]
 #[graphql(name = "ResetPasswordInput")]
 pub struct ResetPasswordParams {
     pub email: String,
+
     #[graphql(secret)]
+    #[validate(length(
+        min = 8,
+        max = 72,
+        message = "The password must be between 8 and 72 characters."
+    ))]
+    #[validate(custom(
+        function = "chars::has_uppercase",
+        message = "The password must contain at least one uppercase letter."
+    ))]
+    #[validate(custom(
+        function = "chars::has_lowercase",
+        message = "The password must contain at least one lowercase letter."
+    ))]
+    #[validate(custom(
+        function = "chars::has_number",
+        message = "The password must contain at least one number."
+    ))]
+    #[validate(custom(
+        function = "chars::has_symbol",
+        message = "The password must contain at least one symbol."
+    ))]
+    #[validate(must_match(
+        other = "password_confirmation",
+        message = "The password confirmation does not match."
+    ))]
     pub password: String,
+
     #[graphql(secret)]
     pub password_confirmation: String,
+
     #[graphql(secret)]
     pub token: String,
 }
@@ -31,28 +59,13 @@ impl ResetPassword {
         hex::encode(Sha256::digest(token.as_bytes()))
     }
 
-    fn validate(params: &ResetPasswordParams) -> Result<(), AppError> {
-        let mut errors = Vec::new();
-
-        let password_errors =
-            Register::get_password_errors(&params.password, &params.password_confirmation);
-
-        if !password_errors.is_empty() {
-            errors.push(ValidationError::new("password", password_errors));
-        }
-
-        if !errors.is_empty() {
-            return Err(AppError::Validation(errors));
-        }
-
-        Ok(())
-    }
-
     pub async fn reset_password(
         ctx: &AppContext,
         params: ResetPasswordParams,
     ) -> Result<(), AppError> {
-        Self::validate(&params)?;
+        if let Err(errors) = params.validate() {
+            return Err(AppError::Validation(errors));
+        }
 
         let token = password_reset_tokens::Entity::find()
             .filter(password_reset_tokens::Column::Email.eq(params.email.clone()))

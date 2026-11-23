@@ -4,11 +4,11 @@ use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt,
     TransactionTrait,
 };
+use validator::{ValidationError, ValidationErrors};
 
 use crate::AppError;
 use crate::entities::content::entry_videos;
 use crate::entities::user::watchhistory;
-use crate::rules::validation_error::ValidationError;
 
 pub struct MarkAsWatchedActionParameters {
     pub entry_id: u64,
@@ -23,31 +23,21 @@ impl MarkAsWatchedAction {
         db: &DatabaseConnection,
         params: &MarkAsWatchedActionParameters,
     ) -> Result<(), AppError> {
-        let mut errors = Vec::new();
-
-        let mut entry_id_errors = Vec::new();
-        let mut video_id_errors = Vec::new();
-
-        let entry_video_exists = entry_videos::Entity::find()
+        let exists = entry_videos::Entity::find()
             .filter(entry_videos::Column::EntryId.eq(params.entry_id))
             .filter(entry_videos::Column::VideoId.eq(params.video_id))
             .exists(db)
             .await?;
 
-        if !entry_video_exists {
-            entry_id_errors.push("The entry video pair does not exist.");
-            video_id_errors.push("The entry video pair does not exist.");
-        }
+        if !exists {
+            let mut errors = ValidationErrors::new();
 
-        if !entry_id_errors.is_empty() {
-            errors.push(ValidationError::new("entry_id", entry_id_errors));
-        }
+            let error = ValidationError::new("not_found")
+                .with_message("The entry video pair does not exist.".into());
 
-        if !video_id_errors.is_empty() {
-            errors.push(ValidationError::new("video_id", video_id_errors));
-        }
+            errors.add("entry_id", error.clone());
+            errors.add("video_id", error);
 
-        if !errors.is_empty() {
             return Err(AppError::Validation(errors));
         }
 

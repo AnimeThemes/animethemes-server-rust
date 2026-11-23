@@ -8,6 +8,7 @@ use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
 };
+use validator::Validate;
 
 use crate::entities::auth::role::Roles;
 use crate::entities::list::playlist;
@@ -16,7 +17,6 @@ use crate::enums::list::playlistvisibility::PlaylistVisibility;
 use crate::features::functions::FeatureManager;
 use crate::middlewares::current_user::CurrentUser;
 use crate::policies::has_any_role;
-use crate::rules::validation_error::ValidationError;
 use crate::typesense::client::typesense;
 use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
 use crate::workers::discord_notification::{
@@ -24,12 +24,25 @@ use crate::workers::discord_notification::{
 };
 use crate::{AppError, discord};
 
-#[derive(InputObject)]
+#[derive(InputObject, Validate)]
 #[graphql(name = "CreatePlaylistInput")]
 pub struct CreatePlaylistActionParameters {
+    #[validate(length(
+        min = 1,
+        max = 192,
+        message = "The name must be between 1 and 192 characters."
+    ))]
     pub name: String,
+
     pub visibility: PlaylistVisibility,
+
+    #[validate(length(
+        min = 1,
+        max = 1000,
+        message = "The description must be between 1 and 1000 characters."
+    ))]
     pub description: Option<String>,
+
     #[graphql(skip)]
     pub user_id: u64,
 }
@@ -37,43 +50,14 @@ pub struct CreatePlaylistActionParameters {
 pub struct CreatePlaylistAction;
 
 impl CreatePlaylistAction {
-    fn validate(params: &CreatePlaylistActionParameters) -> Result<(), AppError> {
-        let mut errors = Vec::new();
-
-        let mut name_errors = Vec::new();
-        let mut description_errors = Vec::new();
-
-        if !(1usize..=192).contains(&params.name.chars().count()) {
-            name_errors.push("The name must be between 1 and 192 characters.");
-        }
-
-        if let Some(description) = &params.description {
-            if !(1usize..=1000).contains(&description.chars().count()) {
-                description_errors.push("The description must be between 1 and 1000 characters.");
-            }
-        }
-
-        if !name_errors.is_empty() {
-            errors.push(ValidationError::new("name", name_errors));
-        }
-
-        if !description_errors.is_empty() {
-            errors.push(ValidationError::new("description", description_errors));
-        }
-
-        if !errors.is_empty() {
-            return Err(AppError::Validation(errors));
-        }
-
-        Ok(())
-    }
-
     pub async fn create(
         ctx: &AppContext,
         params: CreatePlaylistActionParameters,
         user: &CurrentUser,
     ) -> Result<playlist::Model, AppError> {
-        Self::validate(&params)?;
+        if let Err(errors) = params.validate() {
+            return Err(AppError::Validation(errors));
+        }
 
         let count = playlist::Entity::find()
             .filter(playlist::Column::UserId.eq(params.user_id))
