@@ -1,1 +1,14 @@
-pub mod create_anime;
+pub mod anime;
+pub mod anime_series;
+pub mod anime_studio;
+pub mod artist;
+pub mod artist_member;
+pub mod entry;
+pub mod resource;
+pub mod series;
+pub mod song;
+pub mod song_staff;
+pub mod studio;
+pub mod synonym;
+pub mod theme;
+pub mod themegroup;
