@@ -2,9 +2,7 @@ use async_graphql::{Context, Error, Object, Result, ResultExt};
 use loco_rs::app::AppContext;
 
 use crate::AppError;
-use crate::actions::entities::content::create_anime::{
-    CreateAnimeAction, CreateAnimeActionParameters,
-};
+use crate::actions::entities::content::anime::{SaveAnimeAction, SaveAnimeInput};
 use crate::graphql::types::content::anime::Anime;
 use crate::middlewares::current_user::CurrentUser;
 use crate::policies::content::anime::AnimePolicy;
@@ -15,10 +13,11 @@ pub struct AnimeMutation;
 
 #[Object]
 impl AnimeMutation {
-    async fn create_anime(
+    async fn save_anime(
         &self,
         ctx: &Context<'_>,
-        input: CreateAnimeActionParameters,
+        id: Option<u64>,
+        input: SaveAnimeInput,
     ) -> Result<Anime> {
         let user = ctx
             .data::<CurrentUser>()
@@ -28,7 +27,7 @@ impl AnimeMutation {
             .authorize()
             .extend()?;
 
-        let anime = CreateAnimeAction::create(ctx.data_unchecked::<AppContext>(), input, &user)
+        let anime = SaveAnimeAction::save(ctx.data_unchecked::<AppContext>(), id, input, &user)
             .await
             .extend()?;
 
