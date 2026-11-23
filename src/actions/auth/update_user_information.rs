@@ -1,28 +1,47 @@
 use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::BackgroundWorker;
-use loco_rs::validator::ValidateEmail;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter,
     SelectExt,
 };
+use validator::{Validate, ValidationError};
 
-use crate::actions::auth::is_alpha_dash;
 use crate::actions::auth::verify_email::VerifyEmail;
 use crate::entities::auth::user;
 use crate::enums::features::Feature;
 use crate::features::functions::FeatureManager;
 use crate::middlewares::current_user::CurrentUser;
-use crate::rules::validation_error::ValidationError;
+use crate::rules::*;
 use crate::workers::discord_notification::{
     DiscordNotificationWorker, DiscordNotificationWorkerArgs,
 };
 use crate::{AppError, discord};
 
-#[derive(InputObject, Clone)]
+#[derive(InputObject, Clone, Validate)]
 #[graphql(name = "UpdateUserInformationInput")]
 pub struct UpdateUserInformationParameters {
+    #[validate(length(
+        min = 1,
+        max = 35,
+        message = "The name must be between 1 and 35 characters."
+    ))]
+    #[validate(custom(
+        function = "alpha_dash::validate_alpha_dash",
+        message = "The name must be alphanumeric with dashes or underscores."
+    ))]
     pub name: Option<String>,
+
+    #[validate(email(message = "The email is not valid."))]
+    #[validate(length(
+        min = 1,
+        max = 255,
+        message = "The email must be between 1 and 255 characters."
+    ))]
+    #[validate(custom(
+        function = "validate_non_disposable_email",
+        message = "Disposable email addresses are not allowed."
+    ))]
     pub email: Option<String>,
 }
 
@@ -34,56 +53,36 @@ impl UpdateUserInformation {
         user: &user::Model,
         params: &UpdateUserInformationParameters,
     ) -> Result<(), AppError> {
-        let mut errors = Vec::new();
+        let mut errors = params.validate().err().unwrap_or_default();
 
-        let mut name_errors = Vec::new();
-        let mut email_errors = Vec::new();
+        if params.name.is_some() || params.email.is_some() {
+            let exists = user::Entity::find()
+                .filter(
+                    Condition::any()
+                        .add_option(
+                            params
+                                .name
+                                .as_deref()
+                                .map(|name| user::Column::Name.eq(name)),
+                        )
+                        .add_option(
+                            params
+                                .email
+                                .as_deref()
+                                .map(|email| user::Column::Email.eq(email)),
+                        ),
+                )
+                .filter(user::Column::Id.ne(user.id))
+                .exists(db)
+                .await?;
 
-        if let Some(name) = params.name.as_deref() {
-            if !(1usize..=35).contains(&name.chars().count()) {
-                name_errors.push("The name must be between 1 and 35 characters.");
+            if exists {
+                let error = ValidationError::new("already_exists")
+                    .with_message("User already exists with username or email.".into());
+
+                errors.add("name", error.clone());
+                errors.add("email", error);
             }
-
-            if !is_alpha_dash(&name) {
-                name_errors.push("The name must be alphanumeric with dashes or underscores.");
-            }
-        }
-
-        if let Some(email) = params.email.as_deref() {
-            if !email.validate_email() {
-                email_errors.push("The email is not valid.");
-            }
-
-            if disposable::is_email(email) {
-                email_errors.push("Disposable email addresses are not allowed.");
-            }
-
-            if !(1usize..=255).contains(&email.chars().count()) {
-                email_errors.push("The email must be between 1 and 255 characters.");
-            }
-        }
-
-        let exists = user::Entity::find()
-            .filter(
-                Condition::any()
-                    .add(user::Column::Name.eq(params.name.clone()))
-                    .add(user::Column::Email.eq(params.email.clone())),
-            )
-            .filter(user::Column::Id.ne(user.id))
-            .exists(db)
-            .await?;
-
-        if exists {
-            name_errors.push("User already exists with username or email.");
-            email_errors.push("User already exists with username or email.");
-        }
-
-        if !name_errors.is_empty() {
-            errors.push(ValidationError::new("name", name_errors));
-        }
-
-        if !email_errors.is_empty() {
-            errors.push(ValidationError::new("email", email_errors));
         }
 
         if !errors.is_empty() {
@@ -147,5 +146,13 @@ impl UpdateUserInformation {
         }
 
         Ok(true)
+    }
+}
+
+fn validate_non_disposable_email(email: &str) -> Result<(), ValidationError> {
+    if disposable::is_email(email) {
+        Err(ValidationError::new("disposable_email"))
+    } else {
+        Ok(())
     }
 }

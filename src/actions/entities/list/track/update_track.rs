@@ -5,18 +5,20 @@ use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, SelectExt,
     TransactionTrait,
 };
+use validator::{Validate, ValidationError};
 
 use crate::AppError;
 use crate::entities::content::entry_videos;
 use crate::entities::list::track;
-use crate::rules::validation_error::ValidationError;
 use crate::traits::sortable::Sortable;
 
-#[derive(InputObject)]
+#[derive(InputObject, Validate)]
 #[graphql(name = "UpdatePlaylistTrackInput")]
 pub struct UpdateTrackActionParameters {
     pub entry_id: Option<u64>,
     pub video_id: Option<u64>,
+
+    #[validate(range(min = 1, message = "The position must be greater than 0."))]
     pub position: Option<i32>,
 }
 
@@ -28,47 +30,28 @@ impl UpdateTrackAction {
         track: &track::Model,
         params: &UpdateTrackActionParameters,
     ) -> Result<(), AppError> {
-        let mut errors = Vec::new();
+        let mut errors = params.validate().err().unwrap_or_default();
 
-        let mut entry_id_errors = Vec::new();
-        let mut video_id_errors = Vec::new();
-        let mut position_errors = Vec::new();
+        let entry_id = params.entry_id.or(track.entry_id).unwrap();
+        let video_id = params.video_id.or(track.video_id).unwrap();
 
-        let entry_id = params.entry_id.unwrap_or(track.entry_id.unwrap());
-        let video_id = params.video_id.unwrap_or(track.video_id.unwrap());
-
-        let entry_video_exists = entry_videos::Entity::find()
+        let exists = entry_videos::Entity::find()
             .filter(entry_videos::Column::EntryId.eq(entry_id))
             .filter(entry_videos::Column::VideoId.eq(video_id))
             .exists(db)
             .await?;
 
-        if !entry_video_exists {
+        if !exists {
+            let error = ValidationError::new("not_found")
+                .with_message("The entry video pair does not exist.".into());
+
             if params.entry_id.is_some() {
-                entry_id_errors.push("The entry video pair does not exist.");
+                errors.add("entry_id", error.clone());
             }
 
             if params.video_id.is_some() {
-                video_id_errors.push("The entry video pair does not exist.");
+                errors.add("video_id", error);
             }
-        }
-
-        if let Some(position) = params.position {
-            if position < 1 {
-                position_errors.push("The position must be greater than 0.");
-            }
-        }
-
-        if !entry_id_errors.is_empty() {
-            errors.push(ValidationError::new("entry_id", entry_id_errors));
-        }
-
-        if !video_id_errors.is_empty() {
-            errors.push(ValidationError::new("video_id", video_id_errors));
-        }
-
-        if !position_errors.is_empty() {
-            errors.push(ValidationError::new("position", position_errors));
         }
 
         if !errors.is_empty() {

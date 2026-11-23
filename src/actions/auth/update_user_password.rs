@@ -3,18 +3,46 @@ use bcrypt::{hash, verify};
 use loco_rs::app::AppContext;
 use sea_orm::ActiveModelTrait;
 use sea_orm::ActiveValue::Set;
+use validator::{Validate, ValidationError};
 
 use crate::AppError;
 use crate::entities::auth::user;
-use crate::rules::validation_error::ValidationError;
+use crate::rules::*;
 
-#[derive(InputObject, Clone)]
+#[derive(InputObject, Clone, Validate)]
 #[graphql(name = "UpdatePasswordInput")]
 pub struct UpdateUserPasswordParameters {
     #[graphql(secret)]
     pub current_password: String,
+
     #[graphql(secret)]
+    #[validate(length(
+        min = 8,
+        max = 72,
+        message = "The password must be between 8 and 72 characters."
+    ))]
+    #[validate(custom(
+        function = "chars::has_uppercase",
+        message = "The password must contain at least one uppercase letter."
+    ))]
+    #[validate(custom(
+        function = "chars::has_lowercase",
+        message = "The password must contain at least one lowercase letter."
+    ))]
+    #[validate(custom(
+        function = "chars::has_number",
+        message = "The password must contain at least one number."
+    ))]
+    #[validate(custom(
+        function = "chars::has_symbol",
+        message = "The password must contain at least one symbol."
+    ))]
+    #[validate(must_match(
+        other = "new_password_confirmation",
+        message = "The password confirmation does not match."
+    ))]
     pub new_password: String,
+
     #[graphql(secret)]
     pub new_password_confirmation: String,
 }
@@ -26,51 +54,14 @@ impl UpdateUserPassword {
         user: &user::Model,
         params: &UpdateUserPasswordParameters,
     ) -> Result<(), AppError> {
-        let mut errors = Vec::new();
+        let mut errors = params.validate().err().unwrap_or_default();
 
         if !verify(&params.current_password, &user.password).map_err(AppError::internal)? {
-            errors.push(ValidationError::new(
+            errors.add(
                 "current_password",
-                vec!["Invalid current password"],
-            ));
-        }
-
-        let mut password_errors = Vec::new();
-
-        if params.new_password.chars().count() < 8 {
-            password_errors.push("The password must be at least 8 characters.");
-        }
-
-        if !params.new_password.chars().any(|c| c.is_uppercase()) {
-            password_errors.push("The password must contain at least one uppercase letter.");
-        }
-
-        if !params.new_password.chars().any(|c| c.is_lowercase()) {
-            password_errors.push("The password must contain at least one lowercase letter.");
-        }
-
-        if !params.new_password.chars().any(|c| c.is_alphabetic()) {
-            password_errors.push("The password must contain at least one letter.");
-        }
-
-        if !params.new_password.chars().any(|c| c.is_numeric()) {
-            password_errors.push("The password must contain at least one number.");
-        }
-
-        if !params
-            .new_password
-            .chars()
-            .any(|c| c.is_ascii_punctuation())
-        {
-            password_errors.push("The password must contain at least one symbol.");
-        }
-
-        if params.new_password != params.new_password_confirmation {
-            password_errors.push("The password confirmation does not match.");
-        }
-
-        if !password_errors.is_empty() {
-            errors.push(ValidationError::new("new_password", password_errors));
+                ValidationError::new("invalid_password")
+                    .with_message("Invalid current password".into()),
+            );
         }
 
         if !errors.is_empty() {

@@ -2,117 +2,95 @@ use async_graphql::InputObject;
 use bcrypt::hash;
 use loco_rs::app::AppContext;
 use loco_rs::prelude::BackgroundWorker;
-use loco_rs::validator::ValidateEmail;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter,
     SelectExt,
 };
+use validator::{Validate, ValidationError};
 
-use crate::actions::auth::is_alpha_dash;
 use crate::actions::auth::verify_email::VerifyEmail;
 use crate::entities::auth::user::{self};
 use crate::enums::features::Feature;
 use crate::features::functions::FeatureManager;
-use crate::rules::validation_error::ValidationError;
+use crate::rules::*;
 use crate::workers::discord_notification::{
     DiscordNotificationWorker, DiscordNotificationWorkerArgs,
 };
 use crate::{AppError, discord};
 
-#[derive(InputObject, Clone)]
+#[derive(InputObject, Clone, Validate)]
 #[graphql(name = "RegisterInput")]
 pub struct RegisterParameters {
+    #[validate(length(
+        min = 1,
+        max = 35,
+        message = "The name must be between 1 and 35 characters."
+    ))]
+    #[validate(custom(
+        function = "alpha_dash::validate_alpha_dash",
+        message = "The name must be alphanumeric with dashes or underscores."
+    ))]
     pub name: String,
+
+    #[validate(email(message = "The email is not valid."))]
+    #[validate(length(
+        min = 1,
+        max = 255,
+        message = "The email must be between 1 and 255 characters."
+    ))]
+    #[validate(custom(
+        function = "validate_non_disposable_email",
+        message = "Disposable email addresses are not allowed."
+    ))]
     pub email: String,
+
     #[graphql(secret)]
+    #[validate(length(
+        min = 8,
+        max = 72,
+        message = "The password must be between 8 and 72 characters."
+    ))]
+    #[validate(custom(
+        function = "chars::has_uppercase",
+        message = "The password must contain at least one uppercase letter."
+    ))]
+    #[validate(custom(
+        function = "chars::has_lowercase",
+        message = "The password must contain at least one lowercase letter."
+    ))]
+    #[validate(custom(
+        function = "chars::has_number",
+        message = "The password must contain at least one number."
+    ))]
+    #[validate(custom(
+        function = "chars::has_symbol",
+        message = "The password must contain at least one symbol."
+    ))]
+    #[validate(must_match(
+        other = "password_confirmation",
+        message = "The password confirmation does not match."
+    ))]
     pub password: String,
+
     #[graphql(secret)]
     pub password_confirmation: String,
+
+    #[validate(custom(
+        function = "bool::validate_bool_true_required",
+        message = "You must accept the terms and conditions."
+    ))]
     pub terms: bool,
 }
 
 pub struct Register;
 
 impl Register {
-    pub fn get_password_errors<'a>(
-        password: &'a String,
-        password_confirmation: &'a String,
-    ) -> Vec<&'a str> {
-        let mut errors = Vec::new();
-
-        if !(8..=72).contains(&password.chars().count()) {
-            errors.push("The password must be between 8 and 72 characters.");
-        }
-
-        if !password.chars().any(|c| c.is_uppercase()) {
-            errors.push("The password must contain at least one uppercase letter.");
-        }
-
-        if !password.chars().any(|c| c.is_lowercase()) {
-            errors.push("The password must contain at least one lowercase letter.");
-        }
-
-        if !password.chars().any(|c| c.is_alphabetic()) {
-            errors.push("The password must contain at least one letter.");
-        }
-
-        if !password.chars().any(|c| c.is_numeric()) {
-            errors.push("The password must contain at least one number.");
-        }
-
-        if !password.chars().any(|c| c.is_ascii_punctuation()) {
-            errors.push("The password must contain at least one symbol.");
-        }
-
-        if password != password_confirmation {
-            errors.push("The password confirmation does not match.");
-        }
-
-        errors
-    }
-
     async fn validate(
         db: &DatabaseConnection,
         params: &RegisterParameters,
     ) -> Result<(), AppError> {
-        let mut errors = Vec::new();
-
-        let mut name_errors = Vec::new();
-        let mut email_errors = Vec::new();
-        let password_errors =
-            Self::get_password_errors(&params.password, &params.password_confirmation);
-
-        if !(1usize..=35).contains(&params.name.chars().count()) {
-            name_errors.push("The name must be between 1 and 35 characters.");
-        }
-
-        if !is_alpha_dash(&params.name) {
-            name_errors.push("The name must be alphanumeric with dashes or underscores.");
-        }
-
-        if !&params.email.validate_email() {
-            email_errors.push("The email is not valid.");
-        }
-
-        if disposable::is_email(&params.email) {
-            email_errors.push("Disposable email addresses are not allowed.");
-        }
-
-        if !(1usize..=255).contains(&params.email.chars().count()) {
-            email_errors.push("The email must be between 1 and 255 characters.");
-        }
-
-        if !params.terms {
-            errors.push(ValidationError::new(
-                "terms",
-                vec!["You must accept the terms and conditions."],
-            ));
-        }
-
-        if !password_errors.is_empty() {
-            errors.push(ValidationError::new("password", password_errors));
-        }
+        let mut errors = params.validate().err().unwrap_or_default();
 
         let exists = user::Entity::find()
             .filter(
@@ -124,16 +102,11 @@ impl Register {
             .await?;
 
         if exists {
-            name_errors.push("User already exists with username or email.");
-            email_errors.push("User already exists with username or email.");
-        }
+            let error = ValidationError::new("already_exists")
+                .with_message("User already exists with username or email.".into());
 
-        if !name_errors.is_empty() {
-            errors.push(ValidationError::new("name", name_errors));
-        }
-
-        if !email_errors.is_empty() {
-            errors.push(ValidationError::new("email", email_errors));
+            errors.add("name", error.clone());
+            errors.add("email", error);
         }
 
         if !errors.is_empty() {
@@ -180,5 +153,13 @@ impl Register {
         }
 
         Ok(user)
+    }
+}
+
+fn validate_non_disposable_email(email: &str) -> Result<(), ValidationError> {
+    if disposable::is_email(email) {
+        Err(ValidationError::new("disposable_email"))
+    } else {
+        Ok(())
     }
 }

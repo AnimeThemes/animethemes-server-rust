@@ -7,6 +7,7 @@ use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, PaginatorTrait,
     QueryFilter, QueryOrder, QuerySelect, SelectExt, TransactionTrait,
 };
+use validator::{Validate, ValidationError};
 
 use crate::AppError;
 use crate::entities::auth::role::Roles;
@@ -14,14 +15,15 @@ use crate::entities::content::entry_videos;
 use crate::entities::list::{playlist, track};
 use crate::middlewares::current_user::CurrentUser;
 use crate::policies::has_any_role;
-use crate::rules::validation_error::ValidationError;
 use crate::traits::sortable::Sortable;
 
-#[derive(InputObject)]
+#[derive(InputObject, Validate)]
 #[graphql(name = "CreatePlaylistTrackInput")]
 pub struct InsertTrackActionParameters {
     pub entry_id: u64,
     pub video_id: u64,
+
+    #[validate(range(min = 1, message = "The position must be greater than 0."))]
     pub position: Option<i32>,
 }
 
@@ -32,39 +34,20 @@ impl InsertTrackAction {
         db: &DatabaseConnection,
         params: &InsertTrackActionParameters,
     ) -> Result<(), AppError> {
-        let mut errors = Vec::new();
+        let mut errors = params.validate().err().unwrap_or_default();
 
-        let mut entry_id_errors = Vec::new();
-        let mut video_id_errors = Vec::new();
-        let mut position_errors = Vec::new();
-
-        let entry_video_exists = entry_videos::Entity::find()
+        let exists = entry_videos::Entity::find()
             .filter(entry_videos::Column::EntryId.eq(params.entry_id))
             .filter(entry_videos::Column::VideoId.eq(params.video_id))
             .exists(db)
             .await?;
 
-        if !entry_video_exists {
-            entry_id_errors.push("The entry video pair does not exist.");
-            video_id_errors.push("The entry video pair does not exist.");
-        }
+        if !exists {
+            let error = ValidationError::new("not_found")
+                .with_message("The entry video pair does not exist.".into());
 
-        if let Some(position) = params.position {
-            if position < 1 {
-                position_errors.push("The position must be greater than 0.");
-            }
-        }
-
-        if !entry_id_errors.is_empty() {
-            errors.push(ValidationError::new("entry_id", entry_id_errors));
-        }
-
-        if !video_id_errors.is_empty() {
-            errors.push(ValidationError::new("video_id", video_id_errors));
-        }
-
-        if !position_errors.is_empty() {
-            errors.push(ValidationError::new("position", position_errors));
+            errors.add("entry_id", error.clone());
+            errors.add("video_id", error);
         }
 
         if !errors.is_empty() {

@@ -60,6 +60,7 @@ arc-swap = "1.9.3"
 percent-encoding = "2.3.2"
 rand = "0.10.3"
 serenity = "0.12.5"
+validator = { version = "0.21.0", features = ["derive"] }
 
 [[bin]]
 name = "animethemes-server-rust"

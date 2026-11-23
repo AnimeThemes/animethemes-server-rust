@@ -1,49 +1,27 @@
 use async_graphql::{Context, InputObject};
+use validator::Validate;
 
 use crate::AppError;
 use crate::middlewares::rate_limiting::CanBypass;
-use crate::rules::validation_error::ValidationError;
 
-#[derive(InputObject, Default)]
+#[derive(InputObject, Default, Validate)]
 pub struct PaginationInput {
     pub after: Option<String>,
     pub before: Option<String>,
+
+    #[validate(range(min = 1, max = 100, message = "The first must be between 1 and 100"))]
     pub first: Option<i32>,
+
+    #[validate(range(min = 1, max = 100, message = "The last must be between 1 and 100"))]
     pub last: Option<i32>,
 }
 
 impl PaginationInput {
     pub fn validate(&self, ctx: &Context<'_>) -> Result<(), AppError> {
-        let mut errors = Vec::new();
-
-        let can_bypass = ctx.data_unchecked::<CanBypass>().0;
-
-        if can_bypass {
+        if ctx.data_unchecked::<CanBypass>().0 {
             return Ok(());
         }
 
-        if let Some(first) = self.first {
-            if !(1..=100).contains(&first) {
-                errors.push(ValidationError::new(
-                    "first",
-                    vec!["The first must be between 1 and 100".to_string()],
-                ))
-            }
-        }
-
-        if let Some(last) = self.last {
-            if !(1..=100).contains(&last) {
-                errors.push(ValidationError::new(
-                    "last",
-                    vec!["The last must be between 1 and 100".to_string()],
-                ))
-            }
-        }
-
-        if !errors.is_empty() {
-            return Err(AppError::Validation(errors));
-        }
-
-        Ok(())
+        Validate::validate(self).map_err(AppError::Validation)
     }
 }

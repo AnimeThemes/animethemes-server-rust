@@ -1,8 +1,7 @@
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use loco_rs::Error as LocoError;
-
-use crate::rules::validation_error::ValidationError;
+use validator::ValidationErrors;
 
 pub mod actions;
 pub mod app;
@@ -38,7 +37,7 @@ pub enum AppError {
     #[error("Unauthorized")]
     Unauthorized,
     #[error("Validation")]
-    Validation(Vec<ValidationError>),
+    Validation(ValidationErrors),
     #[error("Forbidden")]
     Forbidden,
     #[error("Not Found")]
@@ -77,13 +76,7 @@ impl Into<LocoError> for AppError {
             AppError::Forbidden => LocoError::Message("Forbidden".to_string()),
             AppError::ForbiddenWithMessage(message) => LocoError::Message(message),
             AppError::NotFound => LocoError::NotFound,
-            AppError::Validation(errors) => LocoError::BadRequest(
-                errors
-                    .into_iter()
-                    .map(|e| format!("{}: {}", e.field, e.messages.join(", ")))
-                    .collect::<Vec<_>>()
-                    .join(" "),
-            ),
+            AppError::Validation(errors) => LocoError::BadRequest(errors.to_string()),
             AppError::RateLimitingExceeded => LocoError::Message("Too Many Requests".to_string()),
             AppError::Database(error) => LocoError::DB(error),
             AppError::Internal(_) => LocoError::InternalServerError,

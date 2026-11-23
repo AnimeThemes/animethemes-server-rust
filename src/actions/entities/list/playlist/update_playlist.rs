@@ -3,64 +3,45 @@ use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, DatabaseConnection};
+use validator::Validate;
 
 use crate::AppError;
 use crate::entities::list::playlist;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
-use crate::rules::validation_error::ValidationError;
 use crate::typesense::client::typesense;
 use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
 
-#[derive(InputObject)]
+#[derive(InputObject, Validate)]
 #[graphql(name = "UpdatePlaylistInput")]
 pub struct UpdatePlaylistActionParameters {
+    #[validate(length(
+        min = 1,
+        max = 192,
+        message = "The name must be between 1 and 192 characters."
+    ))]
     pub name: Option<String>,
+
     pub visibility: Option<PlaylistVisibility>,
+
+    #[validate(length(
+        min = 0,
+        max = 1000,
+        message = "The description must be between 1 and 1000 characters."
+    ))]
     pub description: Option<String>,
 }
 
 pub struct UpdatePlaylistAction;
 
 impl UpdatePlaylistAction {
-    fn validate(params: &UpdatePlaylistActionParameters) -> Result<(), AppError> {
-        let mut errors = Vec::new();
-
-        let mut name_errors = Vec::new();
-        let mut description_errors = Vec::new();
-
-        if let Some(name) = &params.name {
-            if !(1usize..=192).contains(&name.chars().count()) {
-                name_errors.push("The name must be between 1 and 192 characters.");
-            }
-        }
-
-        if let Some(description) = &params.description {
-            if !(0usize..=1000).contains(&description.chars().count()) {
-                description_errors.push("The description must be between 0 and 1000 characters.");
-            }
-        }
-
-        if !name_errors.is_empty() {
-            errors.push(ValidationError::new("name", name_errors));
-        }
-
-        if !description_errors.is_empty() {
-            errors.push(ValidationError::new("description", description_errors));
-        }
-
-        if !errors.is_empty() {
-            return Err(AppError::Validation(errors));
-        }
-
-        Ok(())
-    }
-
     pub async fn update(
         ctx: &AppContext,
         playlist: playlist::Model,
         params: UpdatePlaylistActionParameters,
     ) -> Result<playlist::Model, AppError> {
-        Self::validate(&params)?;
+        if let Err(errors) = params.validate() {
+            return Err(AppError::Validation(errors));
+        }
 
         let mut playlist = playlist::ActiveModel {
             id: Set(playlist.id),
