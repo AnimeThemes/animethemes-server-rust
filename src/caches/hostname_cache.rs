@@ -56,7 +56,7 @@ impl HostnameCache {
                     }
                 }
                 Err(err) => {
-                    tracing::warn!("Failed to resolve {hostname}: {err}");
+                    tracing::debug!("Failed to resolve {hostname}: {err}");
                 }
             }
         }
