@@ -76,8 +76,8 @@ impl CreatePlaylistAction {
         }
 
         let playlist = playlist::ActiveModel {
-            name: Set(params.name),
-            description: Set(params.description),
+            name: Set(params.name.trim().to_string()),
+            description: Set(params.description.map(|d| d.trim().to_string())),
             visibility: Set(params.visibility),
             user_id: Set(params.user_id),
             ..Default::default()

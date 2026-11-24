@@ -21,6 +21,7 @@ pub mod rules;
 pub mod schema;
 pub mod scopes;
 pub mod seeds;
+pub mod services;
 pub mod session;
 pub mod settings;
 pub mod storage;

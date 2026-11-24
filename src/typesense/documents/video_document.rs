@@ -1,22 +1,20 @@
-use sea_orm::{DatabaseConnection, LoaderTrait};
+use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use typesense::Typesense;
 
-use crate::entities::content::{entry, video};
+use crate::entities::content::video;
 use crate::typesense::documents::HasId;
-use crate::typesense::documents::entry_document::{EntryDocument, build_entry_documents};
 use crate::typesense::index_document::BuildDocumentsFuture;
 
-pub const QUERY_BY: &str = "filename,tags,entries.theme.song.title,entries.theme.song.title_native,entries.theme.anime.title,entries.theme.anime.title_english,entries.theme.anime.title_native,entries.theme.anime.synonyms,entries.type_sequence_version";
-pub const QUERY_BY_WEIGHTS: &str = "10,8,6,7,5,5,5,4,4";
+pub const QUERY_BY: &str = "filename,tags";
+pub const QUERY_BY_WEIGHTS: &str = "10,4";
 
 #[derive(Debug, Clone, Serialize, Deserialize, Typesense)]
-#[typesense(collection_name = "videos", enable_nested_fields = true)]
+#[typesense(collection_name = "videos")]
 pub struct VideoDocument {
     pub id: String,
     pub filename: String,
     pub tags: String,
-    pub entries: Vec<EntryDocument>,
     pub created_at: i64,
 }
 
@@ -26,15 +24,14 @@ impl HasId for VideoDocument {
     }
 }
 
-type VideoDocumentFrom = (video::Model, Vec<EntryDocument>);
+type VideoDocumentFrom = video::Model;
 
 impl From<VideoDocumentFrom> for VideoDocument {
-    fn from((model, entry_documents): VideoDocumentFrom) -> Self {
+    fn from(model: VideoDocumentFrom) -> Self {
         Self {
             id: model.id.to_string(),
             filename: model.filename.clone(),
             tags: model.tags(),
-            entries: entry_documents,
             created_at: model.created_at.timestamp(),
         }
     }
@@ -42,23 +39,10 @@ impl From<VideoDocumentFrom> for VideoDocument {
 
 pub fn build_video_documents<'a>(
     models: Vec<video::Model>,
-    database: &'a DatabaseConnection,
+    _database: &'a DatabaseConnection,
 ) -> BuildDocumentsFuture<'a, VideoDocument> {
     Box::pin(async move {
-        let entry_models: Vec<Vec<entry::Model>> =
-            models.load_many(entry::Entity, database).await?;
-
-        let mut entry_documents: Vec<Vec<EntryDocument>> = Vec::with_capacity(entry_models.len());
-
-        for entry_group in entry_models {
-            entry_documents.push(build_entry_documents(entry_group, database).await?);
-        }
-
-        let documents = models
-            .into_iter()
-            .zip(entry_documents)
-            .map(|(model, entry_documents)| VideoDocument::from((model, entry_documents)))
-            .collect();
+        let documents = models.into_iter().map(VideoDocument::from).collect();
 
         Ok(documents)
     })
