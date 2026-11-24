@@ -1,8 +1,10 @@
-use async_graphql::InputObject;
+use async_graphql::{InputObject, MaybeUndefined};
 use loco_rs::app::AppContext;
-use validator::Validate;
+use sea_orm::{ActiveModelTrait, ModelTrait, TryIntoModel};
+use validator::{Validate, ValidationError};
 
 use crate::AppError;
+use crate::actions::entities::{nullable, optional};
 use crate::entities::admin::announcement;
 use crate::middlewares::current_user::CurrentUser;
 
@@ -16,23 +18,52 @@ pub struct SaveAnnouncementInput {
     ))]
     pub content: Option<String>,
 
-    pub start_at: Option<chrono::DateTime<chrono::Utc>>,
-    pub end_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub start_at: MaybeUndefined<chrono::DateTime<chrono::Utc>>,
+    pub end_at: MaybeUndefined<chrono::DateTime<chrono::Utc>>,
 }
 
 pub struct SaveAnnouncementAction;
 
 impl SaveAnnouncementAction {
     pub async fn save(
-        _ctx: &AppContext,
-        _id: Option<u64>,
-        _input: SaveAnnouncementInput,
+        ctx: &AppContext,
+        announcement: Option<announcement::Model>,
+        input: SaveAnnouncementInput,
         _user: &CurrentUser,
     ) -> Result<announcement::Model, AppError> {
-        todo!()
+        let mut errors = input.validate().err().unwrap_or_default();
+
+        if announcement.is_none() && input.content.is_none() {
+            errors.add(
+                "content",
+                ValidationError::new("required").with_message("The content is required.".into()),
+            );
+        }
+
+        if !errors.is_empty() {
+            return Err(AppError::Validation(errors));
+        }
+
+        let model = announcement::ActiveModel {
+            id: optional(announcement.as_ref().map(|a| a.id)),
+            content: optional(input.content),
+            start_at: nullable(input.start_at),
+            end_at: nullable(input.end_at),
+            ..Default::default()
+        };
+
+        let model = model.save(&ctx.db).await?.try_into_model()?;
+
+        Ok(model)
     }
 
-    pub async fn delete(_ctx: &AppContext, _id: u64, _user: &CurrentUser) -> Result<(), AppError> {
-        todo!()
+    pub async fn delete(
+        ctx: &AppContext,
+        announcement: announcement::Model,
+        _user: &CurrentUser,
+    ) -> Result<(), AppError> {
+        announcement.delete(&ctx.db).await?;
+
+        Ok(())
     }
 }

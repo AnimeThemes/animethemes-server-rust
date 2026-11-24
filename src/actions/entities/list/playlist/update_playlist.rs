@@ -1,13 +1,15 @@
 use anyhow::{Context, Result};
-use async_graphql::InputObject;
+use async_graphql::{InputObject, MaybeUndefined};
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, DatabaseConnection};
 use validator::Validate;
 
 use crate::AppError;
+use crate::actions::entities::{nullable_string, optional, optional_string};
 use crate::entities::list::playlist;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
+use crate::rules::*;
 use crate::typesense::client::typesense;
 use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
 
@@ -23,12 +25,11 @@ pub struct UpdatePlaylistActionParameters {
 
     pub visibility: Option<PlaylistVisibility>,
 
-    #[validate(length(
-        min = 0,
-        max = 1000,
+    #[validate(custom(
+        function = "string::validate_length::<1, 1000>",
         message = "The description must be between 1 and 1000 characters."
     ))]
-    pub description: Option<String>,
+    pub description: MaybeUndefined<String>,
 }
 
 pub struct UpdatePlaylistAction;
@@ -43,26 +44,13 @@ impl UpdatePlaylistAction {
             return Err(AppError::Validation(errors));
         }
 
-        let mut playlist = playlist::ActiveModel {
+        let playlist = playlist::ActiveModel {
             id: Set(playlist.id),
+            name: optional_string(params.name),
+            description: nullable_string(params.description),
+            visibility: optional(params.visibility),
             ..Default::default()
         };
-
-        if let Some(name) = params.name {
-            playlist.name = Set(name);
-        }
-
-        if let Some(description) = params.description {
-            if description.trim().is_empty() {
-                playlist.description = Set(None);
-            } else {
-                playlist.description = Set(Some(description));
-            }
-        }
-
-        if let Some(visibility) = params.visibility {
-            playlist.visibility = Set(visibility);
-        }
 
         let playlist = playlist.update(&ctx.db).await?;
 

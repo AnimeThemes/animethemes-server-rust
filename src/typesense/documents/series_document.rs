@@ -45,19 +45,24 @@ pub fn build_series_documents<'a>(
     database: &'a DatabaseConnection,
 ) -> BuildDocumentsFuture<'a, SeriesDocument> {
     Box::pin(async move {
-        let anime_models: Vec<Vec<anime::Model>> =
+        let anime_groups: Vec<Vec<anime::Model>> =
             models.load_many(anime::Entity, database).await?;
 
-        let mut anime_documents: Vec<Vec<AnimeDocument>> = Vec::with_capacity(anime_models.len());
+        let counts: Vec<usize> = anime_groups.iter().map(Vec::len).collect();
 
-        for anime_group in anime_models {
-            anime_documents.push(build_anime_documents(anime_group, database).await?);
-        }
+        let mut anime_documents =
+            build_anime_documents(anime_groups.into_iter().flatten().collect(), database)
+                .await?
+                .into_iter();
 
         let documents = models
             .into_iter()
-            .zip(anime_documents)
-            .map(|(model, anime_documents)| SeriesDocument::from((model, anime_documents)))
+            .zip(counts)
+            .map(|(model, count)| {
+                let animes = anime_documents.by_ref().take(count).collect();
+
+                SeriesDocument::from((model, animes))
+            })
             .collect();
 
         Ok(documents)
