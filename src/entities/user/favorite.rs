@@ -1,4 +1,3 @@
-use chrono::Utc;
 use sea_orm::Condition;
 use sea_orm::entity::prelude::*;
 
@@ -17,7 +16,7 @@ pub struct Model {
     pub user_id: u64,
     pub position: i32,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
 
     #[sea_orm(belongs_to, from = "favoriteable_id", to = "id")]
     pub favoriteable: BelongsTo<entry::Entity>,

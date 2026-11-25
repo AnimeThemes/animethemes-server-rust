@@ -10,6 +10,10 @@ pub mod document;
 pub mod list;
 pub mod user;
 
+pub fn default_datetime() -> time::OffsetDateTime {
+    time::OffsetDateTime::UNIX_EPOCH
+}
+
 pub trait HasHashId {
     fn hashids(&self) -> Vec<u64>;
 

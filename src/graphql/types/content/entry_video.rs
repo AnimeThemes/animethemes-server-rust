@@ -1,23 +1,28 @@
 use async_graphql::connection::{ConnectionNameType, EdgeNameType};
-use async_graphql::{Object, OutputType};
-use chrono::{DateTime, Utc};
+use async_graphql::{Object, OutputType, Result};
 
 use crate::graphql::utils::format_datetime;
 
 pub struct EntryVideoEdgeFields {
     /// The date that the resource was created
-    pub created_at: DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     /// The date that the resource was updated
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 }
 
 #[Object]
 impl EntryVideoEdgeFields {
-    async fn created_at(&self, #[graphql(default = "%+")] format: String) -> String {
+    async fn created_at(
+        &self,
+        #[graphql(default = "%Y-%m-%d %H:%M:%S")] format: String,
+    ) -> Result<String> {
         format_datetime(&self.created_at, &format)
     }
 
-    async fn updated_at(&self, #[graphql(default = "%+")] format: String) -> String {
+    async fn updated_at(
+        &self,
+        #[graphql(default = "%Y-%m-%d %H:%M:%S")] format: String,
+    ) -> Result<String> {
         format_datetime(&self.updated_at, &format)
     }
 }
@@ -40,18 +45,24 @@ impl ConnectionNameType for EntryVideoConnection {
 
 pub struct VideoEntryEdgeFields {
     /// The date that the resource was created
-    pub created_at: DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     /// The date that the resource was updated
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 }
 
 #[Object]
 impl VideoEntryEdgeFields {
-    async fn created_at(&self, #[graphql(default = "%+")] format: String) -> String {
+    async fn created_at(
+        &self,
+        #[graphql(default = "%Y-%m-%d %H:%M:%S")] format: String,
+    ) -> Result<String> {
         format_datetime(&self.created_at, &format)
     }
 
-    async fn updated_at(&self, #[graphql(default = "%+")] format: String) -> String {
+    async fn updated_at(
+        &self,
+        #[graphql(default = "%Y-%m-%d %H:%M:%S")] format: String,
+    ) -> Result<String> {
         format_datetime(&self.updated_at, &format)
     }
 }

@@ -1,7 +1,6 @@
 use async_graphql::connection::{Connection, EmptyFields, OpaqueCursor};
 use async_graphql::dataloader::DataLoader;
 use async_graphql::{ComplexObject, Context, InputObject, Result, SimpleObject};
-use chrono::{DateTime, Utc};
 use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter};
 
 use crate::entities::auth::user;
@@ -43,11 +42,11 @@ pub struct Me {
     /// The email of the user
     pub email: String,
     /// The date the user verified their email
-    pub email_verified_at: Option<DateTime<Utc>>,
+    pub email_verified_at: Option<time::OffsetDateTime>,
     /// The date that the resource was created
-    pub created_at: DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     /// The date that the resource was updated
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 }
 
 impl From<user::Model> for Me {

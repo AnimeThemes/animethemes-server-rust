@@ -1,4 +1,3 @@
-use chrono::Utc;
 use macros::SoftDeleteEntity;
 use sea_orm::entity::prelude::*;
 
@@ -17,11 +16,11 @@ pub struct Model {
     pub resourceable_type: ResourceableType,
     pub resourceable_id: u64,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: chrono::DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub deleted_at: Option<chrono::DateTime<Utc>>,
+    pub deleted_at: Option<time::OffsetDateTime>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

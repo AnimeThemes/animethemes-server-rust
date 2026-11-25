@@ -1,4 +1,3 @@
-use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
 use crate::entities::auth::role;
@@ -15,9 +14,9 @@ pub struct Model {
     pub role_id: u64,
     pub r#type: PageRoleType,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: chrono::DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 
     #[sea_orm(belongs_to, from = "page_id", to = "id")]
     pub page: BelongsTo<page::Entity>,

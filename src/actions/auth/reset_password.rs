@@ -82,7 +82,7 @@ impl ResetPassword {
                 let mut active_model = user.into_active_model();
 
                 active_model.password = Set(hash(params.password, 12).map_err(AppError::internal)?);
-                active_model.updated_at = Set(chrono::Utc::now());
+                active_model.updated_at = Set(time::OffsetDateTime::now_utc());
                 active_model.save(&ctx.db).await?;
 
                 token.delete(&ctx.db).await?;

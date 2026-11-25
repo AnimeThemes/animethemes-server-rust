@@ -1,5 +1,4 @@
 use sea_orm::entity::prelude::*;
-use sea_orm::sqlx::types::chrono::{self, Utc};
 
 use crate::entities::content::artist;
 
@@ -16,9 +15,9 @@ pub struct Model {
     pub notes: Option<String>,
     pub relevance: i32,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: chrono::DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 
     #[sea_orm(belongs_to, relation_enum = "Artist", from = "artist_id", to = "id")]
     pub artist: BelongsTo<artist::Entity>,

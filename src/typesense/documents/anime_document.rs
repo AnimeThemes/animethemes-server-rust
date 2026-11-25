@@ -60,7 +60,7 @@ impl From<AnimeDocumentFrom> for AnimeDocument {
             format: model.format.map(|f| f.to_value()),
             season: model.season.map(|s| s.to_value()),
             year: model.year,
-            created_at: model.created_at.timestamp(),
+            created_at: model.created_at.unix_timestamp(),
             synonyms: synonyms.iter().map(|s| s.text.clone()).collect(),
         }
     }

@@ -42,13 +42,13 @@ impl AnnouncementPolicy {
 
     fn view(_user: Option<&CurrentUser>, announcement: &announcement::Model) -> PolicyResponse {
         if let Some(start_at) = &announcement.start_at {
-            if chrono::Utc::now() < *start_at {
+            if time::OffsetDateTime::now_utc() < *start_at {
                 return PolicyResponse::DenyAsNotFound;
             }
         }
 
         if let Some(end_at) = &announcement.end_at {
-            if chrono::Utc::now() > *end_at {
+            if time::OffsetDateTime::now_utc() > *end_at {
                 return PolicyResponse::DenyAsNotFound;
             }
         }

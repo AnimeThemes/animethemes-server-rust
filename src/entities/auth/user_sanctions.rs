@@ -1,4 +1,3 @@
-use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
 use crate::entities::auth::{sanction, user};
@@ -12,7 +11,7 @@ pub struct Model {
     pub sanction_id: Option<u64>,
     pub user_id: Option<u64>,
     pub moderator_id: Option<u64>,
-    pub expires_at: Option<chrono::DateTime<Utc>>,
+    pub expires_at: Option<time::OffsetDateTime>,
     pub reason: Option<String>,
 
     #[sea_orm(belongs_to, relation_enum = "User", from = "user_id", to = "id")]
@@ -36,7 +35,15 @@ impl Model {
     pub fn get_forbidden_message(&self) -> String {
         match &self.expires_at {
             Some(expires_at) => {
-                format!("until {}", expires_at.format("%Y-%m-%d %H:%M:%S UTC"))
+                format!(
+                    "until {}",
+                    expires_at
+                        .to_offset(time::UtcOffset::UTC)
+                        .format(time::macros::format_description!(
+                            "[year]-[month]-[day] [hour]:[minute]:[second] UTC"
+                        ))
+                        .unwrap()
+                )
             }
             None => "permanently".to_string(),
         }

@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use chrono::Utc;
 use sea_orm::ActiveValue::Set;
 use sea_orm::entity::prelude::*;
 
@@ -21,9 +20,9 @@ pub struct Model {
     pub user_id: u64,
     pub visibility: PlaylistVisibility,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: chrono::DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 
     #[sea_orm(belongs_to, from = "user_id", to = "id")]
     pub user: BelongsTo<user::Entity>,
@@ -40,7 +39,7 @@ impl ActiveModelBehavior for ActiveModel {
     {
         let mut model = self;
 
-        model.updated_at = Set(Utc::now());
+        model.updated_at = Set(time::OffsetDateTime::now_utc());
 
         Ok(model)
     }

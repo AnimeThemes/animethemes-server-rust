@@ -1,6 +1,5 @@
 use async_graphql::dataloader::DataLoader;
 use async_graphql::{ComplexObject, Context, Result, SimpleObject};
-use chrono::{DateTime, Utc};
 
 use crate::entities::document::page;
 use crate::graphql::loaders::document::page_page::PagePageLoader;
@@ -25,20 +24,26 @@ pub struct Page {
     #[graphql(skip)]
     pub next_id: Option<u64>,
     #[graphql(skip)]
-    pub created_at: DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     #[graphql(skip)]
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 }
 
 #[ComplexObject]
 impl Page {
     /// The date that the resource was created
-    async fn created_at(&self, #[graphql(default = "%+")] format: String) -> String {
+    async fn created_at(
+        &self,
+        #[graphql(default = "%Y-%m-%d %H:%M:%S")] format: String,
+    ) -> Result<String> {
         format_datetime(&self.created_at, &format)
     }
 
     /// The date that the resource was updated
-    async fn updated_at(&self, #[graphql(default = "%+")] format: String) -> String {
+    async fn updated_at(
+        &self,
+        #[graphql(default = "%Y-%m-%d %H:%M:%S")] format: String,
+    ) -> Result<String> {
         format_datetime(&self.updated_at, &format)
     }
 

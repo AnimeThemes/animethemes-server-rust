@@ -45,7 +45,7 @@ impl From<ThemeDocumentFrom> for ThemeDocument {
             anime: anime_document,
             song: song.clone().map(SongDocument::from),
             song_title: song.as_ref().and_then(|song| song.title.clone()),
-            created_at: model.created_at.timestamp(),
+            created_at: model.created_at.unix_timestamp(),
         }
     }
 }

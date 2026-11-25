@@ -36,7 +36,7 @@ impl From<song::Model> for SongDocument {
             id: model.id.to_string(),
             title: model.title.clone(),
             title_native: title_native,
-            created_at: model.created_at.timestamp(),
+            created_at: model.created_at.unix_timestamp(),
         }
     }
 }

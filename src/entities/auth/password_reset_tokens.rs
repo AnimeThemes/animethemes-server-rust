@@ -1,4 +1,3 @@
-use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
 #[sea_orm::model]
@@ -9,7 +8,7 @@ pub struct Model {
     pub email: String,
     pub token: String,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
 }
 
 impl ActiveModelBehavior for ActiveModel {}
