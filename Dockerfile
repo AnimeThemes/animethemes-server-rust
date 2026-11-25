@@ -1,4 +1,4 @@
-FROM lukemathwalker/cargo-chef:latest-rust-1.95.0-trixie AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.100.0-trixie AS chef
 
 WORKDIR /app
 

@@ -65,7 +65,7 @@ impl From<ArtistDocumentFrom> for ArtistDocument {
             id: model.id.to_string(),
             name: model.name.clone(),
             name_native: name_native,
-            created_at: model.created_at.timestamp(),
+            created_at: model.created_at.unix_timestamp(),
             r#as: r#as,
             synonyms: synonyms.iter().map(|s| s.text.clone()).collect(),
             search_text: search_text.join(" "),

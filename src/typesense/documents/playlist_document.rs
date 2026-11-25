@@ -30,7 +30,7 @@ impl From<playlist::Model> for PlaylistDocument {
         Self {
             id: model.id.to_string(),
             name: model.name.clone(),
-            created_at: model.created_at.timestamp(),
+            created_at: model.created_at.unix_timestamp(),
         }
     }
 }

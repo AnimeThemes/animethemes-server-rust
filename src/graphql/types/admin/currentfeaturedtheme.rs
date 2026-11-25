@@ -1,6 +1,5 @@
 use async_graphql::dataloader::DataLoader;
 use async_graphql::{ComplexObject, Context, Error, Result, SimpleObject};
-use chrono::{DateTime, Utc};
 
 use crate::AppError;
 use crate::entities::admin::featuredtheme;
@@ -19,9 +18,9 @@ pub struct CurrentFeaturedTheme {
     /// The primary key of the resource
     pub id: u64,
     #[graphql(skip)]
-    pub start_at: Option<DateTime<Utc>>,
+    pub start_at: Option<time::OffsetDateTime>,
     #[graphql(skip)]
-    pub end_at: Option<DateTime<Utc>>,
+    pub end_at: Option<time::OffsetDateTime>,
     #[graphql(skip)]
     pub entry_id: u64,
     #[graphql(skip)]
@@ -33,12 +32,18 @@ pub struct CurrentFeaturedTheme {
 #[ComplexObject]
 impl CurrentFeaturedTheme {
     /// The start date of the resource
-    async fn start_at(&self, #[graphql(default = "%+")] format: String) -> Option<String> {
+    async fn start_at(
+        &self,
+        #[graphql(default = "%Y-%m-%d %H:%M:%S")] format: String,
+    ) -> Result<Option<String>> {
         format_option_datetime(self.start_at.as_ref(), &format)
     }
 
     /// The end date of the resource
-    async fn end_at(&self, #[graphql(default = "%+")] format: String) -> Option<String> {
+    async fn end_at(
+        &self,
+        #[graphql(default = "%Y-%m-%d %H:%M:%S")] format: String,
+    ) -> Result<Option<String>> {
         format_option_datetime(self.end_at.as_ref(), &format)
     }
 

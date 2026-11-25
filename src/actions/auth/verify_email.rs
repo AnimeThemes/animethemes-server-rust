@@ -1,8 +1,8 @@
 use std::env;
 
-use chrono::{Duration, Utc};
 use hmac::{Hmac, KeyInit, Mac};
 use sha2::{Digest, Sha256};
+use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 use crate::AppError;
@@ -37,7 +37,7 @@ impl VerifyEmail {
 
         let email_hash = hex::encode(Sha256::digest(email.as_bytes()));
         let token = Uuid::new_v4().simple().to_string();
-        let expires = (Utc::now() + Duration::minutes(60)).timestamp();
+        let expires = (OffsetDateTime::now_utc() + Duration::minutes(60)).unix_timestamp();
 
         let payload = format!("email-verification|{user_id}|{email_hash}|{token}|{expires}");
 

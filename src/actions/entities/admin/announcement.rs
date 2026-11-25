@@ -18,8 +18,8 @@ pub struct SaveAnnouncementInput {
     ))]
     pub content: Option<String>,
 
-    pub start_at: MaybeUndefined<chrono::DateTime<chrono::Utc>>,
-    pub end_at: MaybeUndefined<chrono::DateTime<chrono::Utc>>,
+    pub start_at: MaybeUndefined<time::OffsetDateTime>,
+    pub end_at: MaybeUndefined<time::OffsetDateTime>,
 }
 
 pub struct SaveAnnouncementAction;

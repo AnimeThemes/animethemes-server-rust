@@ -2,7 +2,7 @@
 edition      = "2024"
 name         = "migration"
 publish      = false
-rust-version = "1.95.0"
+rust-version = "1.100.0"
 version      = "0.1.0"
 
 [lib]
@@ -22,4 +22,4 @@ features = [
     "sqlx-mysql"
     # "sqlx-postgres",         # `DATABASE_DRIVER` feature
 ]
-version = "2.0.2"
+version = "2.0.4"

@@ -1,4 +1,3 @@
-use chrono::Utc;
 use macros::SoftDeleteEntity;
 use sea_orm::entity::prelude::*;
 
@@ -19,11 +18,11 @@ pub struct Model {
     pub tracks_count: i32,
     pub version: i32,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: chrono::DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub deleted_at: Option<chrono::DateTime<Utc>>,
+    pub deleted_at: Option<time::OffsetDateTime>,
 
     #[sea_orm(belongs_to, from = "theme_id", to = "id")]
     pub theme: BelongsTo<theme::Entity>,

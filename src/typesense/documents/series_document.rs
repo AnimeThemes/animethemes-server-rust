@@ -35,7 +35,7 @@ impl From<SeriesDocumentFrom> for SeriesDocument {
             id: model.id.to_string(),
             title: model.title,
             anime: anime_documents,
-            created_at: model.created_at.timestamp(),
+            created_at: model.created_at.unix_timestamp(),
         }
     }
 }

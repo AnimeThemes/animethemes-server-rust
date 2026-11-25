@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use chrono::Utc;
 use sea_orm::ActiveValue::Set;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -20,11 +19,11 @@ pub struct Model {
     #[serde(skip_serializing)]
     pub password: String,
     #[sea_orm(column_type = "Timestamp")]
-    pub email_verified_at: Option<chrono::DateTime<Utc>>,
+    pub email_verified_at: Option<time::OffsetDateTime>,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: chrono::DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 
     #[serde(skip)]
     #[sea_orm(has_many, via = "user_roles")]
@@ -55,7 +54,7 @@ impl ActiveModelBehavior for ActiveModel {
     {
         let mut model = self;
 
-        model.updated_at = Set(Utc::now());
+        model.updated_at = Set(time::OffsetDateTime::now_utc());
 
         Ok(model)
     }

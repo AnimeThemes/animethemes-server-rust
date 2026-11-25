@@ -1,4 +1,3 @@
-use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
 #[sea_orm::model]
@@ -9,13 +8,13 @@ pub struct Model {
     pub id: u64,
     pub content: String,
     #[sea_orm(column_type = "Timestamp")]
-    pub start_at: Option<chrono::DateTime<Utc>>,
+    pub start_at: Option<time::OffsetDateTime>,
     #[sea_orm(column_type = "Timestamp")]
-    pub end_at: Option<chrono::DateTime<Utc>>,
+    pub end_at: Option<time::OffsetDateTime>,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: chrono::DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

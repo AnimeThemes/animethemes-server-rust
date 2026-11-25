@@ -9,8 +9,8 @@ use crate::middlewares::current_user::CurrentUser;
 #[derive(InputObject, Validate)]
 #[graphql(name = "SaveFeaturedThemeInput")]
 pub struct SaveFeaturedThemeInput {
-    pub start_at: Option<chrono::DateTime<chrono::Utc>>,
-    pub end_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub start_at: Option<time::OffsetDateTime>,
+    pub end_at: Option<time::OffsetDateTime>,
     pub entry_id: Option<u64>,
     pub video_id: Option<u64>,
     pub user_id: Option<u64>,

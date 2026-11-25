@@ -1,5 +1,4 @@
-use async_graphql::{ComplexObject, SimpleObject};
-use chrono::{DateTime, Utc};
+use async_graphql::{ComplexObject, Result, SimpleObject};
 
 use crate::entities::content::image::{self};
 use crate::enums::LocalizedEnum;
@@ -26,19 +25,25 @@ pub struct Image {
     pub depth: i32,
 
     #[graphql(skip)]
-    pub created_at: DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     #[graphql(skip)]
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 }
 
 #[ComplexObject]
 impl Image {
     /// The date that the resource was created
-    async fn created_at(&self, #[graphql(default = "%+")] format: String) -> String {
+    async fn created_at(
+        &self,
+        #[graphql(default = "%Y-%m-%d %H:%M:%S")] format: String,
+    ) -> Result<String> {
         format_datetime(&self.created_at, &format)
     }
 
-    async fn updated_at(&self, #[graphql(default = "%+")] format: String) -> String {
+    async fn updated_at(
+        &self,
+        #[graphql(default = "%Y-%m-%d %H:%M:%S")] format: String,
+    ) -> Result<String> {
         format_datetime(&self.updated_at, &format)
     }
 }

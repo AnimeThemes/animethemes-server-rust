@@ -1,4 +1,3 @@
-use chrono::Utc;
 use sea_orm::entity::prelude::*;
 
 use crate::entities::auth::user;
@@ -14,9 +13,9 @@ pub struct Model {
     pub user_id: u64,
     pub score: f32,
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
+    pub created_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: chrono::DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 
     #[sea_orm(belongs_to, from = "entry_id", to = "id")]
     pub entry: BelongsTo<entry::Entity>,

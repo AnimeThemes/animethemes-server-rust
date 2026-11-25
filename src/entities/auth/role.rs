@@ -1,7 +1,6 @@
 use std::fmt;
 use std::str::FromStr;
 
-use chrono::Utc;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -19,12 +18,12 @@ pub struct Model {
     pub color: Option<String>,
     pub default: bool,
     pub guard_name: String,
-    #[serde(default)]
+    #[serde(default = "crate::entities::default_datetime")]
     #[sea_orm(column_type = "Timestamp")]
-    pub created_at: chrono::DateTime<Utc>,
-    #[serde(default)]
+    pub created_at: time::OffsetDateTime,
+    #[serde(default = "crate::entities::default_datetime")]
     #[sea_orm(column_type = "Timestamp")]
-    pub updated_at: chrono::DateTime<Utc>,
+    pub updated_at: time::OffsetDateTime,
 
     #[serde(skip)]
     #[sea_orm(has_many, via = "user_roles")]

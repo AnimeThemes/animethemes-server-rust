@@ -36,7 +36,7 @@ impl From<EntryDocumentFrom> for EntryDocument {
             version: version.clone(),
             type_sequence_version: format!("{}{}", theme_document.type_sequence, version),
             theme: theme_document,
-            created_at: model.created_at.timestamp(),
+            created_at: model.created_at.unix_timestamp(),
         }
     }
 }

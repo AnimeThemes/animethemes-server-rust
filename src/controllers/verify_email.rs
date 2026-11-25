@@ -2,7 +2,6 @@ use std::env;
 
 use axum::extract::{Path, Query};
 use axum::response::Redirect;
-use chrono::Utc;
 use loco_rs::prelude::*;
 use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 use serde::Deserialize;
@@ -26,7 +25,7 @@ pub async fn verify_email(
     Path(user_id): Path<u64>,
     Query(query): Query<VerifyEmailQuery>,
 ) -> Result<Redirect, AppError> {
-    if Utc::now().timestamp() > query.expires {
+    if time::OffsetDateTime::now_utc().unix_timestamp() > query.expires {
         return Err(AppError::ForbiddenWithMessage(
             "Verification link has expired".to_string(),
         ));
@@ -48,7 +47,7 @@ pub async fn verify_email(
     let verified_user = if user.email_verified_at.is_none() {
         let mut active_user: user::ActiveModel = user.into();
 
-        active_user.email_verified_at = Set(Some(Utc::now()));
+        active_user.email_verified_at = Set(Some(time::OffsetDateTime::now_utc()));
 
         active_user.update(&ctx.db).await?
     } else {

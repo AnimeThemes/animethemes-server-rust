@@ -32,7 +32,7 @@ impl From<VideoDocumentFrom> for VideoDocument {
             id: model.id.to_string(),
             filename: model.filename.clone(),
             tags: model.tags(),
-            created_at: model.created_at.timestamp(),
+            created_at: model.created_at.unix_timestamp(),
         }
     }
 }
