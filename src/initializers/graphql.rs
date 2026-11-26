@@ -11,9 +11,9 @@ use crate::features::functions::FeatureManager;
 use crate::graphql::loaders::loaders::RegisterLoaders;
 use crate::graphql::mutation::Mutation;
 use crate::graphql::query::Query;
+use crate::initializers::typesense::TypesenseClient;
 use crate::middlewares::current_user::CurrentUser;
 use crate::middlewares::rate_limiting::CanBypass;
-use crate::typesense::client::TypesenseClient;
 
 type AppSchema = Schema<Query, Mutation, EmptySubscription>;
 

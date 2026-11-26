@@ -5,8 +5,8 @@ use sea_orm::{EntityTrait, QueryFilter};
 use typesense::prelude::Document;
 
 use crate::entities::content::studio;
+use crate::initializers::typesense::TypesenseClient;
 use crate::scopes::without_trashed;
-use crate::typesense::client::TypesenseClient;
 use crate::typesense::documents::studio_document::{StudioDocument, build_studio_documents};
 use crate::typesense::index_document;
 

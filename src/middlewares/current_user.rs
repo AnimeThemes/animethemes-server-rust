@@ -8,7 +8,7 @@ use tower_sessions::Session;
 use crate::entities::auth::{role, sanction, user, user_sanctions};
 use crate::scopes::auth::user_sanctions::current_sanctions;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct CurrentUser {
     pub user: user::Model,
     pub roles: Vec<role::Model>,

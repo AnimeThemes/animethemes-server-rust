@@ -5,8 +5,8 @@ use sea_orm::{EntityTrait, QueryFilter};
 use typesense::prelude::Document;
 
 use crate::entities::content::anime;
+use crate::initializers::typesense::TypesenseClient;
 use crate::scopes::without_trashed;
-use crate::typesense::client::TypesenseClient;
 use crate::typesense::documents::anime_document::{AnimeDocument, build_anime_documents};
 use crate::typesense::index_document;
 

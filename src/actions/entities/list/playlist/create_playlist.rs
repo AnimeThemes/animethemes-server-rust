@@ -3,7 +3,6 @@ use std::env;
 use anyhow::Context;
 use async_graphql::InputObject;
 use loco_rs::app::AppContext;
-use loco_rs::prelude::BackgroundWorker;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
@@ -12,17 +11,13 @@ use validator::Validate;
 
 use crate::entities::auth::role::Roles;
 use crate::entities::list::playlist;
-use crate::enums::features::Feature;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
-use crate::features::functions::FeatureManager;
+use crate::events::list::playlist_created::PlaylistCreated;
+use crate::initializers::typesense::typesense;
 use crate::middlewares::current_user::CurrentUser;
 use crate::policies::has_any_role;
-use crate::typesense::client::typesense;
 use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
-use crate::workers::discord_notification::{
-    DiscordNotificationWorker, DiscordNotificationWorkerArgs,
-};
-use crate::{AppError, discord};
+use crate::{AppError, events};
 
 #[derive(InputObject, Validate)]
 #[graphql(name = "CreatePlaylistInput")]
@@ -87,25 +82,14 @@ impl CreatePlaylistAction {
 
         Self::update_search(&ctx.db, &playlist).await?;
 
-        let feature_manager = ctx.shared_store.get::<FeatureManager>();
-
-        if let Some(feature_manager) = feature_manager
-            && feature_manager.is_enabled(Feature::AllowDiscordNotifications, None, false)
-        {
-            DiscordNotificationWorker::perform_later(
-                ctx,
-                DiscordNotificationWorkerArgs {
-                    channel_id: discord::playlist::Playlist::get_discord_channel(),
-                    message: serde_json::to_value(
-                        discord::playlist::Playlist::new(playlist.clone(), Some(user.clone()))
-                            .created_message(),
-                    )
-                    .unwrap(),
-                },
-            )
-            .await
-            .map_err(AppError::internal)?;
-        }
+        events::dispatch(
+            ctx,
+            PlaylistCreated {
+                playlist: playlist.clone(),
+                user: Some(user.clone()),
+            },
+        )
+        .await;
 
         Ok(playlist)
     }

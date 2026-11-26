@@ -4,7 +4,7 @@ use sea_orm::ModelTrait;
 use crate::AppError;
 use crate::entities::list::playlist;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
-use crate::typesense::client::typesense;
+use crate::initializers::typesense::typesense;
 use crate::typesense::documents::playlist_document::PlaylistDocument;
 
 pub struct DeletePlaylistAction;

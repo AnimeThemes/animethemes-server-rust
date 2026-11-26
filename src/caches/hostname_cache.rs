@@ -34,7 +34,7 @@ impl HostnameCache {
 
             tokio::spawn(async move {
                 loop {
-                    tokio::time::sleep(Duration::from_secs(5)).await;
+                    tokio::time::sleep(Duration::from_secs(20)).await;
                     background.refresh(&hostnames).await;
                 }
             });

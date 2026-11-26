@@ -4,7 +4,7 @@ use sea_orm::{
 
 use crate::AppError;
 use crate::entities::content::{anime, artist, entry, series, song, studio, theme, video};
-use crate::typesense::client::typesense;
+use crate::initializers::typesense::typesense;
 use crate::typesense::documents::anime_document::{AnimeDocument, build_anime_documents};
 use crate::typesense::documents::artist_document::{ArtistDocument, build_artist_documents};
 use crate::typesense::documents::entry_document::{EntryDocument, build_entry_documents};
