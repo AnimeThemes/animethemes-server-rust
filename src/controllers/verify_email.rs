@@ -6,11 +6,10 @@ use loco_rs::prelude::*;
 use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 use serde::Deserialize;
 
-use crate::AppError;
-use crate::actions::auth::roles::RoleAction;
 use crate::actions::auth::verify_email::VerifyEmail;
-use crate::entities::auth::role::Roles;
 use crate::entities::auth::user;
+use crate::events::auth::user_verified::UserVerified;
+use crate::{AppError, events};
 
 #[derive(Debug, Deserialize)]
 pub struct VerifyEmailQuery {
@@ -54,7 +53,13 @@ pub async fn verify_email(
         user.clone()
     };
 
-    RoleAction::assign_role(&ctx, &verified_user, Roles::Verified).await?;
+    events::dispatch(
+        &ctx,
+        UserVerified {
+            user: verified_user,
+        },
+    )
+    .await;
 
     let redirect = env::var("CLIENT_PROFILE_URL")
         .unwrap_or_else(|_| "https://animethemes.moe/profile".to_string());

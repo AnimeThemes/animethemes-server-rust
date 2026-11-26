@@ -9,13 +9,15 @@ use sea_orm::{
 };
 use validator::{Validate, ValidationError};
 
-use crate::AppError;
+use crate::entities::HasHashId;
 use crate::entities::auth::role::Roles;
 use crate::entities::content::entry_videos;
 use crate::entities::list::{playlist, track};
+use crate::events::list::track_created::TrackCreated;
 use crate::middlewares::current_user::CurrentUser;
 use crate::policies::has_any_role;
 use crate::traits::sortable::Sortable;
+use crate::{AppError, events};
 
 #[derive(InputObject, Validate)]
 #[graphql(name = "CreatePlaylistTrackInput")]
@@ -117,6 +119,17 @@ impl InsertTrackAction {
         }
 
         txn.commit().await?;
+
+        track.update_hashid(&ctx.db).await?;
+
+        events::dispatch(
+            ctx,
+            TrackCreated {
+                track: track.clone(),
+                user: Some(user.clone()),
+            },
+        )
+        .await;
 
         Ok(track)
     }

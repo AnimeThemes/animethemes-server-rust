@@ -4,6 +4,7 @@ use mod_events::EventDispatcher;
 
 use crate::events::auth::user_registered::UserRegistered;
 use crate::events::auth::user_updated::UserUpdated;
+use crate::events::auth::user_verified::UserVerified;
 use crate::events::list::playlist_created::PlaylistCreated;
 use crate::listeners;
 
@@ -36,6 +37,10 @@ pub fn register() -> Arc<EventDispatcher> {
 
     listen!(dispatcher, UserUpdated => [
         listeners::send_discord_notification::handle,
+    ]);
+
+    listen!(dispatcher, UserVerified => [
+        listeners::verified::assign_verified_role,
     ]);
 
     listen!(dispatcher, PlaylistCreated => [

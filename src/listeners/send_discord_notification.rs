@@ -4,13 +4,13 @@ use mod_events::Event;
 
 use crate::AppError;
 use crate::enums::features::Feature;
-use crate::events::discord::DiscordNotifiable;
+use crate::events::discord::DiscordNotifiableEvent;
 use crate::features::functions::FeatureManager;
 use crate::workers::discord_notification::{
     DiscordNotificationWorker, DiscordNotificationWorkerArgs,
 };
 
-pub async fn handle<E: DiscordNotifiable + Event>(
+pub async fn handle<E: DiscordNotifiableEvent + Event>(
     ctx: &AppContext,
     event: &E,
 ) -> Result<(), AppError> {
