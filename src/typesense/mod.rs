@@ -1,4 +1,3 @@
-pub mod client;
 pub mod documents;
 pub mod index_document;
 pub mod search;

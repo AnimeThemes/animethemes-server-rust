@@ -22,15 +22,12 @@ use tower_http::cors::{AllowCredentials, AllowOrigin, CorsLayer};
 use url::Url;
 
 use crate::caches::hostname_cache::HostnameCache;
+use crate::initializers::{self, graphql, session};
 use crate::middlewares::rate_limiting::GraphqlRateLimitState;
 use crate::middlewares::{self};
-use crate::schema::{self, graphiql, graphql_handler};
-use crate::session::create_session_layer;
-use crate::storage::create_storage;
-use crate::typesense::client::{create_typesense_client, init_typesense};
 #[allow(unused_imports)]
 use crate::{controllers, tasks};
-use crate::{seeds, settings, workers};
+use crate::{seeds, workers};
 
 pub struct App;
 #[async_trait]
@@ -58,18 +55,20 @@ impl Hooks for App {
     }
 
     async fn after_context(ctx: AppContext) -> Result<AppContext> {
-        let typesense = create_typesense_client();
+        let typesense = initializers::typesense::create_typesense_client();
 
-        init_typesense(typesense.clone());
+        initializers::typesense::init_typesense(typesense.clone());
 
-        let schemas = schema::create_schemas(ctx.clone(), typesense.clone());
-        let settings = settings::load_settings(ctx.clone())?;
+        let schemas = graphql::create_schemas(ctx.clone(), typesense.clone());
+        let settings = initializers::settings::load_settings(ctx.clone())?;
+        let dispatcher = initializers::events::register();
 
         ctx.shared_store.insert(schemas);
         ctx.shared_store.insert(typesense);
         ctx.shared_store.insert(settings);
+        ctx.shared_store.insert(dispatcher);
 
-        let storage = create_storage(ctx.clone())?;
+        let storage = initializers::storage::create_storage(ctx.clone())?;
 
         Ok(ctx.into_builder().storage(storage.into()).build())
     }
@@ -86,9 +85,9 @@ impl Hooks for App {
             .add_route(controllers::streams::audio_stream_controller::routes())
             .add_route(controllers::streams::video_stream_controller::routes())
             .add_route(
-                Routes::new().add("/", get(graphiql)).add(
+                Routes::new().add("/", get(graphql::graphiql)).add(
                     "/graphql",
-                    post(graphql_handler)
+                    post(graphql::graphql_handler)
                         .route_layer(middleware::from_fn(
                             middlewares::require_json_content::require_json_content_middleware,
                         ))
@@ -121,7 +120,7 @@ impl Hooks for App {
                 },
             ));
 
-        let session_layer = create_session_layer(&ctx).await;
+        let session_layer = session::create_session_layer(&ctx).await;
 
         let hostname_cache = HostnameCache::new().await;
 

@@ -9,8 +9,8 @@ use crate::AppError;
 use crate::actions::entities::{nullable_string, optional, optional_string};
 use crate::entities::list::playlist;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
+use crate::initializers::typesense::typesense;
 use crate::rules::*;
-use crate::typesense::client::typesense;
 use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
 
 #[derive(InputObject, Validate)]

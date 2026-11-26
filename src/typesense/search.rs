@@ -7,8 +7,8 @@ use typesense::prelude::Document;
 
 use crate::entities::content::{anime, artist, series, song, studio, theme, video};
 use crate::entities::list::playlist;
+use crate::initializers::typesense::TypesenseClient;
 use crate::scopes::list::playlist::public_playlists;
-use crate::typesense::client::TypesenseClient;
 use crate::typesense::documents::HasId;
 use crate::typesense::documents::anime_document::{self, AnimeDocument};
 use crate::typesense::documents::artist_document::{self, ArtistDocument};

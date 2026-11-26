@@ -9,7 +9,7 @@ use serde::de::DeserializeOwned;
 use typesense::models::{ImportDocumentsParameters, IndexAction};
 use typesense::prelude::Document as TypesenseDocument;
 
-use crate::typesense::client::TypesenseClient;
+use crate::initializers::typesense::TypesenseClient;
 
 pub type BuildDocumentsFuture<'a, D> = Pin<Box<dyn Future<Output = Result<Vec<D>>> + Send + 'a>>;
 

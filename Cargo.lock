@@ -16,7 +16,6 @@ checksum = "0fca89247609239eeb6915e6991111866b92d7b31025e69302bbf430cc4d2c38"
 dependencies = [
  "cfg-if",
  "const-random",
- "getrandom 0.3.4",
  "getrandom 0.4.3",
  "once_cell",
  "version_check",
@@ -76,6 +75,7 @@ dependencies = [
  "macros",
  "migration",
  "minijinja",
+ "mod-events",
  "percent-encoding",
  "rand 0.10.4",
  "redis",
@@ -3299,6 +3299,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "mod-events"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "06bdf0ac4a585b5702da00e9e919d76328137d7155c7c02234efdca411b2f27f"
+dependencies = [
+ "futures-util",
+ "parking_lot 0.12.5",
+]
+
+[[package]]
 name = "multer"
 version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5878,7 +5888,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",

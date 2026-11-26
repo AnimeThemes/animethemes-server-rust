@@ -5,7 +5,7 @@ use sea_orm::EntityTrait;
 use typesense::prelude::Document;
 
 use crate::entities::list::playlist;
-use crate::typesense::client::TypesenseClient;
+use crate::initializers::typesense::TypesenseClient;
 use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
 use crate::typesense::index_document;
 

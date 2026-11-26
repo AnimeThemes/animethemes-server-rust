@@ -5,8 +5,8 @@ use sea_orm::{EntityTrait, QueryFilter};
 use typesense::prelude::Document;
 
 use crate::entities::content::video;
+use crate::initializers::typesense::TypesenseClient;
 use crate::scopes::without_trashed;
-use crate::typesense::client::TypesenseClient;
 use crate::typesense::documents::video_document::{VideoDocument, build_video_documents};
 use crate::typesense::index_document;
 

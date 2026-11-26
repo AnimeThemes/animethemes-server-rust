@@ -61,6 +61,7 @@ rand = "0.10.4"
 serenity = { version = "0.12.5", default-features = false, features = ["model", "rustls_backend"] }
 validator = { version = "0.21.0", features = ["derive"] }
 time = "0.3.55"
+mod-events = { version = "1.2.0", features = ["async"] }
 
 [[bin]]
 name = "animethemes-server-rust"

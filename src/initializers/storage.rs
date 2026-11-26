@@ -7,7 +7,7 @@ use loco_rs::storage::{self, Storage};
 use loco_rs::{Error, Result};
 use serde::Deserialize;
 
-use crate::settings::{Settings, null_as_empty};
+use crate::initializers::settings::{Settings, null_as_empty};
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct StorageConfig {

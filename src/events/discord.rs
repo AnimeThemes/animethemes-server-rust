@@ -3,10 +3,18 @@ use sea_orm::{EntityTrait, IdenStatic, Iterable, ModelTrait};
 use serde::Serialize;
 use serde_json::Value;
 
+use crate::AppError;
 use crate::middlewares::current_user::CurrentUser;
 
-pub mod playlist;
-pub mod user;
+pub trait DiscordNotifiable {
+    fn should_send_discord_message(&self) -> bool {
+        true
+    }
+
+    fn get_discord_channel(&self) -> u64;
+
+    fn get_message(&self) -> Result<serenity::all::CreateMessage, AppError>;
+}
 
 const IGNORED_COLUMNS: &[&str] = &["updated_at", "created_at", "deleted_at"];
 

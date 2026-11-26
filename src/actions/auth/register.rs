@@ -1,7 +1,6 @@
 use async_graphql::InputObject;
 use bcrypt::hash;
 use loco_rs::app::AppContext;
-use loco_rs::prelude::BackgroundWorker;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter,
@@ -9,15 +8,10 @@ use sea_orm::{
 };
 use validator::{Validate, ValidationError};
 
-use crate::actions::auth::verify_email::VerifyEmail;
 use crate::entities::auth::user::{self};
-use crate::enums::features::Feature;
-use crate::features::functions::FeatureManager;
+use crate::events::auth::user_registered::UserRegistered;
 use crate::rules::*;
-use crate::workers::discord_notification::{
-    DiscordNotificationWorker, DiscordNotificationWorkerArgs,
-};
-use crate::{AppError, discord};
+use crate::{AppError, events};
 
 #[derive(InputObject, Clone, Validate)]
 #[graphql(name = "RegisterInput")]
@@ -131,26 +125,14 @@ impl Register {
 
         let user = model.insert(&ctx.db).await?;
 
-        VerifyEmail::send_verification_email(&user).await?;
-
-        let feature_manager = ctx.shared_store.get::<FeatureManager>();
-
-        if let Some(feature_manager) = feature_manager
-            && feature_manager.is_enabled(Feature::AllowDiscordNotifications, None, false)
-        {
-            DiscordNotificationWorker::perform_later(
-                ctx,
-                DiscordNotificationWorkerArgs {
-                    channel_id: discord::user::User::get_discord_channel(),
-                    message: serde_json::to_value(
-                        discord::user::User::new(user.clone(), None).created_message(),
-                    )
-                    .unwrap(),
-                },
-            )
-            .await
-            .map_err(AppError::internal)?;
-        }
+        events::dispatch(
+            ctx,
+            UserRegistered {
+                user: user.clone(),
+                auth_user: None,
+            },
+        )
+        .await;
 
         Ok(user)
     }

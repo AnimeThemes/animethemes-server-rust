@@ -8,10 +8,10 @@ use crate::actions::entities::{nullable, optional};
 use crate::entities::content::anime;
 use crate::enums::content::animeformat::AnimeFormat;
 use crate::enums::content::animeseason::AnimeSeason;
+use crate::initializers::typesense::typesense;
 use crate::middlewares::current_user::CurrentUser;
 use crate::rules::*;
 use crate::services::search_indexer::SearchIndexer;
-use crate::typesense::client::typesense;
 use crate::typesense::documents::anime_document::AnimeDocument;
 
 #[derive(InputObject, Validate)]

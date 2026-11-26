@@ -22,8 +22,8 @@ use crate::graphql::types::content::theme::Theme;
 use crate::graphql::types::content::video::Video;
 use crate::graphql::types::list::playlist::Playlist;
 use crate::graphql::types::{OffsetPageInfo, OffsetPagination};
+use crate::initializers::typesense::TypesenseClient;
 use crate::scopes::list::playlist::public_playlists;
-use crate::typesense::client::TypesenseClient;
 use crate::typesense::search::{
     OffsetPageInfo as OffsetPageInfoTypesense, search_anime, search_artists, search_playlists,
     search_series, search_songs, search_studios, search_themes, search_videos,
