@@ -2,7 +2,7 @@ use mod_events::Event;
 
 use crate::AppError;
 use crate::entities::list::playlist;
-use crate::events::discord::{DiscordNotifiable, created_embed};
+use crate::events::discord::{DiscordNotifiableEvent, created_embed};
 use crate::middlewares::current_user::CurrentUser;
 
 #[derive(Debug, Clone)]
@@ -17,7 +17,7 @@ impl Event for PlaylistCreated {
     }
 }
 
-impl DiscordNotifiable for PlaylistCreated {
+impl DiscordNotifiableEvent for PlaylistCreated {
     fn get_discord_channel(&self) -> u64 {
         std::env::var("DISCORD_ADMIN_CHANNEL_ID")
             .expect("DISCORD_ADMIN_CHANNEL_ID is required in .env")

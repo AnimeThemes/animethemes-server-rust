@@ -2,7 +2,7 @@ use mod_events::Event;
 
 use crate::AppError;
 use crate::entities::auth::user;
-use crate::events::discord::{DiscordNotifiable, updated_embed};
+use crate::events::discord::{DiscordNotifiableEvent, updated_embed};
 use crate::middlewares::current_user::CurrentUser;
 
 #[derive(Debug, Clone)]
@@ -18,7 +18,7 @@ impl Event for UserUpdated {
     }
 }
 
-impl DiscordNotifiable for UserUpdated {
+impl DiscordNotifiableEvent for UserUpdated {
     fn get_discord_channel(&self) -> u64 {
         std::env::var("DISCORD_ADMIN_CHANNEL_ID")
             .expect("DISCORD_ADMIN_CHANNEL_ID is required in .env")

@@ -9,6 +9,7 @@ use sea_orm::{
 };
 use validator::Validate;
 
+use crate::entities::HasHashId;
 use crate::entities::auth::role::Roles;
 use crate::entities::list::playlist;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
@@ -78,7 +79,9 @@ impl CreatePlaylistAction {
             ..Default::default()
         };
 
-        let playlist = playlist.insert(&ctx.db).await?;
+        let mut playlist = playlist.insert(&ctx.db).await?;
+
+        playlist.update_hashid(&ctx.db).await?;
 
         Self::update_search(&ctx.db, &playlist).await?;
 

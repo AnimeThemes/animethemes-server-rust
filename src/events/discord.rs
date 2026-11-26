@@ -6,7 +6,7 @@ use serde_json::Value;
 use crate::AppError;
 use crate::middlewares::current_user::CurrentUser;
 
-pub trait DiscordNotifiable {
+pub trait DiscordNotifiableEvent {
     fn should_send_discord_message(&self) -> bool {
         true
     }

@@ -2,6 +2,9 @@ use std::env;
 use std::sync::OnceLock;
 
 use hash_ids::HashIds;
+use sea_orm::DatabaseConnection;
+
+use crate::AppError;
 
 pub mod admin;
 pub mod auth;
@@ -32,4 +35,9 @@ pub trait HasHashId {
 
         hashids.encode(&self.hashids())
     }
+
+    fn update_hashid(
+        &mut self,
+        db: &DatabaseConnection,
+    ) -> impl Future<Output = Result<(), AppError>> + Send;
 }

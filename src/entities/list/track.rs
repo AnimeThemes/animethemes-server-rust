@@ -46,25 +46,6 @@ impl ActiveModelBehavior for ActiveModel {
 
         Ok(model)
     }
-
-    async fn after_save<C>(mut model: Model, db: &C, insert: bool) -> Result<Model, DbErr>
-    where
-        C: ConnectionTrait,
-    {
-        if insert {
-            let hashid = model.encode_hashid();
-
-            Entity::update_many()
-                .col_expr(Column::Hashid, Expr::value(hashid.clone()))
-                .filter(Column::Id.eq(model.id))
-                .exec(db)
-                .await?;
-
-            model.hashid = Some(hashid);
-        }
-
-        Ok(model)
-    }
 }
 
 impl Sortable for Model {
@@ -80,5 +61,19 @@ impl Sortable for Model {
 impl HasHashId for Model {
     fn hashids(&self) -> Vec<u64> {
         vec![self.playlist_id, self.id]
+    }
+
+    async fn update_hashid(&mut self, db: &DatabaseConnection) -> Result<(), crate::AppError> {
+        let hashid = self.encode_hashid();
+
+        Entity::update_many()
+            .col_expr(Column::Hashid, Expr::value(hashid.clone()))
+            .filter(Column::Id.eq(self.id))
+            .exec(db)
+            .await?;
+
+        self.hashid = Some(hashid);
+
+        Ok(())
     }
 }
