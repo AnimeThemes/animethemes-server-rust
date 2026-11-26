@@ -22,14 +22,18 @@ pub struct SaveStudioAction;
 impl SaveStudioAction {
     pub async fn save(
         _ctx: &AppContext,
-        _id: Option<u64>,
+        _studio: Option<studio::Model>,
         _input: SaveStudioInput,
         _user: &CurrentUser,
     ) -> Result<studio::Model, AppError> {
         todo!()
     }
 
-    pub async fn delete(_ctx: &AppContext, _id: u64, _user: &CurrentUser) -> Result<(), AppError> {
+    pub async fn delete(
+        _ctx: &AppContext,
+        _studio: studio::Model,
+        _user: &CurrentUser,
+    ) -> Result<(), AppError> {
         todo!()
     }
 }

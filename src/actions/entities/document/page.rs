@@ -39,14 +39,18 @@ pub struct SavePageAction;
 impl SavePageAction {
     pub async fn save(
         _ctx: &AppContext,
-        _id: Option<u64>,
+        _page: Option<page::Model>,
         _input: SavePageInput,
         _user: &CurrentUser,
     ) -> Result<page::Model, AppError> {
         todo!()
     }
 
-    pub async fn delete(_ctx: &AppContext, _id: u64, _user: &CurrentUser) -> Result<(), AppError> {
+    pub async fn delete(
+        _ctx: &AppContext,
+        _page: page::Model,
+        _user: &CurrentUser,
+    ) -> Result<(), AppError> {
         todo!()
     }
 }

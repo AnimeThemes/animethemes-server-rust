@@ -31,7 +31,7 @@ pub struct SaveThemeAction;
 impl SaveThemeAction {
     pub async fn save(
         _ctx: &AppContext,
-        _id: Option<u64>,
+        _theme: Option<theme::Model>,
         _input: SaveThemeInput,
         _user: &CurrentUser,
     ) -> Result<theme::Model, AppError> {
@@ -40,7 +40,7 @@ impl SaveThemeAction {
 
     pub async fn delete(
         _ctx: &AppContext,
-        _ids: Vec<u64>,
+        _theme: theme::Model,
         _user: &CurrentUser,
     ) -> Result<(), AppError> {
         todo!()

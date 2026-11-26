@@ -57,4 +57,27 @@ impl AnnouncementMutation {
 
         Ok(announcement.into())
     }
+
+    async fn delete_announcement(&self, ctx: &Context<'_>, id: u64) -> Result<bool> {
+        let user = ctx
+            .data::<CurrentUser>()
+            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let db = ctx.data::<DatabaseConnection>()?;
+
+        let announcement = announcement::Entity::find_by_id(id)
+            .one(db)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        AnnouncementPolicy::check(Some(user), PolicyAction::Delete, Some(&announcement))
+            .authorize()
+            .extend()?;
+
+        SaveAnnouncementAction::delete(ctx.data_unchecked::<AppContext>(), announcement, &user)
+            .await
+            .extend()?;
+
+        Ok(true)
+    }
 }

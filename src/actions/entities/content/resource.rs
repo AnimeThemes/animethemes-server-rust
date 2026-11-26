@@ -35,7 +35,7 @@ pub struct SaveResourceAction;
 impl SaveResourceAction {
     pub async fn save(
         _ctx: &AppContext,
-        _id: Option<u64>,
+        _resource: Option<resource::Model>,
         _input: SaveResourceInput,
         _user: &CurrentUser,
     ) -> Result<resource::Model, AppError> {
@@ -44,7 +44,7 @@ impl SaveResourceAction {
 
     pub async fn delete(
         _ctx: &AppContext,
-        _ids: Vec<u64>,
+        _resources: Vec<resource::Model>,
         _user: &CurrentUser,
     ) -> Result<(), AppError> {
         todo!()
