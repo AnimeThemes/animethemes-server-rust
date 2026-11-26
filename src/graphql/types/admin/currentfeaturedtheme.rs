@@ -84,8 +84,8 @@ impl From<featuredtheme::Model> for CurrentFeaturedTheme {
     fn from(model: featuredtheme::Model) -> Self {
         Self {
             id: model.id,
-            start_at: model.start_at,
-            end_at: model.end_at,
+            start_at: Some(model.start_at),
+            end_at: Some(model.end_at),
             entry_id: model
                 .entry_id
                 .expect("entry_id is required for the current featured theme"),

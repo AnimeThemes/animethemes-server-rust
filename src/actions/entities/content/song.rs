@@ -36,14 +36,18 @@ pub struct SaveSongAction;
 impl SaveSongAction {
     pub async fn save(
         _ctx: &AppContext,
-        _id: Option<u64>,
+        _song: Option<song::Model>,
         _input: SaveSongInput,
         _user: &CurrentUser,
     ) -> Result<song::Model, AppError> {
         todo!()
     }
 
-    pub async fn delete(_ctx: &AppContext, _id: u64, _user: &CurrentUser) -> Result<(), AppError> {
+    pub async fn delete(
+        _ctx: &AppContext,
+        _song: song::Model,
+        _user: &CurrentUser,
+    ) -> Result<(), AppError> {
         todo!()
     }
 }

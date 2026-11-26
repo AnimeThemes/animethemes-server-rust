@@ -29,14 +29,18 @@ pub struct SaveThemeGroupAction;
 impl SaveThemeGroupAction {
     pub async fn save(
         _ctx: &AppContext,
-        _id: Option<u64>,
+        _group: Option<themegroup::Model>,
         _input: SaveThemeGroupInput,
         _user: &CurrentUser,
     ) -> Result<themegroup::Model, AppError> {
         todo!()
     }
 
-    pub async fn delete(_ctx: &AppContext, _id: u64, _user: &CurrentUser) -> Result<(), AppError> {
+    pub async fn delete(
+        _ctx: &AppContext,
+        _group: themegroup::Model,
+        _user: &CurrentUser,
+    ) -> Result<(), AppError> {
         todo!()
     }
 }

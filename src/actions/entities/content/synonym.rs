@@ -32,7 +32,7 @@ pub struct SaveSynonymAction;
 impl SaveSynonymAction {
     pub async fn save(
         _ctx: &AppContext,
-        _id: Option<u64>,
+        _synonym: Option<synonym::Model>,
         _input: SaveSynonymInput,
         _user: &CurrentUser,
     ) -> Result<synonym::Model, AppError> {
@@ -41,7 +41,7 @@ impl SaveSynonymAction {
 
     pub async fn delete(
         _ctx: &AppContext,
-        _ids: Vec<u64>,
+        _synonym: synonym::Model,
         _user: &CurrentUser,
     ) -> Result<(), AppError> {
         todo!()

@@ -40,6 +40,28 @@ impl SaveAnnouncementAction {
             );
         }
 
+        let start_at = match input.start_at {
+            MaybeUndefined::Undefined => announcement.as_ref().and_then(|t| t.start_at),
+            MaybeUndefined::Null => None,
+            MaybeUndefined::Value(value) => Some(value),
+        };
+
+        let end_at = match input.end_at {
+            MaybeUndefined::Undefined => announcement.as_ref().and_then(|t| t.end_at),
+            MaybeUndefined::Null => None,
+            MaybeUndefined::Value(value) => Some(value),
+        };
+
+        if let (Some(start_at), Some(end_at)) = (start_at, end_at)
+            && start_at > end_at
+        {
+            let error = ValidationError::new("")
+                .with_message("The start_at must be before the end_at".into());
+
+            errors.add("start_at", error.clone());
+            errors.add("end_at", error);
+        }
+
         if !errors.is_empty() {
             return Err(AppError::Validation(errors));
         }

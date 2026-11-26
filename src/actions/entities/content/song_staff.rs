@@ -40,7 +40,7 @@ pub struct SaveSongStaffAction;
 impl SaveSongStaffAction {
     pub async fn save(
         _ctx: &AppContext,
-        _id: Option<u64>,
+        _songstaff: Option<song_staff::Model>,
         _input: SaveSongStaffInput,
         _user: &CurrentUser,
     ) -> Result<song_staff::Model, AppError> {
@@ -49,7 +49,7 @@ impl SaveSongStaffAction {
 
     pub async fn delete(
         _ctx: &AppContext,
-        _ids: Vec<u64>,
+        _songstaff: song_staff::Model,
         _user: &CurrentUser,
     ) -> Result<(), AppError> {
         todo!()

@@ -38,7 +38,7 @@ pub struct SaveEntryAction;
 impl SaveEntryAction {
     pub async fn save(
         _ctx: &AppContext,
-        _id: Option<u64>,
+        _entry: Option<entry::Model>,
         _input: SaveEntryInput,
         _user: &CurrentUser,
     ) -> Result<entry::Model, AppError> {
@@ -47,7 +47,7 @@ impl SaveEntryAction {
 
     pub async fn delete(
         _ctx: &AppContext,
-        _ids: Vec<u64>,
+        _entry: entry::Model,
         _user: &CurrentUser,
     ) -> Result<(), AppError> {
         todo!()

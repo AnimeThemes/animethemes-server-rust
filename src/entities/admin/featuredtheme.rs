@@ -10,9 +10,9 @@ pub struct Model {
     #[sea_orm(primary_key, column_name = "featured_theme_id")]
     pub id: u64,
     #[sea_orm(column_type = "Timestamp")]
-    pub start_at: Option<time::OffsetDateTime>,
+    pub start_at: time::OffsetDateTime,
     #[sea_orm(column_type = "Timestamp")]
-    pub end_at: Option<time::OffsetDateTime>,
+    pub end_at: time::OffsetDateTime,
     pub entry_id: Option<u64>,
     pub video_id: Option<u64>,
     pub user_id: Option<u64>,

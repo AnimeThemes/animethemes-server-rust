@@ -3,7 +3,7 @@ use loco_rs::app::AppContext;
 use validator::Validate;
 
 use crate::AppError;
-use crate::entities::content::song;
+use crate::entities::content::{artist, song};
 use crate::middlewares::current_user::CurrentUser;
 
 #[derive(InputObject, Validate)]
@@ -43,14 +43,18 @@ pub struct SaveArtistAction;
 impl SaveArtistAction {
     pub async fn save(
         _ctx: &AppContext,
-        _id: Option<u64>,
+        _artist: Option<artist::Model>,
         _input: SaveArtistInput,
         _user: &CurrentUser,
     ) -> Result<song::Model, AppError> {
         todo!()
     }
 
-    pub async fn delete(_ctx: &AppContext, _id: u64, _user: &CurrentUser) -> Result<(), AppError> {
+    pub async fn delete(
+        _ctx: &AppContext,
+        _artist: artist::Model,
+        _user: &CurrentUser,
+    ) -> Result<(), AppError> {
         todo!()
     }
 }
