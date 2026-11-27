@@ -17,6 +17,9 @@ use crate::events::content::series_updated::SeriesUpdated;
 use crate::events::content::song_created::SongCreated;
 use crate::events::content::song_deleting::SongDeleting;
 use crate::events::content::song_updated::SongUpdated;
+use crate::events::content::studio_created::StudioCreated;
+use crate::events::content::studio_deleting::StudioDeleting;
+use crate::events::content::studio_updated::StudioUpdated;
 use crate::events::list::playlist_created::PlaylistCreated;
 use crate::events::list::playlist_deleted::PlaylistDeleted;
 use crate::events::list::playlist_updated::PlaylistUpdated;
@@ -115,6 +118,18 @@ pub fn register() -> Arc<EventDispatcher> {
     ]);
 
     listen!(dispatcher, SongUpdated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, StudioCreated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, StudioDeleting => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, StudioUpdated => [
         listeners::update_typesense_documents::handle,
     ]);
 
