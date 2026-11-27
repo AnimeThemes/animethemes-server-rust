@@ -7,7 +7,7 @@ pub mod entry;
 pub mod resource;
 pub mod series;
 pub mod song;
-pub mod song_staff;
+pub mod songstaff;
 pub mod studio;
 pub mod synonym;
 pub mod theme;
