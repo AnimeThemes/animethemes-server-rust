@@ -20,6 +20,9 @@ use crate::events::content::song_updated::SongUpdated;
 use crate::events::content::studio_created::StudioCreated;
 use crate::events::content::studio_deleting::StudioDeleting;
 use crate::events::content::studio_updated::StudioUpdated;
+use crate::events::content::theme_created::ThemeCreated;
+use crate::events::content::theme_deleting::ThemeDeleting;
+use crate::events::content::theme_updated::ThemeUpdated;
 use crate::events::list::playlist_created::PlaylistCreated;
 use crate::events::list::playlist_deleted::PlaylistDeleted;
 use crate::events::list::playlist_updated::PlaylistUpdated;
@@ -130,6 +133,18 @@ pub fn register() -> Arc<EventDispatcher> {
     ]);
 
     listen!(dispatcher, StudioUpdated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, ThemeCreated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, ThemeDeleting => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, ThemeUpdated => [
         listeners::update_typesense_documents::handle,
     ]);
 
