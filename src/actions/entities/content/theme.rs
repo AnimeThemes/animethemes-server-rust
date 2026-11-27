@@ -46,9 +46,9 @@ impl SaveThemeAction {
         if theme.is_none() {
             if input.anime_id.is_none() {
                 errors.add(
-                    "anime_id",
+                    "animeId",
                     ValidationError::new("required")
-                        .with_message("The anime_id is required.".into()),
+                        .with_message("The animeId is required.".into()),
                 );
             }
 
