@@ -3,7 +3,7 @@ use loco_rs::app::AppContext;
 use sea_orm::{ActiveModelTrait, ModelTrait, TryIntoModel};
 use validator::Validate;
 
-use crate::actions::entities::{nullable, optional};
+use crate::actions::entities::{nullable, nullable_string, optional, optional_string};
 use crate::entities::content::anime;
 use crate::enums::content::animeformat::AnimeFormat;
 use crate::enums::content::animeseason::AnimeSeason;
@@ -105,14 +105,14 @@ impl SaveAnimeAction {
 
         let anime = anime::ActiveModel {
             id: optional(anime.as_ref().map(|a| a.id)),
-            title: optional(title.romaji),
-            title_english: nullable(title.english),
-            title_native: nullable(title.native),
-            slug: optional(params.slug),
+            title: optional_string(title.romaji),
+            title_english: nullable_string(title.english),
+            title_native: nullable_string(title.native),
+            slug: optional_string(params.slug),
             season: nullable(params.season),
             year: nullable(params.year),
             format: nullable(params.format),
-            synopsis: nullable(params.synopsis),
+            synopsis: nullable_string(params.synopsis),
             ..Default::default()
         };
 

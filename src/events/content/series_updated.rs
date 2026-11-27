@@ -1,0 +1,29 @@
+use loco_rs::app::AppContext;
+use mod_events::Event;
+
+use crate::AppError;
+use crate::entities::content::series;
+use crate::events::update_typesense_documents::UpdateTypesenseDocuments;
+use crate::middlewares::current_user::CurrentUser;
+use crate::services::search_indexer::SearchIndexer;
+
+#[derive(Debug, Clone)]
+pub struct SeriesUpdated {
+    pub old_series: series::Model,
+    pub new_series: series::Model,
+    pub user: Option<CurrentUser>,
+}
+
+impl Event for SeriesUpdated {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
+impl UpdateTypesenseDocuments for SeriesUpdated {
+    async fn update_typesense_documents(&self, ctx: &AppContext) -> Result<(), AppError> {
+        SearchIndexer::reindex_series(&ctx.db, vec![self.new_series.id]).await?;
+
+        Ok(())
+    }
+}
