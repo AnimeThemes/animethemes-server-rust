@@ -3,3 +3,4 @@ pub mod artist;
 pub mod series;
 pub mod song;
 pub mod studio;
+pub mod theme;

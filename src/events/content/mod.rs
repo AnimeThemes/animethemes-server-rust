@@ -13,3 +13,6 @@ pub mod song_updated;
 pub mod studio_created;
 pub mod studio_deleting;
 pub mod studio_updated;
+pub mod theme_created;
+pub mod theme_deleting;
+pub mod theme_updated;
