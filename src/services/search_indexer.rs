@@ -4,10 +4,13 @@ use sea_orm::{
 
 use crate::AppError;
 use crate::entities::content::{anime, artist, entry, series, song, studio, theme, video};
+use crate::entities::list::playlist;
 use crate::initializers::typesense::typesense;
+use crate::scopes::list::playlist::public_playlists;
 use crate::typesense::documents::anime_document::{AnimeDocument, build_anime_documents};
 use crate::typesense::documents::artist_document::{ArtistDocument, build_artist_documents};
 use crate::typesense::documents::entry_document::{EntryDocument, build_entry_documents};
+use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
 use crate::typesense::documents::series_document::{SeriesDocument, build_series_documents};
 use crate::typesense::documents::song_document::{SongDocument, build_song_documents};
 use crate::typesense::documents::studio_document::{StudioDocument, build_studio_documents};
@@ -193,6 +196,26 @@ impl SearchIndexer {
             .await?;
 
         Self::reindex_themes(db, theme_ids).await?;
+
+        Ok(())
+    }
+
+    pub async fn reindex_playlist(
+        db: &DatabaseConnection,
+        playlists: Vec<u64>,
+    ) -> Result<(), AppError> {
+        let typesense = typesense();
+
+        index_document::<playlist::Entity, PlaylistDocument, _>(
+            db,
+            &typesense,
+            playlist::Entity::find()
+                .filter(playlist::Column::Id.is_in(playlists.iter()))
+                .filter(public_playlists()),
+            build_playlist_documents,
+        )
+        .await
+        .map_err(AppError::internal)?;
 
         Ok(())
     }

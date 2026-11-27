@@ -5,7 +5,15 @@ use mod_events::EventDispatcher;
 use crate::events::auth::user_registered::UserRegistered;
 use crate::events::auth::user_updated::UserUpdated;
 use crate::events::auth::user_verified::UserVerified;
+use crate::events::content::anime_created::AnimeCreated;
+use crate::events::content::anime_deleting::AnimeDeleting;
+use crate::events::content::anime_updated::AnimeUpdated;
+use crate::events::content::artist_created::ArtistCreated;
+use crate::events::content::artist_deleting::ArtistDeleting;
+use crate::events::content::artist_updated::ArtistUpdated;
 use crate::events::list::playlist_created::PlaylistCreated;
+use crate::events::list::playlist_deleted::PlaylistDeleted;
+use crate::events::list::playlist_updated::PlaylistUpdated;
 use crate::listeners;
 
 macro_rules! listen {
@@ -44,7 +52,40 @@ pub fn register() -> Arc<EventDispatcher> {
     ]);
 
     listen!(dispatcher, PlaylistCreated => [
+        listeners::update_typesense_documents::handle,
         listeners::send_discord_notification::handle,
+    ]);
+
+    listen!(dispatcher, PlaylistDeleted => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, PlaylistUpdated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, AnimeCreated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, AnimeDeleting => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, AnimeUpdated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, ArtistCreated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, ArtistDeleting => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, ArtistUpdated => [
+        listeners::update_typesense_documents::handle,
     ]);
 
     dispatcher

@@ -84,10 +84,14 @@ impl PlaylistMutation {
             .authorize()
             .extend()?;
 
-        let playlist =
-            UpdatePlaylistAction::update(ctx.data_unchecked::<AppContext>(), playlist, input)
-                .await
-                .extend()?;
+        let playlist = UpdatePlaylistAction::update(
+            ctx.data_unchecked::<AppContext>(),
+            playlist,
+            input,
+            &user,
+        )
+        .await
+        .extend()?;
 
         Ok(playlist.into())
     }
@@ -116,9 +120,10 @@ impl PlaylistMutation {
             .authorize()
             .extend()?;
 
-        let result = DeletePlaylistAction::delete(ctx.data_unchecked::<AppContext>(), playlist)
-            .await
-            .extend()?;
+        let result =
+            DeletePlaylistAction::delete(ctx.data_unchecked::<AppContext>(), playlist, &user)
+                .await
+                .extend()?;
 
         Ok(result)
     }
