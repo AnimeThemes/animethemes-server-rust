@@ -1,9 +1,12 @@
+use loco_rs::app::AppContext;
 use mod_events::Event;
 
 use crate::AppError;
 use crate::entities::list::playlist;
 use crate::events::discord::{DiscordNotifiableEvent, created_embed};
+use crate::events::update_typesense_documents::UpdateTypesenseDocuments;
 use crate::middlewares::current_user::CurrentUser;
+use crate::services::search_indexer::SearchIndexer;
 
 #[derive(Debug, Clone)]
 pub struct PlaylistCreated {
@@ -14,6 +17,14 @@ pub struct PlaylistCreated {
 impl Event for PlaylistCreated {
     fn as_any(&self) -> &dyn std::any::Any {
         self
+    }
+}
+
+impl UpdateTypesenseDocuments for PlaylistCreated {
+    async fn update_typesense_documents(&self, ctx: &AppContext) -> Result<(), AppError> {
+        SearchIndexer::reindex_playlist(&ctx.db, vec![self.playlist.id]).await?;
+
+        Ok(())
     }
 }
 

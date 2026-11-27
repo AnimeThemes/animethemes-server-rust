@@ -1,18 +1,19 @@
 use async_graphql::{InputObject, MaybeUndefined};
 use loco_rs::app::AppContext;
 use sea_orm::{ActiveModelTrait, ModelTrait, TryIntoModel};
-use validator::{Validate, ValidationError};
+use validator::Validate;
 
-use crate::AppError;
 use crate::actions::entities::{nullable, optional};
 use crate::entities::content::anime;
 use crate::enums::content::animeformat::AnimeFormat;
 use crate::enums::content::animeseason::AnimeSeason;
-use crate::initializers::typesense::typesense;
+use crate::events::content::anime_created::AnimeCreated;
+use crate::events::content::anime_deleting::AnimeDeleting;
+use crate::events::content::anime_updated::AnimeUpdated;
 use crate::middlewares::current_user::CurrentUser;
 use crate::rules::*;
-use crate::services::search_indexer::SearchIndexer;
-use crate::typesense::documents::anime_document::AnimeDocument;
+use crate::traits::soft_delete::SoftDeleteModel;
+use crate::{AppError, events};
 
 #[derive(InputObject, Validate)]
 #[graphql(name = "SaveAnimeInput")]
@@ -74,30 +75,24 @@ impl SaveAnimeAction {
         ctx: &AppContext,
         anime: Option<anime::Model>,
         params: SaveAnimeInput,
-        _user: &CurrentUser,
+        user: &CurrentUser,
     ) -> Result<anime::Model, AppError> {
         let mut errors = params.validate().err().unwrap_or_default();
 
         if anime.is_none() {
-            if params
-                .title
-                .as_ref()
-                .and_then(|t| t.romaji.as_deref())
-                .is_none_or(|v| v.trim().is_empty())
-            {
-                errors.add(
-                    "title",
-                    ValidationError::new("required")
-                        .with_message("The romaji title is required.".into()),
-                );
-            }
+            validate_required_string(
+                &mut errors,
+                "title.romaji",
+                params.title.as_ref().and_then(|t| t.romaji.as_deref()),
+                "The romaji title is required.",
+            );
 
-            if params.slug.as_deref().is_none_or(|v| v.trim().is_empty()) {
-                errors.add(
-                    "slug",
-                    ValidationError::new("required").with_message("The slug is required.".into()),
-                );
-            }
+            validate_required_string(
+                &mut errors,
+                "slug",
+                params.slug.as_deref(),
+                "The slug is required.",
+            );
         }
 
         if !errors.is_empty() {
@@ -105,6 +100,8 @@ impl SaveAnimeAction {
         }
 
         let title = params.title.unwrap_or_default();
+
+        let old_anime = anime.as_ref().cloned();
 
         let anime = anime::ActiveModel {
             id: optional(anime.as_ref().map(|a| a.id)),
@@ -121,7 +118,26 @@ impl SaveAnimeAction {
 
         let anime = anime.save(&ctx.db).await?.try_into_model()?;
 
-        SearchIndexer::reindex_anime(&ctx.db, anime.clone()).await?;
+        if let Some(old_anime) = old_anime {
+            events::dispatch(
+                ctx,
+                AnimeUpdated {
+                    old_anime: old_anime,
+                    new_anime: anime.clone(),
+                    user: Some(user.clone()),
+                },
+            )
+            .await;
+        } else {
+            events::dispatch(
+                ctx,
+                AnimeCreated {
+                    anime: anime.clone(),
+                    user: Some(user.clone()),
+                },
+            )
+            .await;
+        }
 
         Ok(anime)
     }
@@ -129,18 +145,24 @@ impl SaveAnimeAction {
     pub async fn delete(
         ctx: &AppContext,
         anime: anime::Model,
-        _user: &CurrentUser,
+        is_force_delete: bool,
+        user: &CurrentUser,
     ) -> Result<(), AppError> {
-        anime.clone().delete(&ctx.db).await?;
+        events::dispatch(
+            ctx,
+            AnimeDeleting {
+                anime: anime.clone(),
+                is_force_deleting: is_force_delete,
+                user: Some(user.clone()),
+            },
+        )
+        .await;
 
-        let typesense = typesense();
-
-        typesense
-            .collection::<AnimeDocument>()
-            .document(anime.id.to_string())
-            .delete()
-            .await
-            .map_err(AppError::internal)?;
+        if is_force_delete {
+            anime.delete(&ctx.db).await?;
+        } else {
+            anime.soft_delete(&ctx.db).await?;
+        }
 
         Ok(())
     }

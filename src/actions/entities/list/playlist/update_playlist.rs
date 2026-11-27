@@ -1,17 +1,16 @@
-use anyhow::{Context, Result};
 use async_graphql::{InputObject, MaybeUndefined};
 use loco_rs::app::AppContext;
+use sea_orm::ActiveModelTrait;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{ActiveModelTrait, DatabaseConnection};
 use validator::Validate;
 
-use crate::AppError;
 use crate::actions::entities::{nullable_string, optional, optional_string};
 use crate::entities::list::playlist;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
-use crate::initializers::typesense::typesense;
+use crate::events::list::playlist_updated::PlaylistUpdated;
+use crate::middlewares::current_user::CurrentUser;
 use crate::rules::*;
-use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
+use crate::{AppError, events};
 
 #[derive(InputObject, Validate)]
 #[graphql(name = "UpdatePlaylistInput")]
@@ -39,10 +38,13 @@ impl UpdatePlaylistAction {
         ctx: &AppContext,
         playlist: playlist::Model,
         params: UpdatePlaylistActionParameters,
+        user: &CurrentUser,
     ) -> Result<playlist::Model, AppError> {
         if let Err(errors) = params.validate() {
             return Err(AppError::Validation(errors));
         }
+
+        let old_playlist = playlist.clone();
 
         let playlist = playlist::ActiveModel {
             id: Set(playlist.id),
@@ -54,36 +56,16 @@ impl UpdatePlaylistAction {
 
         let playlist = playlist.update(&ctx.db).await?;
 
-        Self::update_search(&ctx.db, &playlist).await?;
+        events::dispatch(
+            ctx,
+            PlaylistUpdated {
+                old_playlist: old_playlist,
+                new_playlist: playlist.clone(),
+                user: Some(user.clone()),
+            },
+        )
+        .await;
 
         Ok(playlist)
-    }
-
-    async fn update_search(
-        db: &DatabaseConnection,
-        playlist: &playlist::Model,
-    ) -> Result<(), AppError> {
-        if playlist.visibility != PlaylistVisibility::Public {
-            return Ok(());
-        }
-
-        let document = build_playlist_documents(vec![playlist.clone()], db)
-            .await
-            .map_err(AppError::internal)?
-            .into_iter()
-            .next()
-            .context("Failed")
-            .map_err(AppError::internal)?;
-
-        let typesense = typesense();
-
-        typesense
-            .collection::<PlaylistDocument>()
-            .documents()
-            .upsert(&document, None)
-            .await
-            .map_err(AppError::internal)?;
-
-        Ok(())
     }
 }

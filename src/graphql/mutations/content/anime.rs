@@ -54,4 +54,37 @@ impl AnimeMutation {
 
         Ok(anime.into())
     }
+
+    async fn delete_anime(
+        &self,
+        ctx: &Context<'_>,
+        id: u64,
+        #[graphql(default = false)] force_delete: bool,
+    ) -> Result<bool> {
+        let user = ctx
+            .data::<CurrentUser>()
+            .map_err(|_| Error::from(AppError::Unauthenticated))?;
+
+        let db = ctx.data::<DatabaseConnection>()?;
+
+        let anime = anime::Entity::find_by_id(id)
+            .one(db)
+            .await?
+            .ok_or_else(|| Error::from(AppError::NotFound))?;
+
+        AnimePolicy::check(Some(user), PolicyAction::Delete, Some(&anime))
+            .authorize()
+            .extend()?;
+
+        SaveAnimeAction::delete(
+            ctx.data_unchecked::<AppContext>(),
+            anime,
+            force_delete,
+            &user,
+        )
+        .await
+        .extend()?;
+
+        Ok(true)
+    }
 }

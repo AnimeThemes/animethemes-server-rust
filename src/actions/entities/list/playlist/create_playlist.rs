@@ -1,12 +1,9 @@
 use std::env;
 
-use anyhow::Context;
 use async_graphql::InputObject;
 use loco_rs::app::AppContext;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
-};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter};
 use validator::Validate;
 
 use crate::entities::HasHashId;
@@ -14,10 +11,8 @@ use crate::entities::auth::role::Roles;
 use crate::entities::list::playlist;
 use crate::enums::list::playlistvisibility::PlaylistVisibility;
 use crate::events::list::playlist_created::PlaylistCreated;
-use crate::initializers::typesense::typesense;
 use crate::middlewares::current_user::CurrentUser;
 use crate::policies::has_any_role;
-use crate::typesense::documents::playlist_document::{PlaylistDocument, build_playlist_documents};
 use crate::{AppError, events};
 
 #[derive(InputObject, Validate)]
@@ -83,8 +78,6 @@ impl CreatePlaylistAction {
 
         playlist.update_hashid(&ctx.db).await?;
 
-        Self::update_search(&ctx.db, &playlist).await?;
-
         events::dispatch(
             ctx,
             PlaylistCreated {
@@ -95,33 +88,5 @@ impl CreatePlaylistAction {
         .await;
 
         Ok(playlist)
-    }
-
-    async fn update_search(
-        db: &DatabaseConnection,
-        playlist: &playlist::Model,
-    ) -> Result<(), AppError> {
-        if playlist.visibility != PlaylistVisibility::Public {
-            return Ok(());
-        }
-
-        let document = build_playlist_documents(vec![playlist.clone()], db)
-            .await
-            .map_err(AppError::internal)?
-            .into_iter()
-            .next()
-            .context("Failed")
-            .map_err(AppError::internal)?;
-
-        let typesense = typesense();
-
-        typesense
-            .collection::<PlaylistDocument>()
-            .documents()
-            .create(&document, None)
-            .await
-            .map_err(AppError::internal)?;
-
-        Ok(())
     }
 }

@@ -4,8 +4,10 @@ use loco_rs::app::AppContext;
 use mod_events::{Event, EventDispatcher};
 
 pub mod auth;
+pub mod content;
 pub mod discord;
 pub mod list;
+pub mod update_typesense_documents;
 
 #[derive(Clone)]
 pub struct EventContext<E> {
