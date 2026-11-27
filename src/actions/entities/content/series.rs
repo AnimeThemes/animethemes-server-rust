@@ -21,8 +21,8 @@ pub struct SaveSeriesInput {
 
     #[validate(length(
         min = 1,
-        max = 255,
-        message = "The slug must be between 1 and 255 characters."
+        max = 192,
+        message = "The slug must be between 1 and 192 characters."
     ))]
     pub slug: Option<String>,
 }

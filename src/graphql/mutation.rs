@@ -7,6 +7,7 @@ use crate::graphql::mutations::content::anime::AnimeMutation;
 use crate::graphql::mutations::content::artist::ArtistMutation;
 use crate::graphql::mutations::content::series::SeriesMutation;
 use crate::graphql::mutations::content::song::SongMutation;
+use crate::graphql::mutations::content::studio::StudioMutation;
 use crate::graphql::mutations::list::playlist::PlaylistMutation;
 use crate::graphql::mutations::list::track::PlaylistTrackMutation;
 use crate::graphql::mutations::user::favorite::FavoriteMutation;
@@ -24,6 +25,7 @@ pub struct Mutation(
     ArtistMutation,
     SeriesMutation,
     SongMutation,
+    StudioMutation,
     // List
     PlaylistMutation,
     PlaylistTrackMutation,

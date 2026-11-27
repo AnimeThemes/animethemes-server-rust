@@ -10,3 +10,6 @@ pub mod series_updated;
 pub mod song_created;
 pub mod song_deleting;
 pub mod song_updated;
+pub mod studio_created;
+pub mod studio_deleting;
+pub mod studio_updated;
