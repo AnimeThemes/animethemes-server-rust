@@ -4,3 +4,6 @@ pub mod anime_updated;
 pub mod artist_created;
 pub mod artist_deleting;
 pub mod artist_updated;
+pub mod series_created;
+pub mod series_deleting;
+pub mod series_updated;
