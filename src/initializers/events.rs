@@ -11,6 +11,12 @@ use crate::events::content::anime_updated::AnimeUpdated;
 use crate::events::content::artist_created::ArtistCreated;
 use crate::events::content::artist_deleting::ArtistDeleting;
 use crate::events::content::artist_updated::ArtistUpdated;
+use crate::events::content::series_created::SeriesCreated;
+use crate::events::content::series_deleting::SeriesDeleting;
+use crate::events::content::series_updated::SeriesUpdated;
+use crate::events::content::song_created::SongCreated;
+use crate::events::content::song_deleting::SongDeleting;
+use crate::events::content::song_updated::SongUpdated;
 use crate::events::list::playlist_created::PlaylistCreated;
 use crate::events::list::playlist_deleted::PlaylistDeleted;
 use crate::events::list::playlist_updated::PlaylistUpdated;
@@ -85,6 +91,30 @@ pub fn register() -> Arc<EventDispatcher> {
     ]);
 
     listen!(dispatcher, ArtistUpdated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, SeriesCreated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, SeriesDeleting => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, SeriesUpdated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, SongCreated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, SongDeleting => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, SongUpdated => [
         listeners::update_typesense_documents::handle,
     ]);
 

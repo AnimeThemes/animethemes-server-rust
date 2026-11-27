@@ -7,3 +7,6 @@ pub mod artist_updated;
 pub mod series_created;
 pub mod series_deleting;
 pub mod series_updated;
+pub mod song_created;
+pub mod song_deleting;
+pub mod song_updated;
