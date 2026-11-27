@@ -11,6 +11,9 @@ use crate::events::content::anime_updated::AnimeUpdated;
 use crate::events::content::artist_created::ArtistCreated;
 use crate::events::content::artist_deleting::ArtistDeleting;
 use crate::events::content::artist_updated::ArtistUpdated;
+use crate::events::content::entry_created::EntryCreated;
+use crate::events::content::entry_deleting::EntryDeleting;
+use crate::events::content::entry_updated::EntryUpdated;
 use crate::events::content::series_created::SeriesCreated;
 use crate::events::content::series_deleting::SeriesDeleting;
 use crate::events::content::series_updated::SeriesUpdated;
@@ -97,6 +100,18 @@ pub fn register() -> Arc<EventDispatcher> {
     ]);
 
     listen!(dispatcher, ArtistUpdated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, EntryCreated => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, EntryDeleting => [
+        listeners::update_typesense_documents::handle,
+    ]);
+
+    listen!(dispatcher, EntryUpdated => [
         listeners::update_typesense_documents::handle,
     ]);
 

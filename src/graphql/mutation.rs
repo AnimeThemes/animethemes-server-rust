@@ -5,6 +5,7 @@ use crate::graphql::mutations::admin::featuredtheme::FeaturedThemeMutation;
 use crate::graphql::mutations::auth::AuthMutation;
 use crate::graphql::mutations::content::anime::AnimeMutation;
 use crate::graphql::mutations::content::artist::ArtistMutation;
+use crate::graphql::mutations::content::entry::EntryMutation;
 use crate::graphql::mutations::content::series::SeriesMutation;
 use crate::graphql::mutations::content::song::SongMutation;
 use crate::graphql::mutations::content::studio::StudioMutation;
@@ -24,6 +25,7 @@ pub struct Mutation(
     // Content
     AnimeMutation,
     ArtistMutation,
+    EntryMutation,
     SeriesMutation,
     SongMutation,
     StudioMutation,
